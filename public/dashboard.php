@@ -56,7 +56,15 @@ for ($h = 8; $h <= 22; $h++) {
             -webkit-overflow-scrolling: touch;
             display: block;
             scrollbar-width: thin;
-            scrollbar-color: #888 #eee;
+            scrollbar-color: #111 #eee;
+        }
+        .calendar-scroll-x::-webkit-scrollbar {
+            height: 10px;
+            background: #eee;
+        }
+        .calendar-scroll-x::-webkit-scrollbar-thumb {
+            background: #111;
+            border-radius: 6px;
         }
         .dashboard-title {
             text-align: center;
@@ -136,10 +144,8 @@ for ($h = 8; $h <= 22; $h++) {
                 <?php endforeach; ?>
             </div>
             <div class="calendar-grid">
-                <?php foreach ($intervalli as $idx => $ora): ?>
-                    <div class="hour-label">
-                        <?= ($idx % 4 === 0) ? $ora : '' ?>
-                    </div>
+                <?php foreach ($intervalli as $ora): ?>
+                    <div class="hour-label"><span class="hour-label-time"><?= $ora ?></span></div>
                     <?php foreach ($giorni as $g): ?>
                         <div class="day<?= $g->format('Y-m-d') === $oggi->format('Y-m-d') ? ' today' : '' ?>"></div>
                     <?php endforeach; ?>
@@ -156,7 +162,7 @@ for ($h = 8; $h <= 22; $h++) {
         }
         .calendar-header-row {
             display: grid;
-            grid-template-columns: 60px repeat(7, 1fr);
+            grid-template-columns: 48px repeat(7, 1fr);
             min-width: 1100px;
             background: #eee;
             border-radius: 6px 6px 0 0;
@@ -187,22 +193,28 @@ for ($h = 8; $h <= 22; $h++) {
         }
         .calendar-grid {
             display: grid;
-            grid-template-columns: 60px repeat(7, 1fr);
+            grid-template-columns: 48px repeat(7, 1fr);
             min-width: 1100px;
             background: #eee;
             border-radius: 0 0 6px 6px;
         }
         .hour-label {
-            text-align: right;
+            display: flex;
+            align-items: flex-start;
+            justify-content: flex-end;
             color: #888;
-            font-size: 1.05em;
+            font-size: 0.85em;
             background: #fff;
-            border-right: 2px solid #eee;
+            border: 1px solid #eee;
             font-family: 'Courier New', Courier, monospace;
-            min-width: 56px;
-            max-width: 60px;
-            padding: 10px 6px;
-            border-bottom: 1px solid #eee;
+            padding: 2px 2px 0 0;
+            box-sizing: border-box;
+            height: 40px;
+        }
+        .hour-label-time {
+            display: block;
+            width: 100%;
+            text-align: right;
         }
         .day {
             min-height: 36px;
