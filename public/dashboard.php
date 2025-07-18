@@ -62,6 +62,7 @@ for ($h = 8; $h <= 22; $h++) {
             <label for="cerca" class="control-label">Cliente:</label>
             <input type="search" autocomplete="on" id="cerca" placeholder="Cerca cliente...">
             <input type="submit" onmouseover="this.style.cursor='pointer'" value="Cerca">
+            <button type="button" id="note-btn" title="Note" onmouseover="this.style.cursor='pointer'">📝</button>
         </div>
         
         <div class="controls-right">

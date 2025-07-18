@@ -1,4 +1,7 @@
 const dayNames = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'];
+const viewInput = document.getElementById('set-view');
+const weekInput = document.getElementById('set-week');
+const dateInput = document.getElementById('set-date');
 
 function getMonday(w, y) {
     const simple = new Date(y, 0, 1 + (w - 1) * 7);
@@ -9,10 +12,8 @@ function getMonday(w, y) {
     return monday;
 }
 
-document.getElementById('set-view').addEventListener('change', function() {
+viewInput.addEventListener('change', function() {
     const val = this.value;
-    const weekInput = document.getElementById('set-week');
-    const dateInput = document.getElementById('set-date');
     if (val === 'week') {
         weekInput.hidden = false;
         dateInput.hidden = true;
@@ -22,7 +23,7 @@ document.getElementById('set-view').addEventListener('change', function() {
     }
 });
 
-document.getElementById('set-week').addEventListener('change', function() {
+weekInput.addEventListener('change', function() {
     const val = this.value; // formato: YYYY-Wnn
     const [year, week] = val.split('-W');
 

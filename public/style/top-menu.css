@@ -1,54 +1,70 @@
 .dashboard-controls {
     display: flex;
     width: 100%;
-    margin: 10px 0;
-    padding: 10px 16px;
+    margin: 8px 0;
+    padding: 8px 12px;
     box-sizing: border-box;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 
 select, input[type="week"], input[type="date"], input[type="search"] {
     font-family: 'Courier New', Courier, monospace;
-    width: 200px;
+    width: 180px;
     box-sizing: border-box;
-    padding: 4px 6px;
-    margin-right: 6px;
-    border-radius: 4px;
-    font-size: 13px;
+    padding: 4px 4px;
+    margin-right: 4px;
+    border-radius: 6px;
+    font-size: 14px;
+    border: 1px solid #bbb;
+    background: #fff;
+    transition: border 0.2s, box-shadow 0.2s;
 }
 
-input[type="submit"] {
+button, input[type="submit"] {
     font-family: 'Courier New', Courier, monospace;
-    width: 80px;
+    min-width: 36px;
+    width: auto;
     background-color: #222;
     color: #fff;
     box-sizing: border-box;
-    padding: 4px 6px;
-    margin-right: 6px;
-    border-radius: 4px;
-    font-size: 13px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 15px;
+    border: none;
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    cursor: pointer;
 }
 
 input[type="submit"]:hover, input[type="submit"]:focus {
     background: #fff;
-    color: #000;
+    color: #222;
+    box-shadow: 0 0 0 2px #2222;
 }
 
 .controls-left {
     flex: 1;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
 }
 
 .controls-center {
-    flex: 1;
+    flex: 2;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 12px;
 }
 
 .controls-right {
     flex: 1;
     display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+button:hover, button:focus {
+    background: #fff;
+    color: #222;
+    box-shadow: 0 0 0 2px #2222;
 }
