@@ -41,10 +41,9 @@ for ($h = 8; $h <= 22; $h++) {
 <body>
     
     <div id="sidebar" class="sidebar sidebar-hover">
-        <a href="#">Dashboard</a>
-        <a href="#">Profilo</a>
-        <a href="#">Impostazioni</a>
-        <a href="#">Logout</a>
+        <a href="#">Servizi</a>
+        <a href="#">Utenti</a>
+        <a href="#">Orario</a>
     </div>
 
     <div class="dashboard-controls">
