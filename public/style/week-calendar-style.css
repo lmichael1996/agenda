@@ -3,6 +3,10 @@ body {
     padding: 0;
     background: transparent;
     font-family: 'Courier New', Courier, monospace;
+    background-image: url('../image/background.png');
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-position: center;
 }
 
 .dashboard-container {
@@ -79,8 +83,14 @@ body {
     display: grid;
     grid-template-columns: 48px repeat(7, 1fr);
     min-width: 1100px;
+    width: 100vw;
+    left: 0;
+    top: 0;
     background: #eee;
     border-radius: 6px 6px 0 0;
+    position: sticky;
+    z-index: 10;
+    box-sizing: border-box;
 }
 
 .hour-label-empty {
@@ -124,8 +134,9 @@ body {
 .calendar-grid {
     display: grid;
     grid-template-columns: 48px repeat(7, 1fr);
-    min-width: 1100px;background: #eee;
+    min-width: 1100px;
     border-radius: 0 0 6px 6px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.04);
 }
 
 .hour-label {
@@ -149,23 +160,14 @@ body {
 
 .day {
     min-height: 36px;
-    background: #fff;
-    border: 1px solid #eee;
+    background: transparent;
+    border: 1px solid #000000;
     border-radius: 0;
     transition: background 0.2s;
 }
 
 .day.today {
-    border: 1px solid #222;
-    background: #f3f3f3;
-}
-
-@media (max-width: 900px) {
-    .calendar-header-row, .calendar-grid {
-        min-width: 500px;
-    }
-    .header-day, .day {
-        font-size: 0.95em;
-        min-width: 40px;
-    }
+    border-left: 3px solid #222;
+    border-right: 3px solid #222;
+    background: #ffffff;
 }

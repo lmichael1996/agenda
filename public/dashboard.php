@@ -35,7 +35,7 @@ for ($h = 8; $h <= 22; $h++) {
     <title>Calendario Settimanale</title>
 
     <link rel="stylesheet" href="style/top-menu.css">
-    <link rel="stylesheet" href="style/calendar-style.css">
+    <link rel="stylesheet" href="style/week-calendar-style.css">
     <link rel="stylesheet" href="style/lateral-menu-style.css">
 </head>
 <body>

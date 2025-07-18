@@ -1,11 +1,11 @@
 .dashboard-controls {
     display: flex;
     width: 100%;
-    margin: 8px 0;
     padding: 8px 12px;
     box-sizing: border-box;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    background-color: #fff;
 }
 
 select, input[type="week"], input[type="date"], input[type="search"] {
