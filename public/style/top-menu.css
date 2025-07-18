@@ -1,0 +1,54 @@
+.dashboard-controls {
+    display: flex;
+    width: 100%;
+    margin: 10px 0;
+    padding: 10px 16px;
+    box-sizing: border-box;
+}
+
+select, input[type="week"], input[type="date"], input[type="search"] {
+    font-family: 'Courier New', Courier, monospace;
+    width: 200px;
+    box-sizing: border-box;
+    padding: 4px 6px;
+    margin-right: 6px;
+    border-radius: 4px;
+    font-size: 13px;
+}
+
+input[type="submit"] {
+    font-family: 'Courier New', Courier, monospace;
+    width: 80px;
+    background-color: #222;
+    color: #fff;
+    box-sizing: border-box;
+    padding: 4px 6px;
+    margin-right: 6px;
+    border-radius: 4px;
+    font-size: 13px;
+}
+
+input[type="submit"]:hover, input[type="submit"]:focus {
+    background: #fff;
+    color: #000;
+}
+
+.controls-left {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.controls-center {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.controls-right {
+    flex: 1;
+    display: flex;
+}
