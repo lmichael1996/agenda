@@ -1,11 +1,9 @@
 <?php
 // Carica configurazione
-require_once 'config/config.php';
+require_once 'config/simple_config.php';
 
 // Imposta headers di sicurezza
 setSecurityHeaders();
-
-session_start();
 
 $isGet = $_SERVER['REQUEST_METHOD'] === 'GET';
 $noParams = empty($_GET);

@@ -1,61 +1,70 @@
 <?php
-/*
-session_start();
-if (empty($_SESSION['logged_in'])) {
-    header('Location: login.php');
+/**
+ * Dashboard principale - Calendario settimanale
+ */
+
+require_once '../config/simple_config.php';
+require_once '../config/calendar_functions.php';
+setSecurityHeaders();
+
+// Controllo autenticazione - redirect a index se non autenticato
+if (empty($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
+    // Imposta flag per permettere accesso al login
+    $_SESSION['from_index'] = true;
+    header('Location: ../index.php');
     exit;
 }
-*/
-// Calculate current week days (Monday-Sunday)
+
+// Genera dati per il calendario
+$days = getCurrentWeekDays();
+$dayNames = getDayNames();
+$intervals = generateTimeIntervals();
 $today = new DateTime();
-$weekDay = (int)$today->format('N'); // 1 (Mon) - 7 (Sun)
-$monday = clone $today;
-$monday->modify('-' . ($weekDay - 1) . ' days');
-$days = [];
-for ($i = 0; $i < 7; $i++) {
-    $days[] = clone $monday;
-    $monday->modify('+1 day');
-}
 
-// Day names
-$dayNames = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'];
+// Calcola ora attuale per evidenziazione
+$nowHour = (int)$today->format('H');
+$nowMin = (int)$today->format('i');
+$roundedMin = floor($nowMin / CALENDAR_INTERVAL_MINUTES) * CALENDAR_INTERVAL_MINUTES;
+$nowTime = sprintf('%02d:%02d', $nowHour, $roundedMin);
 
-// 15-minute intervals from 8:00 to 22:00
-$intervals = [];
-for ($h = 8; $h <= 22; $h++) {
-    for ($m = 0; $m < 60; $m += 15) {
-        $intervals[] = sprintf('%02d:%02d', $h, $m);
-    }
-}
+// Variabili per i controlli della UI
+$currentWeek = $today->format('Y-\WW');
+$currentDate = $today->format('Y-m-d');
 ?>
 <!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <title>Calendario Settimanale</title>
-
-    <link rel="stylesheet" href="style/top-menu.css">
-    <link rel="stylesheet" href="style/calendar-events.css">
-    <link rel="stylesheet" href="style/week-calendar-style.css">
-    <link rel="stylesheet" href="style/lateral-menu-style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agenda Settimanale</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="../assets/css/top-menu.css">
+    <link rel="stylesheet" href="../assets/css/calendar-events.css">
+    <link rel="stylesheet" href="../assets/css/week-calendar-style.css">
+    <link rel="stylesheet" href="../assets/css/lateral-menu-style.css">
 </head>
 <body>
     
+    <!-- Sidebar con icona integrata -->
     <div id="sidebar" class="sidebar sidebar-hover">
+        <div class="sidebar-toggle">
+            <img src="../assets/images/menu-icon.png" alt="Menu" class="menu-icon">
+        </div>
         <a href="#">Servizi</a>
         <a href="#">Utenti</a>
         <a href="#">Orario</a>
     </div>
 
+    <!-- Top Menu Controls -->
     <div class="dashboard-controls">
-
         <div class="controls-left">
             <select id="set-view" onmouseover="this.style.cursor='pointer'">
                 <option value="week">Settimana</option>
                 <option value="day">Giorno</option>
             </select>
-            <input type="week" id="set-week" onmouseover="this.style.cursor='pointer'" value="<?= $today->format('Y-\WW') ?>">
-            <input type="date" id="set-date" onmouseover="this.style.cursor='pointer'" value="<?= $today->format('Y-m-d') ?>" hidden>
+            <input type="week" id="set-week" onmouseover="this.style.cursor='pointer'" value="<?= $currentWeek ?>">
+            <input type="date" id="set-date" onmouseover="this.style.cursor='pointer'" value="<?= $currentDate ?>" hidden>
         </div>
         
         <div class="controls-center">
@@ -68,45 +77,56 @@ for ($h = 8; $h <= 22; $h++) {
         <div class="controls-right">
             <marquee> Non è mai troppo tardi per essere ciò che vuoi essere! </marquee>
         </div>
-    
     </div>
 
+    <!-- Main Calendar -->
     <div class="dashboard-container">
-
+        
+        <!-- Calendar Header -->
         <div class="calendar-header-row">
             <div class="hour-label-empty">Orario:</div>
-
+            
             <?php foreach ($days as $idx => $day): ?>
-                <div class = "header-day<?= $day->format('d-m-Y') === $today->format('d-m-Y') ? ' today' : '' ?>" 
-                    id = "header-day-<?= $idx ?>">
-                    <?= htmlspecialchars($dayNames[$idx]) ?><br>
-                    <span class="header-date"> <?= $day->format('d/m/Y') ?> </span>
+                <?php 
+                $dayName = htmlspecialchars($dayNames[$idx]);
+                $formattedDate = $day->format('d/m/Y');
+                $isTodayClass = isToday($day) ? ' today' : '';
+                ?>
+                <div class="header-day<?= $isTodayClass ?>" 
+                     id="header-day-<?= $idx ?>">
+                    <?= $dayName ?><br>
+                    <span class="header-date"><?= $formattedDate ?></span>
                 </div>
             <?php endforeach; ?>
-
         </div>
 
+        <!-- Calendar Grid -->
         <div class="calendar-grid">
-
             <?php foreach ($intervals as $time): ?>
-                <div class="hour-label">
+                <?php $isPastOrNow = ($time <= $nowTime); ?>
+                <div class="hour-label<?= $isPastOrNow ? ' hour-label-past' : '' ?>">
                     <span class="hour-label-time"><?= $time ?></span>
                 </div>
 
                 <?php foreach ($days as $day): ?>
-                    <div class = "day<?= $day->format('d-m-Y') === $today->format('d-m-Y') ? ' today' : '' ?>"
-                        data-date = "<?= $day->format('d-m-Y') ?>"
-                        data-time ="<?= $time ?>">
+                    <?php 
+                    $dayDate = $day->format('d-m-Y');
+                    $isTodayClass = isToday($day) ? ' today' : '';
+                    ?>
+                    <div class="day<?= $isTodayClass ?>"
+                         data-date="<?= $dayDate ?>"
+                         data-time="<?= $time ?>">
                     </div>
                 <?php endforeach; ?>
             <?php endforeach; ?>
-        
         </div>
 
     </div>
 
-<script src="js/lateral-menu.js"></script>
-<script src="js/calendar-date.js"></script>
-<script src="js/calendar-events.js"></script>
+    <!-- JavaScript -->
+    <script src="../assets/js/lateral-menu.js"></script>
+    <script src="../assets/js/calendar-date.js"></script>
+    <script src="../assets/js/calendar-events.js"></script>
+
 </body>
 </html>
