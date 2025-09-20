@@ -4,11 +4,27 @@ const MIN_DURATION = 15; // minuti
 
 let draggedNote = null;
 
-function createNote(text, duration) {
+function calculateDivHeight(duration, parentSlot) {
+    // Calcola l'altezza basata sui div effettivi del calendario
+    if (!parentSlot) return ((duration / 15) * 105 - 4) + '%';
+    
+    const slotHeight = parentSlot.offsetHeight;
+    const slotsNeeded = duration / 15; // numero di slot da 15 minuti
+    const totalHeight = slotHeight * slotsNeeded;
+    
+    return totalHeight + 'px';
+}
+
+function createNote(text, duration, parentSlot = null) {
     const note = document.createElement('div');
     note.className = 'calendar-note';
     note.draggable = true;
-    note.style.height = ((duration / 15) * 105 - 4) + '%';
+    // Usa calcolo basato su div effettivi se disponibile
+    if (parentSlot) {
+        note.style.height = calculateDivHeight(duration, parentSlot);
+    } else {
+        note.style.height = ((duration / 15) * 105 - 4) + '%';
+    }
     note.setAttribute('data-duration', duration);
 
     const noteText = document.createElement('span');
@@ -44,7 +60,14 @@ function createNote(text, duration) {
         let newHeight = Math.max(SLOT_PX, startHeight + delta);
         let newDuration = Math.round(newHeight / SLOT_PX) * 15;
         newDuration = Math.max(MIN_DURATION, newDuration);
-        note.style.height = ((newDuration / 15) * 105 - 4) + '%';
+        
+        // Usa calcolo basato su div se il parent è disponibile
+        const parentSlot = note.parentElement;
+        if (parentSlot && parentSlot.classList.contains('day')) {
+            note.style.height = calculateDivHeight(newDuration, parentSlot);
+        } else {
+            note.style.height = ((newDuration / 15) * 105 - 4) + '%';
+        }
         note.setAttribute('data-duration', newDuration);
     }
 
@@ -78,11 +101,13 @@ window.addEventListener('DOMContentLoaded', function() {
 
     const slotMartedi = slots[1]; // martedì 8:00
     slotMartedi.style.position = 'relative';
-    slotMartedi.appendChild(createNote('Evento Martedì', 30));
+    const eventoMartedi = createNote('Evento Martedì', 30, slotMartedi);
+    slotMartedi.appendChild(eventoMartedi);
 
     const slotSabato = slots[5];  // sabato 8:00
     slotSabato.style.position = 'relative';
-    slotSabato.appendChild(createNote('Evento Sabato', 45));
+    const eventoSabato = createNote('Evento Sabato', 45, slotSabato);
+    slotSabato.appendChild(eventoSabato);
 
     // Rendi tutti gli slot drop target
     slots.forEach(slot => {

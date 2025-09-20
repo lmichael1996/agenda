@@ -1,9 +1,9 @@
 <?php
-// Carica configurazione
-require_once 'config/simple_config.php';
-
-// Imposta headers di sicurezza
-setSecurityHeaders();
+session_start();
+header('X-Frame-Options: DENY');
+header('X-Content-Type-Options: nosniff');
+header('Referrer-Policy: no-referrer');
+header('X-XSS-Protection: 1; mode=block');
 
 $isGet = $_SERVER['REQUEST_METHOD'] === 'GET';
 $noParams = empty($_GET);

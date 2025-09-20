@@ -125,6 +125,7 @@ $currentDate = $today->format('Y-m-d');
     </div>
 
     <!-- JavaScript -->
+    <script src="../assets/js/date-utils.js"></script>
     <script src="../assets/js/lateral-menu.js"></script>
     <script src="../assets/js/calendar-date.js"></script>
     <script src="../assets/js/calendar-events.js"></script>
