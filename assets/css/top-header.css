@@ -1,70 +1,68 @@
+/* Top menu controls */
 .dashboard-controls {
     display: flex;
     width: 100%;
     padding: 8px 12px;
-    box-sizing: border-box;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    background-color: #fff;
+    background: #fff;
 }
 
+/* Form inputs */
 select, input[type="week"], input[type="date"], input[type="search"] {
-    font-family: 'Courier New', Courier, monospace;
+    font-family: 'Courier New', monospace;
     width: 180px;
-    box-sizing: border-box;
-    padding: 4px 4px;
+    padding: 4px;
     margin-right: 4px;
+    border: 1px solid #bbb;
     border-radius: 6px;
     font-size: 14px;
-    border: 1px solid #bbb;
     background: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     transition: border 0.2s, box-shadow 0.2s;
 }
 
+/* Buttons */
 button, input[type="submit"] {
-    font-family: 'Courier New', Courier, monospace;
+    font-family: 'Courier New', monospace;
     min-width: 36px;
-    width: auto;
-    background-color: #222;
-    color: #fff;
-    box-sizing: border-box;
     padding: 4px 10px;
+    background: #222;
+    color: #fff;
+    border: none;
     border-radius: 6px;
     font-size: 15px;
-    border: none;
-    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
     cursor: pointer;
+    transition: all 0.2s;
 }
 
+button:hover, button:focus, 
 input[type="submit"]:hover, input[type="submit"]:focus {
     background: #fff;
     color: #222;
-    box-shadow: 0 0 0 2px #2222;
+    box-shadow: 0 0 0 2px #222;
 }
 
-.controls-left {
-    flex: 1;
+/* Layout sections */
+.controls-left, .controls-center, .controls-right {
     display: flex;
     align-items: center;
-    gap: 10px;
+}
+
+.controls-left, .controls-right {
+    flex: 1;
 }
 
 .controls-center {
     flex: 2;
-    display: flex;
-    align-items: center;
     justify-content: center;
     gap: 12px;
 }
 
-.controls-right {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
+.controls-left {
+    gap: 10px;
 }
-button:hover, button:focus {
-    background: #fff;
-    color: #222;
-    box-shadow: 0 0 0 2px #2222;
+
+.controls-right {
+    justify-content: flex-end;
 }

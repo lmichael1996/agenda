@@ -13,7 +13,7 @@ if (empty($_SESSION['from_index'])) {
 <head>
     <meta charset="UTF-8">
     <title>Login - Agenda Settimanale</title>
-    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/login.css">
 </head>
 <body>
     <div class="login-box">

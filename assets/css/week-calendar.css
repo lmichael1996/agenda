@@ -1,0 +1,99 @@
+/* Base styles */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Courier New', monospace;
+    background: url('../images/background.png') center fixed no-repeat;
+}
+
+.dashboard-container {
+    width: 100vw;
+    min-height: 100vh;
+}
+
+/* Calendar header */
+.calendar-header-row {
+    display: grid;
+    grid-template-columns: 48px repeat(7, 1fr);
+    min-width: 1100px;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    border-radius: 6px 6px 0 0;
+}
+
+.hour-label-empty {
+    font-size: 0.7em;
+    background: #222;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 80%;
+}
+
+.header-day {
+    text-align: center;
+    font-weight: 500;
+    font-size: 1em;
+    background: #222;
+    color: #fff;
+    border: 1px solid #fff;
+    padding: 6px 2px 2px;
+}
+
+.header-day.today {
+    background: #fff;
+    color: #000;
+    border-color: #000;
+}
+
+.header-date {
+    font-size: 0.95em;
+    color: #888;
+}
+
+.header-day.today .header-date {
+    color: #222;
+}
+
+/* Calendar grid */
+.calendar-grid {
+    display: grid;
+    grid-template-columns: 48px repeat(7, 1fr);
+    min-width: 1100px;
+    border-radius: 0 0 6px 6px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+}
+
+.hour-label {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    background: #222;
+    color: #fff;
+    font-size: 0.75em;
+    height: 40px;
+    padding: 2px 2px 0 0;
+    margin-top: -9px;
+}
+
+.hour-label-time {
+    width: 100%;
+    text-align: center;
+}
+
+.hour-label-past { color: #bbb; }
+
+.day {
+    background: transparent;
+    border: 1px solid #000;
+    transition: background 0.2s;
+}
+
+.day.today {
+    background: #c9c9c9;
+    border-left: 2px solid #222;
+    border-right: 2px solid #222;
+}
+

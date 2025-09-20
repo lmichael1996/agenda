@@ -39,10 +39,11 @@ $currentDate = $today->format('Y-m-d');
     <title>Agenda Settimanale</title>
     
     <!-- CSS -->
-    <link rel="stylesheet" href="../assets/css/top-menu.css">
+    <link rel="stylesheet" href="../assets/css/top-header.css">
+    <link rel="stylesheet" href="../assets/css/scrollbar.css">
     <link rel="stylesheet" href="../assets/css/calendar-events.css">
-    <link rel="stylesheet" href="../assets/css/week-calendar-style.css">
-    <link rel="stylesheet" href="../assets/css/lateral-menu-style.css">
+    <link rel="stylesheet" href="../assets/css/week-calendar.css">
+    <link rel="stylesheet" href="../assets/css/lateral-menu.css">
 </head>
 <body>
     
