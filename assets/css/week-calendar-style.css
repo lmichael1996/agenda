@@ -3,7 +3,7 @@ body {
     padding: 0;
     background: transparent;
     font-family: 'Courier New', Courier, monospace;
-    background-image: url('../image/background.png');
+    background-image: url('../images/background.png');
     background-attachment: fixed;
     background-repeat: no-repeat;
     background-position: center;
@@ -155,8 +155,11 @@ body {
     text-align: center;
 }
 
+.hour-label-past {
+    font: #bbb;
+}
+
 .day {
-    min-height: 36px;
     background: transparent;
     border: 1px solid #000000;
     border-radius: 0;
@@ -168,3 +171,4 @@ body {
     border-right: 2px solid #222;
     background: #c9c9c9;
 }
+

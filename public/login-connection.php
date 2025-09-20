@@ -1,5 +1,10 @@
 <?php
-header('Location: dashboard.php');
+// Carica configurazione
+require_once '../config/config.php';
+
+session_start();
+
+header('Location: dashboard_new.php');
 exit;
 
 /*

@@ -1,4 +1,7 @@
 <?php
+// Carica configurazione
+require_once '../config/config.php';
+
 session_start();
 if (empty($_SESSION['from_index'])) {
     http_response_code(403);
@@ -10,8 +13,8 @@ if (empty($_SESSION['from_index'])) {
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <title>Login</title>
-    <link rel="stylesheet" href="style/style.css">
+    <title>Login - <?= APP_NAME ?></title>
+    <link rel="stylesheet" href="../assets/css/style.css">
 </head>
 <body>
     <div class="login-box">

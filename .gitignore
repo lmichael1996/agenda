@@ -1,0 +1,52 @@
+# File di configurazione sensibili
+config/local_config.php
+
+# Log e cache
+*.log
+cache/
+temp/
+tmp/
+
+# IDE e editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Node modules (se aggiunti in futuro)
+node_modules/
+npm-debug.log
+
+# Composer (se aggiunto in futuro)
+vendor/
+composer.lock
+
+# File temporanei PHP
+*.tmp
+
+# Upload directory
+uploads/
+files/
+
+# Database dumps
+*.sql
+*.sqlite
+
+# Test files
+tests/output/
+coverage/
