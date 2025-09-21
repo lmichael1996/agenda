@@ -1,6 +1,62 @@
 // ========== GESTIONE SERVIZI ==========
 let serviceIdCounter = 4;
 
+// Lista servizi centralizzata
+let servicesList = [
+    {
+        id: 1,
+        name: "Consulenza Personalizzata",
+        price: 50.00,
+        durationMinutes: 60,
+        description: "Consulenza individuale personalizzata",
+        status: "attivo"
+    },
+    {
+        id: 2,
+        name: "Servizio Standard", 
+        price: 30.00,
+        durationMinutes: 45,
+        description: "Servizio base standard",
+        status: "attivo"
+    },
+    {
+        id: 3,
+        name: "Pacchetto Premium",
+        price: 100.00,
+        durationMinutes: 120,
+        description: "Pacchetto completo premium", 
+        status: "attivo"
+    }
+];
+
+// Genera HTML per una singola riga servizio
+function generateServiceRow(service) {
+    return `
+        <tr data-service-id="${service.id}">
+            <td><input type="checkbox" class="row-select-service"></td>
+            <td><input type="text" value="${service.name}" class="cell-input"></td>
+            <td><input type="number" value="${service.price.toFixed(2)}" step="1" min="0" class="cell-input price-input"></td>
+            <td><input type="number" value="${service.durationMinutes}" step="15" min="15" max="480" class="cell-input duration-input"></td>
+            <td><input type="text" value="${service.description}" class="cell-input"></td>
+            <td>
+                <select class="cell-select status-select">
+                    <option value="attivo" ${service.status === 'attivo' ? 'selected' : ''}>Attivo</option>
+                    <option value="inattivo" ${service.status === 'inattivo' ? 'selected' : ''}>Inattivo</option>
+                    <option value="sospeso" ${service.status === 'sospeso' ? 'selected' : ''}>Sospeso</option>
+                </select>
+            </td>
+            <td class="actions-cell">
+                <button data-action="deleteService" data-service-id="${service.id}" class="action-btn btn-delete-single" title="Elimina">🗑️</button>
+            </td>
+        </tr>
+    `;
+}
+
+// Genera HTML per tutte le righe servizi
+function generateServicesRows() {
+    return servicesList.map(service => generateServiceRow(service)).join('');
+}
+
 // Template HTML per il popup servizi
 function getServicesPopupContent() {
     return `
@@ -36,63 +92,13 @@ function getServicesPopupContent() {
                             </tr>
                         </thead>
                         <tbody id="services-list">
-                            <tr data-service-id="1">
-                                <td><input type="checkbox" class="row-select-service"></td>
-                                <td><input type="text" value="Consulenza Personalizzata" class="cell-input"></td>
-                                <td><input type="number" value="50.00" step="0.01" min="0" class="cell-input price-input"></td>
-                                <td><input type="number" value="60" min="1" max="480" class="cell-input duration-input"></td>
-                                <td><input type="text" value="Consulenza individuale personalizzata" class="cell-input"></td>
-                                <td>
-                                    <select class="cell-select status-select">
-                                        <option value="attivo" selected>Attivo</option>
-                                        <option value="inattivo">Inattivo</option>
-                                        <option value="sospeso">Sospeso</option>
-                                    </select>
-                                </td>
-                                <td class="actions-cell">
-                                    <button data-action="deleteService" data-service-id="1" class="action-btn btn-delete-single" title="Elimina">🗑️</button>
-                                </td>
-                            </tr>
-                            <tr data-service-id="2">
-                                <td><input type="checkbox" class="row-select-service"></td>
-                                <td><input type="text" value="Servizio Standard" class="cell-input"></td>
-                                <td><input type="number" value="30.00" step="0.01" min="0" class="cell-input price-input"></td>
-                                <td><input type="number" value="45" min="1" max="480" class="cell-input duration-input"></td>
-                                <td><input type="text" value="Servizio base standard" class="cell-input"></td>
-                                <td>
-                                    <select class="cell-select status-select">
-                                        <option value="attivo" selected>Attivo</option>
-                                        <option value="inattivo">Inattivo</option>
-                                        <option value="sospeso">Sospeso</option>
-                                    </select>
-                                </td>
-                                <td class="actions-cell">
-                                    <button data-action="deleteService" data-service-id="2" class="action-btn btn-delete-single" title="Elimina">🗑️</button>
-                                </td>
-                            </tr>
-                            <tr data-service-id="3">
-                                <td><input type="checkbox" class="row-select-service"></td>
-                                <td><input type="text" value="Pacchetto Premium" class="cell-input"></td>
-                                <td><input type="number" value="100.00" step="0.01" min="0" class="cell-input price-input"></td>
-                                <td><input type="number" value="120" min="1" max="480" class="cell-input duration-input"></td>
-                                <td><input type="text" value="Pacchetto completo premium" class="cell-input"></td>
-                                <td>
-                                    <select class="cell-select status-select">
-                                        <option value="attivo" selected>Attivo</option>
-                                        <option value="inattivo">Inattivo</option>
-                                        <option value="sospeso">Sospeso</option>
-                                    </select>
-                                </td>
-                                <td class="actions-cell">
-                                    <button data-action="deleteService" data-service-id="3" class="action-btn btn-delete-single" title="Elimina">🗑️</button>
-                                </td>
-                            </tr>
+                            ${generateServicesRows()}
                         </tbody>
                     </table>
                 </div>
 
                 <div class="services-stats">
-                    <span class="stat-item">Totale servizi: <strong id="total-services">3</strong></span>
+                    <span class="stat-item">Totale servizi: <strong id="total-services">${servicesList.length}</strong></span>
                     <span class="stat-item">Selezionati: <strong id="selected-services">0</strong></span>
                 </div>
             </div>
@@ -108,6 +114,17 @@ function getServicesPopupContent() {
 
 // Funzioni gestione servizi
 window.addNewService = function() {
+    const newService = {
+        id: serviceIdCounter,
+        name: "",
+        price: 0.00,
+        durationMinutes: 15,
+        description: "",
+        status: "attivo"
+    };
+    
+    servicesList.push(newService);
+    
     const tbody = document.getElementById('services-list');
     if (!tbody) {
         console.error('Elemento services-list non trovato');
@@ -116,12 +133,11 @@ window.addNewService = function() {
     
     const newRow = document.createElement('tr');
     newRow.setAttribute('data-service-id', serviceIdCounter);
-    
     newRow.innerHTML = `
         <td><input type="checkbox" class="row-select-service"></td>
         <td><input type="text" value="" placeholder="Nome servizio" class="cell-input new-service"></td>
-        <td><input type="number" value="0.00" step="0.01" min="0" placeholder="0.00" class="cell-input price-input new-service"></td>
-        <td><input type="number" value="30" min="1" max="480" placeholder="30" class="cell-input duration-input new-service"></td>
+        <td><input type="number" value="10" step="1" min="0" class="cell-input price-input new-service"></td>
+        <td><input type="number" value="15" step="15" min="15" max="480" placeholder="30" class="cell-input duration-input new-service"></td>
         <td><input type="text" value="" placeholder="Descrizione servizio" class="cell-input new-service"></td>
         <td>
             <select class="cell-select status-select new-service">
@@ -136,8 +152,6 @@ window.addNewService = function() {
     `;
     
     tbody.appendChild(newRow);
-    
-    // Focus sul nome del nuovo servizio
     newRow.querySelector('input[type="text"]').focus();
     
     serviceIdCounter++;
@@ -146,6 +160,10 @@ window.addNewService = function() {
 
 window.deleteService = function(serviceId) {
     if (confirm('Sei sicuro di voler eliminare questo servizio?')) {
+        // Rimuovi dalla variabile servicesList
+        servicesList = servicesList.filter(service => service.id != serviceId);
+        
+        // Rimuovi dalla UI
         const row = document.querySelector(`tr[data-service-id="${serviceId}"]`);
         if (row) {
             row.remove();
@@ -162,9 +180,16 @@ window.deleteSelectedServices = function() {
     }
     
     if (confirm(`Sei sicuro di voler eliminare ${selectedRows.length} servizi selezionati?`)) {
+        const selectedIds = [];
         selectedRows.forEach(checkbox => {
+            const serviceId = checkbox.closest('tr').getAttribute('data-service-id');
+            selectedIds.push(parseInt(serviceId));
             checkbox.closest('tr').remove();
         });
+        
+        // Rimuovi dalla variabile servicesList
+        servicesList = servicesList.filter(service => !selectedIds.includes(service.id));
+        
         updateServiceStats();
         const selectAllCheckbox = document.getElementById('select-all-services');
         if (selectAllCheckbox) {
@@ -186,36 +211,43 @@ window.toggleSelectAllServices = function() {
 };
 
 window.saveAllServices = function() {
-    const rows = document.querySelectorAll('#services-list tr');
-    const services = [];
+    // Sincronizza dati dalla UI alla variabile servicesList
+    syncServicesFromUI();
     
-    rows.forEach(row => {
-        const serviceId = row.getAttribute('data-service-id');
-        const inputs = row.querySelectorAll('.cell-input, .cell-select, .cell-color');
-        
-        const service = {
-            id: serviceId,
-            nome: inputs[0]?.value?.trim() || '',
-            prezzo: parseFloat(inputs[1]?.value) || 0,
-            tempoMinuti: parseInt(inputs[2]?.value) || 30,
-            descrizione: inputs[3]?.value?.trim() || '',
-            stato: inputs[4]?.value || 'attivo'
-        };
-        
-        // Validazione base
-        if (service.nome && service.prezzo >= 0 && service.tempoMinuti > 0) {
-            services.push(service);
-        }
-    });
-    
-    localStorage.setItem('servicesData', JSON.stringify(services));
-    alert(`✅ Salvati ${services.length} servizi!`);
+    // Salva la lista servizi aggiornata
+    localStorage.setItem('servicesData', JSON.stringify(servicesList));
+    alert(`✅ Salvati ${servicesList.length} servizi!`);
     
     // Rimuovi evidenziazione dai nuovi servizi
     document.querySelectorAll('.new-service').forEach(element => {
         element.classList.remove('new-service');
     });
 };
+
+// Sincronizza dati dalla UI alla variabile servicesList
+function syncServicesFromUI() {
+    const rows = document.querySelectorAll('#services-list tr');
+    
+    rows.forEach(row => {
+        const serviceId = parseInt(row.getAttribute('data-service-id'));
+        const inputs = row.querySelectorAll('.cell-input, .cell-select');
+        
+        const serviceData = {
+            id: serviceId,
+            name: inputs[0]?.value?.trim() || '',
+            price: parseFloat(inputs[1]?.value) || 0,
+            durationMinutes: parseInt(inputs[2]?.value) || 15,
+            description: inputs[3]?.value?.trim() || '',
+            status: inputs[4]?.value || 'attivo'
+        };
+        
+        // Trova e aggiorna il servizio nella lista
+        const serviceIndex = servicesList.findIndex(s => s.id === serviceId);
+        if (serviceIndex !== -1) {
+            servicesList[serviceIndex] = serviceData;
+        }
+    });
+}
 
 function updateServiceStats() {
     const totalServices = document.querySelectorAll('#services-list tr').length;
@@ -233,9 +265,20 @@ function loadSavedServices() {
     const savedServices = localStorage.getItem('servicesData');
     if (savedServices) {
         try {
-            const services = JSON.parse(savedServices);
-            // Logica per ripopolare la tabella con i dati salvati
-            console.log('Servizi caricati:', services);
+            servicesList = JSON.parse(savedServices);
+            
+            // Aggiorna il counter con l'ID più alto + 1
+            const maxId = Math.max(...servicesList.map(s => s.id), 0);
+            serviceIdCounter = maxId + 1;
+            
+            // Rigenera la tabella con i dati caricati
+            const tbody = document.getElementById('services-list');
+            if (tbody) {
+                tbody.innerHTML = generateServicesRows();
+                updateServiceStats();
+            }
+            
+            console.log('Servizi caricati:', servicesList);
         } catch (error) {
             console.error('Errore nel caricamento dei servizi:', error);
         }
