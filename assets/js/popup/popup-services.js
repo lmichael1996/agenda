@@ -31,22 +31,32 @@ let servicesList = [
 
 // Genera HTML per una singola riga servizio
 function generateServiceRow(service) {
+    // Protezione contro valori undefined
+    const safeService = {
+        id: service.id || 0,
+        name: service.name || '',
+        price: Number(service.price) || 0,
+        durationMinutes: Number(service.durationMinutes) || 15,
+        description: service.description || '',
+        status: service.status || 'attivo'
+    };
+    
     return `
-        <tr data-service-id="${service.id}">
+        <tr data-service-id="${safeService.id}">
             <td><input type="checkbox" class="row-select-service"></td>
-            <td><input type="text" value="${service.name}" class="cell-input"></td>
-            <td><input type="number" value="${service.price.toFixed(2)}" step="1" min="0" class="cell-input price-input"></td>
-            <td><input type="number" value="${service.durationMinutes}" step="15" min="15" max="480" class="cell-input duration-input"></td>
-            <td><input type="text" value="${service.description}" class="cell-input"></td>
+            <td><input type="text" value="${safeService.name}" class="cell-input"></td>
+            <td><input type="number" value="${safeService.price.toFixed(2)}" step="0.01" min="0" class="cell-input price-input"></td>
+            <td><input type="number" value="${safeService.durationMinutes}" step="15" min="15" max="480" class="cell-input duration-input"></td>
+            <td><input type="text" value="${safeService.description}" class="cell-input"></td>
             <td>
                 <select class="cell-select status-select">
-                    <option value="attivo" ${service.status === 'attivo' ? 'selected' : ''}>Attivo</option>
-                    <option value="inattivo" ${service.status === 'inattivo' ? 'selected' : ''}>Inattivo</option>
-                    <option value="sospeso" ${service.status === 'sospeso' ? 'selected' : ''}>Sospeso</option>
+                    <option value="attivo" ${safeService.status === 'attivo' ? 'selected' : ''}>Attivo</option>
+                    <option value="inattivo" ${safeService.status === 'inattivo' ? 'selected' : ''}>Inattivo</option>
+                    <option value="sospeso" ${safeService.status === 'sospeso' ? 'selected' : ''}>Sospeso</option>
                 </select>
             </td>
             <td class="actions-cell">
-                <button data-action="deleteService" data-service-id="${service.id}" class="action-btn btn-delete-single" title="Elimina">🗑️</button>
+                <button data-action="deleteService" data-service-id="${safeService.id}" class="action-btn btn-delete-single" title="Elimina">🗑️</button>
             </td>
         </tr>
     `;
@@ -54,6 +64,38 @@ function generateServiceRow(service) {
 
 // Genera HTML per tutte le righe servizi
 function generateServicesRows() {
+    // Verifica di sicurezza: se servicesList è vuoto, ripristina i dati di default
+    if (!servicesList || !Array.isArray(servicesList) || servicesList.length === 0) {
+        console.warn('servicesList vuoto, ripristino dati di default');
+        servicesList = [
+            {
+                id: 1,
+                name: "Consulenza Personalizzata",
+                price: 50.00,
+                durationMinutes: 60,
+                description: "Consulenza individuale personalizzata",
+                status: "attivo"
+            },
+            {
+                id: 2,
+                name: "Servizio Standard", 
+                price: 30.00,
+                durationMinutes: 45,
+                description: "Servizio base standard",
+                status: "attivo"
+            },
+            {
+                id: 3,
+                name: "Pacchetto Premium",
+                price: 100.00,
+                durationMinutes: 120,
+                description: "Pacchetto completo premium", 
+                status: "attivo"
+            }
+        ];
+        serviceIdCounter = 4;
+    }
+    
     return servicesList.map(service => generateServiceRow(service)).join('');
 }
 
@@ -136,7 +178,7 @@ window.addNewService = function() {
     newRow.innerHTML = `
         <td><input type="checkbox" class="row-select-service"></td>
         <td><input type="text" value="" placeholder="Nome servizio" class="cell-input new-service"></td>
-        <td><input type="number" value="10" step="1" min="0" class="cell-input price-input new-service"></td>
+        <td><input type="number" value="10.00" step="1.00" min="0" class="cell-input price-input new-service"></td>
         <td><input type="number" value="15" step="15" min="15" max="480" placeholder="30" class="cell-input duration-input new-service"></td>
         <td><input type="text" value="" placeholder="Descrizione servizio" class="cell-input new-service"></td>
         <td>
@@ -265,23 +307,34 @@ function loadSavedServices() {
     const savedServices = localStorage.getItem('servicesData');
     if (savedServices) {
         try {
-            servicesList = JSON.parse(savedServices);
+            const parsedServices = JSON.parse(savedServices);
             
-            // Aggiorna il counter con l'ID più alto + 1
-            const maxId = Math.max(...servicesList.map(s => s.id), 0);
-            serviceIdCounter = maxId + 1;
-            
-            // Rigenera la tabella con i dati caricati
-            const tbody = document.getElementById('services-list');
-            if (tbody) {
-                tbody.innerHTML = generateServicesRows();
-                updateServiceStats();
+            // Solo sostituisci se ci sono effettivamente servizi validi
+            if (Array.isArray(parsedServices) && parsedServices.length > 0) {
+                servicesList = parsedServices;
+                
+                // Aggiorna il counter con l'ID più alto + 1
+                const maxId = Math.max(...servicesList.map(s => s.id), 0);
+                serviceIdCounter = maxId + 1;
+                
+                console.log('Servizi caricati dal localStorage:', servicesList);
+            } else {
+                console.log('localStorage vuoto o non valido, mantengo dati di default');
             }
             
-            console.log('Servizi caricati:', servicesList);
         } catch (error) {
-            console.error('Errore nel caricamento dei servizi:', error);
+            console.error('Errore nel parsing del localStorage:', error);
+            console.log('Mantengo dati di default');
         }
+    } else {
+        console.log('Nessun dato nel localStorage, uso dati di default');
+    }
+    
+    // Rigenera sempre la tabella (con dati caricati o di default)
+    const tbody = document.getElementById('services-list');
+    if (tbody) {
+        tbody.innerHTML = generateServicesRows();
+        updateServiceStats();
     }
 }
 

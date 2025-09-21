@@ -1,6 +1,58 @@
 // ========== GESTIONE UTENTI ==========
 let userIdCounter = 4;
 
+// Lista utenti centralizzata
+let usersList = [
+    {
+        id: 1,
+        username: "mario.rossi",
+        color: "#3498db",
+        status: "attivo"
+    },
+    {
+        id: 2,
+        username: "laura.bianchi", 
+        color: "#e74c3c",
+        status: "attivo"
+    },
+    {
+        id: 3,
+        username: "giuseppe.verdi",
+        color: "#2ecc71",
+        status: "attivo"
+    }
+];
+
+// Genera HTML per una singola riga utente
+function generateUserRow(user) {
+    return `
+        <tr data-user-id="${user.id}">
+            <td><input type="checkbox" class="row-select"></td>
+            <td><input type="text" value="${user.username}" class="cell-input"></td>
+            <td><input type="password" value="" placeholder="Password" class="cell-input"></td>
+            <td><input type="password" value="" placeholder="Conferma Password" class="cell-input"></td>
+            <td>
+                <input type="color" value="${user.color}" class="cell-color">
+            </td>
+            <td>
+                <select class="cell-select status-select">
+                    <option value="attivo" ${user.status === 'attivo' ? 'selected' : ''}>Attivo</option>
+                    <option value="inattivo" ${user.status === 'inattivo' ? 'selected' : ''}>Inattivo</option>
+                    <option value="sospeso" ${user.status === 'sospeso' ? 'selected' : ''}>Sospeso</option>
+                </select>
+            </td>
+            <td class="actions-cell">
+                <button data-action="deleteUser" data-user-id="${user.id}" class="action-btn btn-delete-single" title="Elimina">🗑️</button>
+            </td>
+        </tr>
+    `;
+}
+
+// Genera HTML per tutte le righe utenti
+function generateUsersRows() {
+    return usersList.map(user => generateUserRow(user)).join('');
+}
+
 // Template HTML per il popup utenti
 function getUsersPopupContent() {
     return `
@@ -36,70 +88,14 @@ function getUsersPopupContent() {
                             </tr>
                         </thead>
                         <tbody id="users-list">
-                            <tr data-user-id="1">
-                                <td><input type="checkbox" class="row-select"></td>
-                                <td><input type="text" value="mario.rossi" class="cell-input"></td>
-                                <td><input type="password" value="" placeholder="Password" class="cell-input"></td>
-                                <td><input type="password" value="" placeholder="Conferma Password" class="cell-input"></td>
-                                <td>
-                                    <input type="color" value="#3498db" class="cell-color">
-                                </td>
-                                <td>
-                                    <select class="cell-select status-select">
-                                        <option value="attivo" selected>Attivo</option>
-                                        <option value="inattivo">Inattivo</option>
-                                        <option value="sospeso">Sospeso</option>
-                                    </select>
-                                </td>
-                                <td class="actions-cell">
-                                    <button data-action="deleteUser" data-user-id="1" class="action-btn btn-delete-single" title="Elimina">🗑️</button>
-                                </td>
-                            </tr>
-                            <tr data-user-id="2">
-                                <td><input type="checkbox" class="row-select"></td>
-                                <td><input type="text" value="laura.bianchi" class="cell-input"></td>
-                                <td><input type="password" value="" placeholder="Password" class="cell-input"></td>
-                                <td><input type="password" value="" placeholder="Conferma Password" class="cell-input"></td>
-                                <td>
-                                    <input type="color" value="#e74c3c" class="cell-color">
-                                </td>
-                                <td>
-                                    <select class="cell-select status-select">
-                                        <option value="attivo" selected>Attivo</option>
-                                        <option value="inattivo">Inattivo</option>
-                                        <option value="sospeso">Sospeso</option>
-                                    </select>
-                                </td>
-                                <td class="actions-cell">
-                                    <button data-action="deleteUser" data-user-id="2" class="action-btn btn-delete-single" title="Elimina">🗑️</button>
-                                </td>
-                            </tr>
-                            <tr data-user-id="3">
-                                <td><input type="checkbox" class="row-select"></td>
-                                <td><input type="text" value="giuseppe.verdi" class="cell-input"></td>
-                                <td><input type="password" value="" placeholder="Password" class="cell-input"></td>
-                                <td><input type="password" value="" placeholder="Conferma Password" class="cell-input"></td>
-                                <td>
-                                    <input type="color" value="#2ecc71" class="cell-color">
-                                </td>
-                                <td>
-                                    <select class="cell-select status-select">
-                                        <option value="attivo" selected>Attivo</option>
-                                        <option value="inattivo">Inattivo</option>
-                                        <option value="sospeso">Sospeso</option>
-                                    </select>
-                                </td>
-                                <td class="actions-cell">
-                                    <button data-action="deleteUser" data-user-id="3" class="action-btn btn-delete-single" title="Elimina">🗑️</button>
-                                </td>
-                            </tr>
+                            ${generateUsersRows()}
                         </tbody>
                     </table>
                 </div>
 
                 <div class="users-stats">
-                    <span class="stat-item">Totale utenti: <strong id="total-users">3</strong></span>
-                    <span class="stat-item">Attivi: <strong id="active-users">3</strong></span>
+                    <span class="stat-item">Totale utenti: <strong id="total-users">${usersList.length}</strong></span>
+                    <span class="stat-item">Attivi: <strong id="active-users">${usersList.filter(u => u.status === 'attivo').length}</strong></span>
                     <span class="stat-item">Selezionati: <strong id="selected-users">0</strong></span>
                 </div>
             </div>
@@ -115,6 +111,15 @@ function getUsersPopupContent() {
 
 // Funzioni gestione utenti
 window.addNewUser = function() {
+    const newUser = {
+        id: userIdCounter,
+        username: "",
+        color: "#3498db",
+        status: "attivo"
+    };
+    
+    usersList.push(newUser);
+    
     const tbody = document.getElementById('users-list');
     if (!tbody) {
         console.error('Elemento users-list non trovato');
@@ -123,7 +128,6 @@ window.addNewUser = function() {
     
     const newRow = document.createElement('tr');
     newRow.setAttribute('data-user-id', userIdCounter);
-    
     newRow.innerHTML = `
         <td><input type="checkbox" class="row-select"></td>
         <td><input type="text" value="" placeholder="username" class="cell-input new-user"></td>
@@ -145,8 +149,6 @@ window.addNewUser = function() {
     `;
     
     tbody.appendChild(newRow);
-    
-    // Focus sull'username del nuovo utente
     newRow.querySelector('input[type="text"]').focus();
     
     userIdCounter++;
@@ -155,6 +157,10 @@ window.addNewUser = function() {
 
 window.deleteUser = function(userId) {
     if (confirm('Sei sicuro di voler eliminare questo utente?')) {
+        // Rimuovi dalla variabile usersList
+        usersList = usersList.filter(user => user.id != userId);
+        
+        // Rimuovi dalla UI
         const row = document.querySelector(`tr[data-user-id="${userId}"]`);
         if (row) {
             row.remove();
@@ -171,9 +177,16 @@ window.deleteSelectedUsers = function() {
     }
     
     if (confirm(`Sei sicuro di voler eliminare ${selectedRows.length} utenti selezionati?`)) {
+        const selectedIds = [];
         selectedRows.forEach(checkbox => {
+            const userId = checkbox.closest('tr').getAttribute('data-user-id');
+            selectedIds.push(parseInt(userId));
             checkbox.closest('tr').remove();
         });
+        
+        // Rimuovi dalla variabile usersList
+        usersList = usersList.filter(user => !selectedIds.includes(user.id));
+        
         updateUserStats();
         const selectAllCheckbox = document.getElementById('select-all-users');
         if (selectAllCheckbox) {
@@ -195,41 +208,49 @@ window.toggleSelectAll = function() {
 };
 
 window.saveAllUsers = function() {
-    const rows = document.querySelectorAll('#users-list tr');
-    const users = [];
+    // Sincronizza dati dalla UI alla variabile usersList
+    syncUsersFromUI();
     
-    rows.forEach(row => {
-        const userId = row.getAttribute('data-user-id');
-        const inputs = row.querySelectorAll('.cell-input, .cell-select, .cell-color');
-        
-        const user = {
-            id: userId,
-            username: inputs[0]?.value?.trim() || '',
-            password: inputs[1]?.value || '',
-            confermaPassword: inputs[2]?.value || '',
-            colore: inputs[3]?.value || '#3498db',
-            stato: inputs[4]?.value || 'attivo'
-        };
-        
-        // Validazione base
-        if (user.username) {
-            // Verifica corrispondenza password se sono entrambe compilate
-            if (user.password && user.password !== user.confermaPassword) {
-                alert(`⚠️ Le password per ${user.username} non corrispondono!`);
-                return;
-            }
-            users.push(user);
-        }
-    });
-    
-    localStorage.setItem('usersData', JSON.stringify(users));
-    alert(`✅ Salvati ${users.length} utenti!`);
+    // Salva la lista utenti aggiornata
+    localStorage.setItem('usersData', JSON.stringify(usersList));
+    alert(`✅ Salvati ${usersList.length} utenti!`);
     
     // Rimuovi evidenziazione dai nuovi utenti
     document.querySelectorAll('.new-user').forEach(element => {
         element.classList.remove('new-user');
     });
 };
+
+// Sincronizza dati dalla UI alla variabile usersList
+function syncUsersFromUI() {
+    const rows = document.querySelectorAll('#users-list tr');
+    
+    rows.forEach(row => {
+        const userId = parseInt(row.getAttribute('data-user-id'));
+        const inputs = row.querySelectorAll('.cell-input, .cell-select, .cell-color');
+        
+        const userData = {
+            id: userId,
+            username: inputs[0]?.value?.trim() || '',
+            color: inputs[3]?.value || '#3498db',
+            status: inputs[4]?.value || 'attivo'
+        };
+        
+        // Validazione password se compilata (solo per verifica UI)
+        const password = inputs[1]?.value || '';
+        const confirmPassword = inputs[2]?.value || '';
+        if (password && password !== confirmPassword) {
+            alert(`⚠️ Le password per ${userData.username} non corrispondono!`);
+            return;
+        }
+        
+        // Trova e aggiorna l'utente nella lista
+        const userIndex = usersList.findIndex(u => u.id === userId);
+        if (userIndex !== -1) {
+            usersList[userIndex] = userData;
+        }
+    });
+}
 
 function updateUserStats() {
     const totalUsers = document.querySelectorAll('#users-list tr').length;
@@ -250,9 +271,20 @@ function loadSavedUsers() {
     const savedUsers = localStorage.getItem('usersData');
     if (savedUsers) {
         try {
-            const users = JSON.parse(savedUsers);
-            // Logica per ripopolare la tabella con i dati salvati
-            console.log('Utenti caricati:', users);
+            usersList = JSON.parse(savedUsers);
+            
+            // Aggiorna il counter con l'ID più alto + 1
+            const maxId = Math.max(...usersList.map(u => u.id), 0);
+            userIdCounter = maxId + 1;
+            
+            // Rigenera la tabella con i dati caricati
+            const tbody = document.getElementById('users-list');
+            if (tbody) {
+                tbody.innerHTML = generateUsersRows();
+                updateUserStats();
+            }
+            
+            console.log('Utenti caricati:', usersList);
         } catch (error) {
             console.error('Errore nel caricamento degli utenti:', error);
         }

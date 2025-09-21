@@ -1,5 +1,80 @@
 // ========== GESTIONE ORARI ==========
 
+// Configurazione orari centralizzata
+let scheduleConfig = {
+    openingTime: "08:00",
+    closingTime: "18:00",
+    lunchBreakEnabled: true,
+    breakStart: "12:30",
+    breakEnd: "13:30",
+    workingDays: [true, true, true, true, true, false, false], // Lun-Ven
+    timezone: "Europe/Rome"
+};
+
+// Genera HTML per il campo orario di apertura/chiusura
+function generateTimeFields() {
+    return `
+        <div class="time-row">
+            <div class="time-field">
+                <label>Apertura</label>
+                <input type="time" id="opening-time" value="${scheduleConfig.openingTime}">
+            </div>
+            <div class="time-field">
+                <label>Chiusura</label>
+                <input type="time" id="closing-time" value="${scheduleConfig.closingTime}">
+            </div>
+        </div>
+    `;
+}
+
+// Genera HTML per la configurazione pausa pranzo
+function generateBreakConfig() {
+    return `
+        <div class="break-toggle">
+            <label>
+                <input type="checkbox" id="lunch-break" ${scheduleConfig.lunchBreakEnabled ? 'checked' : ''}>
+                <span>Abilita pausa pranzo</span>
+            </label>
+        </div>
+        <div id="break-config" class="time-row">
+            <div class="time-field">
+                <label>Dalle</label>
+                <input type="time" id="break-start" value="${scheduleConfig.breakStart}">
+            </div>
+            <div class="time-field">
+                <label>Alle</label>
+                <input type="time" id="break-end" value="${scheduleConfig.breakEnd}">
+            </div>
+        </div>
+    `;
+}
+
+// Genera HTML per i giorni lavorativi
+function generateWorkingDays() {
+    const dayNames = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'];
+    return dayNames.map((day, index) => 
+        `<label><input type="checkbox" ${scheduleConfig.workingDays[index] ? 'checked' : ''}> ${day}</label>`
+    ).join('');
+}
+
+// Genera HTML per il fuso orario
+function generateTimezoneSelect() {
+    const timezones = [
+        { value: "Europe/Rome", label: "Europa/Roma (UTC+1)" },
+        { value: "Europe/London", label: "Europa/Londra (UTC+0)" },
+        { value: "Europe/Paris", label: "Europa/Parigi (UTC+1)" },
+        { value: "Europe/Berlin", label: "Europa/Berlino (UTC+1)" },
+        { value: "Europe/Madrid", label: "Europa/Madrid (UTC+1)" },
+        { value: "America/New_York", label: "America/New York (UTC-5)" },
+        { value: "America/Los_Angeles", label: "America/Los Angeles (UTC-8)" },
+        { value: "Asia/Tokyo", label: "Asia/Tokyo (UTC+9)" }
+    ];
+    
+    return timezones.map(tz => 
+        `<option value="${tz.value}" ${scheduleConfig.timezone === tz.value ? 'selected' : ''}>${tz.label}</option>`
+    ).join('');
+}
+
 // Template HTML per il popup orari
 function getSchedulePopupContent() {
     return `
@@ -14,11 +89,11 @@ function getSchedulePopupContent() {
                 <div class="time-row">
                     <div class="time-field">
                         <label>Apertura</label>
-                        <input type="time" id="opening-time" value="08:00">
+                        <input type="time" id="opening-time" value="${scheduleConfig.openingTime}">
                     </div>
                     <div class="time-field">
                         <label>Chiusura</label>
-                        <input type="time" id="closing-time" value="18:00">
+                        <input type="time" id="closing-time" value="${scheduleConfig.closingTime}">
                     </div>
                 </div>
             </div>
@@ -27,105 +102,34 @@ function getSchedulePopupContent() {
                 <h3>Pausa Pranzo</h3>
                 <div class="break-toggle">
                     <label>
-                        <input type="checkbox" id="lunch-break" checked>
+                        <input type="checkbox" id="lunch-break" ${scheduleConfig.lunchBreakEnabled ? 'checked' : ''}>
                         <span>Abilita pausa pranzo</span>
                     </label>
                 </div>
                 <div id="break-config" class="time-row">
                     <div class="time-field">
                         <label>Dalle</label>
-                        <input type="time" id="break-start" value="12:30">
+                        <input type="time" id="break-start" value="${scheduleConfig.breakStart}">
                     </div>
                     <div class="time-field">
                         <label>Alle</label>
-                        <input type="time" id="break-end" value="13:30">
+                        <input type="time" id="break-end" value="${scheduleConfig.breakEnd}">
                     </div>
                 </div>
             </div>
 
             <div class="days-section">
                 <h3>Giorni Lavorativi</h3>
-                <div class="days-list">
-                    <label><input type="checkbox" checked> Lunedì</label>
-                    <label><input type="checkbox" checked> Martedì</label>
-                    <label><input type="checkbox" checked> Mercoledì</label>
-                    <label><input type="checkbox" checked> Giovedì</label>
-                    <label><input type="checkbox" checked> Venerdì</label>
-                    <label><input type="checkbox"> Sabato</label>
-                    <label><input type="checkbox"> Domenica</label>
-                </div>
+                            <div class="working-days">
+                <h4>Giorni lavorativi</h4>
+                ${generateWorkingDays()}
+            </div>
             </div>
 
             <div class="timezone-section">
                 <h3>Fuso Orario</h3>
                 <select id="fuso-orario">
-                    <option value="Europe/Rome" selected>Europa/Roma (UTC+1)</option>
-                    <option value="Europe/London">Europa/Londra (UTC+0)</option>
-                    <option value="Europe/Paris">Europa/Parigi (UTC+1)</option>
-                    <option value="Europe/Berlin">Europa/Berlino (UTC+1)</option>
-                    <option value="Europe/Madrid">Europa/Madrid (UTC+1)</option>
-                    <option value="Europe/Amsterdam">Europa/Amsterdam (UTC+1)</option>
-                    <option value="Europe/Vienna">Europa/Vienna (UTC+1)</option>
-                    <option value="Europe/Zurich">Europa/Zurigo (UTC+1)</option>
-                    <option value="Europe/Brussels">Europa/Bruxelles (UTC+1)</option>
-                    <option value="Europe/Stockholm">Europa/Stoccolma (UTC+1)</option>
-                    <option value="Europe/Oslo">Europa/Oslo (UTC+1)</option>
-                    <option value="Europe/Copenhagen">Europa/Copenaghen (UTC+1)</option>
-                    <option value="Europe/Helsinki">Europa/Helsinki (UTC+2)</option>
-                    <option value="Europe/Athens">Europa/Atene (UTC+2)</option>
-                    <option value="Europe/Warsaw">Europa/Varsavia (UTC+1)</option>
-                    <option value="Europe/Prague">Europa/Praga (UTC+1)</option>
-                    <option value="Europe/Budapest">Europa/Budapest (UTC+1)</option>
-                    <option value="Europe/Bucharest">Europa/Bucarest (UTC+2)</option>
-                    <option value="Europe/Sofia">Europa/Sofia (UTC+2)</option>
-                    <option value="Europe/Kiev">Europa/Kiev (UTC+2)</option>
-                    <option value="Europe/Moscow">Europa/Mosca (UTC+3)</option>
-                    <option value="Europe/Istanbul">Europa/Istanbul (UTC+3)</option>
-                    <option value="Europe/Dublin">Europa/Dublino (UTC+0)</option>
-                    <option value="Europe/Lisbon">Europa/Lisbona (UTC+0)</option>
-                    <option value="America/New_York">America/New York (UTC-5)</option>
-                    <option value="America/Los_Angeles">America/Los Angeles (UTC-8)</option>
-                    <option value="America/Chicago">America/Chicago (UTC-6)</option>
-                    <option value="America/Denver">America/Denver (UTC-7)</option>
-                    <option value="America/Phoenix">America/Phoenix (UTC-7)</option>
-                    <option value="America/Toronto">America/Toronto (UTC-5)</option>
-                    <option value="America/Vancouver">America/Vancouver (UTC-8)</option>
-                    <option value="America/Mexico_City">America/Città del Messico (UTC-6)</option>
-                    <option value="America/Sao_Paulo">America/San Paolo (UTC-3)</option>
-                    <option value="America/Buenos_Aires">America/Buenos Aires (UTC-3)</option>
-                    <option value="America/Lima">America/Lima (UTC-5)</option>
-                    <option value="America/Bogota">America/Bogotà (UTC-5)</option>
-                    <option value="America/Santiago">America/Santiago (UTC-4)</option>
-                    <option value="Asia/Tokyo">Asia/Tokyo (UTC+9)</option>
-                    <option value="Asia/Shanghai">Asia/Shanghai (UTC+8)</option>
-                    <option value="Asia/Hong_Kong">Asia/Hong Kong (UTC+8)</option>
-                    <option value="Asia/Singapore">Asia/Singapore (UTC+8)</option>
-                    <option value="Asia/Seoul">Asia/Seoul (UTC+9)</option>
-                    <option value="Asia/Bangkok">Asia/Bangkok (UTC+7)</option>
-                    <option value="Asia/Mumbai">Asia/Mumbai (UTC+5:30)</option>
-                    <option value="Asia/Dubai">Asia/Dubai (UTC+4)</option>
-                    <option value="Asia/Tehran">Asia/Tehran (UTC+3:30)</option>
-                    <option value="Asia/Jerusalem">Asia/Gerusalemme (UTC+2)</option>
-                    <option value="Asia/Riyadh">Asia/Riyadh (UTC+3)</option>
-                    <option value="Asia/Karachi">Asia/Karachi (UTC+5)</option>
-                    <option value="Asia/Dhaka">Asia/Dhaka (UTC+6)</option>
-                    <option value="Asia/Jakarta">Asia/Jakarta (UTC+7)</option>
-                    <option value="Asia/Manila">Asia/Manila (UTC+8)</option>
-                    <option value="Australia/Sydney">Australia/Sydney (UTC+10)</option>
-                    <option value="Australia/Melbourne">Australia/Melbourne (UTC+10)</option>
-                    <option value="Australia/Perth">Australia/Perth (UTC+8)</option>
-                    <option value="Australia/Brisbane">Australia/Brisbane (UTC+10)</option>
-                    <option value="Pacific/Auckland">Pacifico/Auckland (UTC+12)</option>
-                    <option value="Pacific/Honolulu">Pacifico/Honolulu (UTC-10)</option>
-                    <option value="Pacific/Fiji">Pacifico/Fiji (UTC+12)</option>
-                    <option value="Africa/Cairo">Africa/Il Cairo (UTC+2)</option>
-                    <option value="Africa/Lagos">Africa/Lagos (UTC+1)</option>
-                    <option value="Africa/Johannesburg">Africa/Johannesburg (UTC+2)</option>
-                    <option value="Africa/Casablanca">Africa/Casablanca (UTC+0)</option>
-                    <option value="Africa/Nairobi">Africa/Nairobi (UTC+3)</option>
-                    <option value="Atlantic/Reykjavik">Atlantico/Reykjavik (UTC+0)</option>
-                    <option value="GMT">GMT (UTC+0)</option>
-                    <option value="UTC">UTC (UTC+0)</option>
+                    ${generateTimezoneSelect()}
                 </select>
             </div>
         </div>
