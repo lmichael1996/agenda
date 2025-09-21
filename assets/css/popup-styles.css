@@ -19,8 +19,8 @@
     padding: 2rem;
     border-radius: 8px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-    max-width: 1200px;
-    width: 95%;
+    max-width: 1400px;
+    width: 98%;
     max-height: 85vh;
     overflow-y: auto;
     transform: scale(0.9);
@@ -819,6 +819,15 @@
 }
 
 /* Stili Excel-like table per gestione utenti */
+.users-section {
+    grid-column: 1 / -1;
+    background: #f9f9f9;
+    padding: 1rem;
+    border-radius: 6px;
+    border: 1px solid #e0e0e0;
+    margin-top: 0.75rem;
+}
+
 .users-toolbar {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -932,19 +941,31 @@
 }
 
 .name-col {
+    width: 220px;
+}
+
+.username-col {
     width: 200px;
 }
 
-.email-col {
-    width: 250px;
-}
-
 .role-col {
-    width: 150px;
+    width: 160px;
 }
 
 .phone-col {
-    width: 180px;
+    width: 150px;
+}
+
+.password-col {
+    width: 140px;
+}
+
+.confirm-password-col {
+    width: 160px;
+}
+
+.color-col {
+    width: 80px;
 }
 
 .status-col {
@@ -952,7 +973,7 @@
 }
 
 .actions-col {
-    width: 100px;
+    width: 120px;
     text-align: center;
 }
 
@@ -972,6 +993,21 @@
     border: 1px solid #007bff;
     outline: none;
     box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+}
+
+.cell-color {
+    width: 60px;
+    height: 35px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    background: none;
+    padding: 0;
+}
+
+.cell-color:focus {
+    outline: none;
+    border: 2px solid #007bff;
 }
 
 .cell-input.new-user {
@@ -1085,7 +1121,11 @@ input[type="checkbox"] {
     }
     
     /* Nascondi alcune colonne su mobile */
+    .username-col,
     .phone-col,
+    .password-col,
+    .confirm-password-col,
+    .color-col,
     .status-col {
         display: none;
     }

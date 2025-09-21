@@ -78,117 +78,131 @@ function getPopupContent(type) {
                 </div>
                 
                 <div class="calendar-body">
-                    <div class="users-toolbar">
-                        <button onclick="addNewUser()" class="toolbar-btn btn-add">
-                            <span>➕</span> Nuovo Utente
-                        </button>
-                        <button onclick="deleteSelectedUsers()" class="toolbar-btn btn-delete">
-                            <span>🗑️</span> Elimina Selezionati
-                        </button>
-                        <button onclick="saveAllUsers()" class="toolbar-btn btn-save">
-                            <span>💾</span> Salva Modifiche
-                        </button>
-                    </div>
+                    <div class="users-section">
+                        <div class="users-toolbar">
+                            <button onclick="addNewUser()" class="toolbar-btn btn-add">
+                                <span>➕</span> Nuovo Utente
+                            </button>
+                            <button onclick="deleteSelectedUsers()" class="toolbar-btn btn-delete">
+                                <span>🗑️</span> Elimina Selezionati
+                            </button>
+                        </div>
 
-                    <div class="users-table-container">
-                        <table class="excel-table" id="users-table">
-                            <thead>
-                                <tr>
-                                    <th class="select-col">
-                                        <input type="checkbox" id="select-all" onchange="toggleSelectAll()">
-                                    </th>
-                                    <th class="name-col">Nome</th>
-                                    <th class="email-col">Email</th>
-                                    <th class="role-col">Ruolo</th>
-                                    <th class="phone-col">Telefono</th>
-                                    <th class="status-col">Stato</th>
-                                    <th class="actions-col">Azioni</th>
-                                </tr>
-                            </thead>
-                            <tbody id="users-tbody">
-                                <tr data-user-id="1">
-                                    <td><input type="checkbox" class="row-select"></td>
-                                    <td><input type="text" value="Mario Rossi" class="cell-input"></td>
-                                    <td><input type="email" value="mario@email.com" class="cell-input"></td>
-                                    <td>
-                                        <select class="cell-select">
-                                            <option value="cliente" selected>Cliente</option>
-                                            <option value="admin">Admin</option>
-                                            <option value="operatore">Operatore</option>
-                                            <option value="viewer">Visualizzatore</option>
-                                        </select>
-                                    </td>
-                                    <td><input type="tel" value="+39 333 1234567" class="cell-input"></td>
-                                    <td>
-                                        <select class="cell-select status-select">
-                                            <option value="attivo" selected>Attivo</option>
-                                            <option value="inattivo">Inattivo</option>
-                                            <option value="sospeso">Sospeso</option>
-                                        </select>
-                                    </td>
-                                    <td class="actions-cell">
-                                        <button onclick="editUser(1)" class="action-btn btn-edit" title="Modifica">✏️</button>
-                                        <button onclick="deleteUser(1)" class="action-btn btn-delete-single" title="Elimina">🗑️</button>
-                                    </td>
-                                </tr>
-                                <tr data-user-id="2">
-                                    <td><input type="checkbox" class="row-select"></td>
-                                    <td><input type="text" value="Laura Bianchi" class="cell-input"></td>
-                                    <td><input type="email" value="laura@email.com" class="cell-input"></td>
-                                    <td>
-                                        <select class="cell-select">
-                                            <option value="cliente">Cliente</option>
-                                            <option value="admin" selected>Admin</option>
-                                            <option value="operatore">Operatore</option>
-                                            <option value="viewer">Visualizzatore</option>
-                                        </select>
-                                    </td>
-                                    <td><input type="tel" value="+39 347 9876543" class="cell-input"></td>
-                                    <td>
-                                        <select class="cell-select status-select">
-                                            <option value="attivo" selected>Attivo</option>
-                                            <option value="inattivo">Inattivo</option>
-                                            <option value="sospeso">Sospeso</option>
-                                        </select>
-                                    </td>
-                                    <td class="actions-cell">
-                                        <button onclick="editUser(2)" class="action-btn btn-edit" title="Modifica">✏️</button>
-                                        <button onclick="deleteUser(2)" class="action-btn btn-delete-single" title="Elimina">🗑️</button>
-                                    </td>
-                                </tr>
-                                <tr data-user-id="3">
-                                    <td><input type="checkbox" class="row-select"></td>
-                                    <td><input type="text" value="Giuseppe Verdi" class="cell-input"></td>
-                                    <td><input type="email" value="giuseppe@email.com" class="cell-input"></td>
-                                    <td>
-                                        <select class="cell-select">
-                                            <option value="cliente">Cliente</option>
-                                            <option value="admin">Admin</option>
-                                            <option value="operatore" selected>Operatore</option>
-                                            <option value="viewer">Visualizzatore</option>
-                                        </select>
-                                    </td>
-                                    <td><input type="tel" value="+39 320 5555444" class="cell-input"></td>
-                                    <td>
-                                        <select class="cell-select status-select">
-                                            <option value="attivo" selected>Attivo</option>
-                                            <option value="inattivo">Inattivo</option>
-                                            <option value="sospeso">Sospeso</option>
-                                        </select>
-                                    </td>
-                                    <td class="actions-cell">
-                                        <button onclick="editUser(3)" class="action-btn btn-edit" title="Modifica">✏️</button>
-                                        <button onclick="deleteUser(3)" class="action-btn btn-delete-single" title="Elimina">🗑️</button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                        <div class="users-table-container">
+                            <table class="excel-table" id="users-table">
+                                <thead>
+                                    <tr>
+                                        <th class="select-col">
+                                            <input type="checkbox" id="select-all" onchange="toggleSelectAll()">
+                                        </th>
+                                        <th class="name-col">Nome</th>
+                                        <th class="username-col">Username</th>
+                                        <th class="role-col">Ruolo</th>
+                                        <th class="phone-col">Telefono</th>
+                                        <th class="password-col">Password</th>
+                                        <th class="confirm-password-col">Conferma Password</th>
+                                        <th class="color-col">Colore</th>
+                                        <th class="status-col">Stato</th>
+                                        <th class="actions-col">Azioni</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="users-tbody">
+                                    <tr data-user-id="1">
+                                        <td><input type="checkbox" class="row-select"></td>
+                                        <td><input type="text" value="Mario Rossi" class="cell-input"></td>
+                                        <td><input type="text" value="mario.rossi" class="cell-input"></td>
+                                        <td>
+                                            <select class="cell-select">
+                                                <option value="cliente" selected>Cliente</option>
+                                                <option value="admin">Admin</option>
+                                                <option value="operatore">Operatore</option>
+                                                <option value="viewer">Visualizzatore</option>
+                                            </select>
+                                        </td>
+                                        <td><input type="tel" value="+39 333 1234567" class="cell-input"></td>
+                                        <td><input type="password" value="" placeholder="Password" class="cell-input"></td>
+                                        <td><input type="password" value="" placeholder="Conferma Password" class="cell-input"></td>
+                                        <td>
+                                            <input type="color" value="#3498db" class="cell-color">
+                                        </td>
+                                        <td>
+                                            <select class="cell-select status-select">
+                                                <option value="attivo" selected>Attivo</option>
+                                                <option value="inattivo">Inattivo</option>
+                                                <option value="sospeso">Sospeso</option>
+                                            </select>
+                                        </td>
+                                        <td class="actions-cell">
+                                            <button onclick="deleteUser(1)" class="action-btn btn-delete-single" title="Elimina">🗑️</button>
+                                        </td>
+                                    </tr>
+                                    <tr data-user-id="2">
+                                        <td><input type="checkbox" class="row-select"></td>
+                                        <td><input type="text" value="Laura Bianchi" class="cell-input"></td>
+                                        <td><input type="text" value="laura.bianchi" class="cell-input"></td>
+                                        <td>
+                                            <select class="cell-select">
+                                                <option value="cliente">Cliente</option>
+                                                <option value="admin" selected>Admin</option>
+                                                <option value="operatore">Operatore</option>
+                                                <option value="viewer">Visualizzatore</option>
+                                            </select>
+                                        </td>
+                                        <td><input type="tel" value="+39 347 9876543" class="cell-input"></td>
+                                        <td><input type="password" value="" placeholder="Password" class="cell-input"></td>
+                                        <td><input type="password" value="" placeholder="Conferma Password" class="cell-input"></td>
+                                        <td>
+                                            <input type="color" value="#e74c3c" class="cell-color">
+                                        </td>
+                                        <td>
+                                            <select class="cell-select status-select">
+                                                <option value="attivo" selected>Attivo</option>
+                                                <option value="inattivo">Inattivo</option>
+                                                <option value="sospeso">Sospeso</option>
+                                            </select>
+                                        </td>
+                                        <td class="actions-cell">
+                                            <button onclick="deleteUser(2)" class="action-btn btn-delete-single" title="Elimina">🗑️</button>
+                                        </td>
+                                    </tr>
+                                    <tr data-user-id="3">
+                                        <td><input type="checkbox" class="row-select"></td>
+                                        <td><input type="text" value="Giuseppe Verdi" class="cell-input"></td>
+                                        <td><input type="text" value="giuseppe.verdi" class="cell-input"></td>
+                                        <td>
+                                            <select class="cell-select">
+                                                <option value="cliente">Cliente</option>
+                                                <option value="admin">Admin</option>
+                                                <option value="operatore" selected>Operatore</option>
+                                                <option value="viewer">Visualizzatore</option>
+                                            </select>
+                                        </td>
+                                        <td><input type="tel" value="+39 320 5555444" class="cell-input"></td>
+                                        <td><input type="password" value="" placeholder="Password" class="cell-input"></td>
+                                        <td><input type="password" value="" placeholder="Conferma Password" class="cell-input"></td>
+                                        <td>
+                                            <input type="color" value="#2ecc71" class="cell-color">
+                                        </td>
+                                        <td>
+                                            <select class="cell-select status-select">
+                                                <option value="attivo" selected>Attivo</option>
+                                                <option value="inattivo">Inattivo</option>
+                                                <option value="sospeso">Sospeso</option>
+                                            </select>
+                                        </td>
+                                        <td class="actions-cell">
+                                            <button onclick="deleteUser(3)" class="action-btn btn-delete-single" title="Elimina">🗑️</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
 
-                    <div class="users-stats">
-                        <span class="stat-item">Totale utenti: <strong id="total-users">3</strong></span>
-                        <span class="stat-item">Attivi: <strong id="active-users">3</strong></span>
-                        <span class="stat-item">Selezionati: <strong id="selected-users">0</strong></span>
+                        <div class="users-stats">
+                            <span class="stat-item">Totale utenti: <strong id="total-users">3</strong></span>
+                            <span class="stat-item">Attivi: <strong id="active-users">3</strong></span>
+                            <span class="stat-item">Selezionati: <strong id="selected-users">0</strong></span>
+                        </div>
                     </div>
                 </div>
                 
@@ -402,7 +416,7 @@ window.addNewUser = function() {
     newRow.innerHTML = `
         <td><input type="checkbox" class="row-select"></td>
         <td><input type="text" value="" placeholder="Nome utente" class="cell-input new-user"></td>
-        <td><input type="email" value="" placeholder="email@esempio.com" class="cell-input new-user"></td>
+        <td><input type="text" value="" placeholder="username" class="cell-input new-user"></td>
         <td>
             <select class="cell-select new-user">
                 <option value="cliente" selected>Cliente</option>
@@ -412,6 +426,11 @@ window.addNewUser = function() {
             </select>
         </td>
         <td><input type="tel" value="" placeholder="+39 xxx xxxxxxx" class="cell-input new-user"></td>
+        <td><input type="password" value="" placeholder="Password" class="cell-input new-user"></td>
+        <td><input type="password" value="" placeholder="Conferma Password" class="cell-input new-user"></td>
+        <td>
+            <input type="color" value="#3498db" class="cell-color new-user">
+        </td>
         <td>
             <select class="cell-select status-select new-user">
                 <option value="attivo" selected>Attivo</option>
@@ -420,7 +439,6 @@ window.addNewUser = function() {
             </select>
         </td>
         <td class="actions-cell">
-            <button onclick="editUser(${userIdCounter})" class="action-btn btn-edit" title="Modifica">✏️</button>
             <button onclick="deleteUser(${userIdCounter})" class="action-btn btn-delete-single" title="Elimina">🗑️</button>
         </td>
     `;
@@ -460,22 +478,6 @@ window.deleteSelectedUsers = function() {
     }
 };
 
-window.editUser = function(userId) {
-    const row = document.querySelector(`tr[data-user-id="${userId}"]`);
-    const inputs = row.querySelectorAll('.cell-input, .cell-select');
-    
-    // Aggiungi classe di evidenziazione
-    row.classList.add('editing');
-    
-    // Focus sul primo campo
-    inputs[0].focus();
-    
-    // Rimuovi evidenziazione dopo 3 secondi
-    setTimeout(() => {
-        row.classList.remove('editing');
-    }, 3000);
-};
-
 window.toggleSelectAll = function() {
     const selectAll = document.getElementById('select-all');
     const rowSelects = document.querySelectorAll('.row-select');
@@ -498,14 +500,22 @@ window.saveAllUsers = function() {
         const user = {
             id: userId,
             nome: inputs[0].value.trim(),
-            email: inputs[1].value.trim(),
+            username: inputs[1].value.trim(),
             ruolo: inputs[2].value,
             telefono: inputs[3].value.trim(),
-            stato: inputs[4].value
+            password: inputs[4].value,
+            confermaPassword: inputs[5].value,
+            colore: inputs[6].value,
+            stato: inputs[7].value
         };
         
         // Validazione base
-        if (user.nome && user.email) {
+        if (user.nome && user.username) {
+            // Verifica corrispondenza password se sono entrambe compilate
+            if (user.password && user.password !== user.confermaPassword) {
+                alert(`⚠️ Le password per ${user.nome} non corrispondono!`);
+                return;
+            }
             users.push(user);
         }
     });
