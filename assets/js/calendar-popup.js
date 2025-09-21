@@ -72,30 +72,130 @@ function getPopupContent(type) {
             
         case 'utenti':
             contentDiv.innerHTML = `
-                <h2>Gestione Utenti</h2>
-                <div>
-                    <h3>Utenti Registrati</h3>
-                    <table class="popup-table">
-                        <tr>
-                            <th>Nome</th>
-                            <th>Email</th>
-                            <th>Ruolo</th>
-                        </tr>
-                        <tr>
-                            <td>Mario Rossi</td>
-                            <td>mario@email.com</td>
-                            <td>Cliente</td>
-                        </tr>
-                        <tr>
-                            <td>Laura Bianchi</td>
-                            <td>laura@email.com</td>
-                            <td>Admin</td>
-                        </tr>
-                    </table>
+                <div class="calendar-header">
+                    <h2>Gestione Utenti</h2>
+                    <p>Aggiungi e modifica utenti del sistema</p>
                 </div>
-                <div class="popup-actions">
-                    <button onclick="alert('Nuovo utente')" class="popup-btn popup-btn-primary">Aggiungi Utente</button>
-                    <button onclick="alert('Modifica utente')" class="popup-btn popup-btn-secondary">Modifica Utente</button>
+                
+                <div class="calendar-body">
+                    <div class="users-toolbar">
+                        <button onclick="addNewUser()" class="toolbar-btn btn-add">
+                            <span>➕</span> Nuovo Utente
+                        </button>
+                        <button onclick="deleteSelectedUsers()" class="toolbar-btn btn-delete">
+                            <span>🗑️</span> Elimina Selezionati
+                        </button>
+                        <button onclick="saveAllUsers()" class="toolbar-btn btn-save">
+                            <span>💾</span> Salva Modifiche
+                        </button>
+                    </div>
+
+                    <div class="users-table-container">
+                        <table class="excel-table" id="users-table">
+                            <thead>
+                                <tr>
+                                    <th class="select-col">
+                                        <input type="checkbox" id="select-all" onchange="toggleSelectAll()">
+                                    </th>
+                                    <th class="name-col">Nome</th>
+                                    <th class="email-col">Email</th>
+                                    <th class="role-col">Ruolo</th>
+                                    <th class="phone-col">Telefono</th>
+                                    <th class="status-col">Stato</th>
+                                    <th class="actions-col">Azioni</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-tbody">
+                                <tr data-user-id="1">
+                                    <td><input type="checkbox" class="row-select"></td>
+                                    <td><input type="text" value="Mario Rossi" class="cell-input"></td>
+                                    <td><input type="email" value="mario@email.com" class="cell-input"></td>
+                                    <td>
+                                        <select class="cell-select">
+                                            <option value="cliente" selected>Cliente</option>
+                                            <option value="admin">Admin</option>
+                                            <option value="operatore">Operatore</option>
+                                            <option value="viewer">Visualizzatore</option>
+                                        </select>
+                                    </td>
+                                    <td><input type="tel" value="+39 333 1234567" class="cell-input"></td>
+                                    <td>
+                                        <select class="cell-select status-select">
+                                            <option value="attivo" selected>Attivo</option>
+                                            <option value="inattivo">Inattivo</option>
+                                            <option value="sospeso">Sospeso</option>
+                                        </select>
+                                    </td>
+                                    <td class="actions-cell">
+                                        <button onclick="editUser(1)" class="action-btn btn-edit" title="Modifica">✏️</button>
+                                        <button onclick="deleteUser(1)" class="action-btn btn-delete-single" title="Elimina">🗑️</button>
+                                    </td>
+                                </tr>
+                                <tr data-user-id="2">
+                                    <td><input type="checkbox" class="row-select"></td>
+                                    <td><input type="text" value="Laura Bianchi" class="cell-input"></td>
+                                    <td><input type="email" value="laura@email.com" class="cell-input"></td>
+                                    <td>
+                                        <select class="cell-select">
+                                            <option value="cliente">Cliente</option>
+                                            <option value="admin" selected>Admin</option>
+                                            <option value="operatore">Operatore</option>
+                                            <option value="viewer">Visualizzatore</option>
+                                        </select>
+                                    </td>
+                                    <td><input type="tel" value="+39 347 9876543" class="cell-input"></td>
+                                    <td>
+                                        <select class="cell-select status-select">
+                                            <option value="attivo" selected>Attivo</option>
+                                            <option value="inattivo">Inattivo</option>
+                                            <option value="sospeso">Sospeso</option>
+                                        </select>
+                                    </td>
+                                    <td class="actions-cell">
+                                        <button onclick="editUser(2)" class="action-btn btn-edit" title="Modifica">✏️</button>
+                                        <button onclick="deleteUser(2)" class="action-btn btn-delete-single" title="Elimina">🗑️</button>
+                                    </td>
+                                </tr>
+                                <tr data-user-id="3">
+                                    <td><input type="checkbox" class="row-select"></td>
+                                    <td><input type="text" value="Giuseppe Verdi" class="cell-input"></td>
+                                    <td><input type="email" value="giuseppe@email.com" class="cell-input"></td>
+                                    <td>
+                                        <select class="cell-select">
+                                            <option value="cliente">Cliente</option>
+                                            <option value="admin">Admin</option>
+                                            <option value="operatore" selected>Operatore</option>
+                                            <option value="viewer">Visualizzatore</option>
+                                        </select>
+                                    </td>
+                                    <td><input type="tel" value="+39 320 5555444" class="cell-input"></td>
+                                    <td>
+                                        <select class="cell-select status-select">
+                                            <option value="attivo" selected>Attivo</option>
+                                            <option value="inattivo">Inattivo</option>
+                                            <option value="sospeso">Sospeso</option>
+                                        </select>
+                                    </td>
+                                    <td class="actions-cell">
+                                        <button onclick="editUser(3)" class="action-btn btn-edit" title="Modifica">✏️</button>
+                                        <button onclick="deleteUser(3)" class="action-btn btn-delete-single" title="Elimina">🗑️</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="users-stats">
+                        <span class="stat-item">Totale utenti: <strong id="total-users">3</strong></span>
+                        <span class="stat-item">Attivi: <strong id="active-users">3</strong></span>
+                        <span class="stat-item">Selezionati: <strong id="selected-users">0</strong></span>
+                    </div>
+                </div>
+                
+                <div class="calendar-footer">
+                    <button onclick="saveAllUsers()" class="save-btn">
+                        Salva Tutti gli Utenti
+                    </button>
                 </div>
             `;
             break;
@@ -290,3 +390,151 @@ window.saveOrarioConfig = function() {
     alert('✅ Configurazione salvata!');
     closePopup('popup-orario');
 };
+
+// Funzioni gestione utenti tipo Excel
+let userIdCounter = 4; // Contatore per nuovi utenti
+
+window.addNewUser = function() {
+    const tbody = document.getElementById('users-tbody');
+    const newRow = document.createElement('tr');
+    newRow.setAttribute('data-user-id', userIdCounter);
+    
+    newRow.innerHTML = `
+        <td><input type="checkbox" class="row-select"></td>
+        <td><input type="text" value="" placeholder="Nome utente" class="cell-input new-user"></td>
+        <td><input type="email" value="" placeholder="email@esempio.com" class="cell-input new-user"></td>
+        <td>
+            <select class="cell-select new-user">
+                <option value="cliente" selected>Cliente</option>
+                <option value="admin">Admin</option>
+                <option value="operatore">Operatore</option>
+                <option value="viewer">Visualizzatore</option>
+            </select>
+        </td>
+        <td><input type="tel" value="" placeholder="+39 xxx xxxxxxx" class="cell-input new-user"></td>
+        <td>
+            <select class="cell-select status-select new-user">
+                <option value="attivo" selected>Attivo</option>
+                <option value="inattivo">Inattivo</option>
+                <option value="sospeso">Sospeso</option>
+            </select>
+        </td>
+        <td class="actions-cell">
+            <button onclick="editUser(${userIdCounter})" class="action-btn btn-edit" title="Modifica">✏️</button>
+            <button onclick="deleteUser(${userIdCounter})" class="action-btn btn-delete-single" title="Elimina">🗑️</button>
+        </td>
+    `;
+    
+    tbody.appendChild(newRow);
+    
+    // Focus sul nome del nuovo utente
+    newRow.querySelector('input[type="text"]').focus();
+    
+    userIdCounter++;
+    updateUserStats();
+};
+
+window.deleteUser = function(userId) {
+    if (confirm('Sei sicuro di voler eliminare questo utente?')) {
+        const row = document.querySelector(`tr[data-user-id="${userId}"]`);
+        if (row) {
+            row.remove();
+            updateUserStats();
+        }
+    }
+};
+
+window.deleteSelectedUsers = function() {
+    const selectedRows = document.querySelectorAll('.row-select:checked');
+    if (selectedRows.length === 0) {
+        alert('Seleziona almeno un utente da eliminare');
+        return;
+    }
+    
+    if (confirm(`Sei sicuro di voler eliminare ${selectedRows.length} utenti selezionati?`)) {
+        selectedRows.forEach(checkbox => {
+            checkbox.closest('tr').remove();
+        });
+        updateUserStats();
+        document.getElementById('select-all').checked = false;
+    }
+};
+
+window.editUser = function(userId) {
+    const row = document.querySelector(`tr[data-user-id="${userId}"]`);
+    const inputs = row.querySelectorAll('.cell-input, .cell-select');
+    
+    // Aggiungi classe di evidenziazione
+    row.classList.add('editing');
+    
+    // Focus sul primo campo
+    inputs[0].focus();
+    
+    // Rimuovi evidenziazione dopo 3 secondi
+    setTimeout(() => {
+        row.classList.remove('editing');
+    }, 3000);
+};
+
+window.toggleSelectAll = function() {
+    const selectAll = document.getElementById('select-all');
+    const rowSelects = document.querySelectorAll('.row-select');
+    
+    rowSelects.forEach(checkbox => {
+        checkbox.checked = selectAll.checked;
+    });
+    
+    updateUserStats();
+};
+
+window.saveAllUsers = function() {
+    const rows = document.querySelectorAll('#users-tbody tr');
+    const users = [];
+    
+    rows.forEach(row => {
+        const userId = row.getAttribute('data-user-id');
+        const inputs = row.querySelectorAll('.cell-input, .cell-select');
+        
+        const user = {
+            id: userId,
+            nome: inputs[0].value.trim(),
+            email: inputs[1].value.trim(),
+            ruolo: inputs[2].value,
+            telefono: inputs[3].value.trim(),
+            stato: inputs[4].value
+        };
+        
+        // Validazione base
+        if (user.nome && user.email) {
+            users.push(user);
+        }
+    });
+    
+    // Salva nel localStorage
+    localStorage.setItem('usersData', JSON.stringify(users));
+    
+    // Feedback visivo
+    alert(`✅ Salvati ${users.length} utenti!`);
+    
+    // Rimuovi evidenziazione dai nuovi utenti
+    document.querySelectorAll('.new-user').forEach(element => {
+        element.classList.remove('new-user');
+    });
+};
+
+function updateUserStats() {
+    const totalUsers = document.querySelectorAll('#users-tbody tr').length;
+    const activeUsers = document.querySelectorAll('.status-select option[value="attivo"]:checked').length;
+    const selectedUsers = document.querySelectorAll('.row-select:checked').length;
+    
+    document.getElementById('total-users').textContent = totalUsers;
+    document.getElementById('active-users').textContent = activeUsers;
+    document.getElementById('selected-users').textContent = selectedUsers;
+}
+
+// Event listener per aggiornare stats quando cambia selezione
+document.addEventListener('change', function(e) {
+    if (e.target.classList.contains('row-select')) {
+        updateUserStats();
+    }
+});
