@@ -81,7 +81,6 @@ function getPopupContent(type) {
                                         <th class="price-col">Prezzo (€)</th>
                                         <th class="duration-col">Tempo (min)</th>
                                         <th class="description-col">Descrizione</th>
-                                        <th class="color-col">Colore</th>
                                         <th class="status-col">Stato</th>
                                         <th class="actions-col">Azioni</th>
                                     </tr>
@@ -93,9 +92,6 @@ function getPopupContent(type) {
                                         <td><input type="number" value="50.00" step="0.01" min="0" class="cell-input price-input"></td>
                                         <td><input type="number" value="60" min="1" max="480" class="cell-input duration-input"></td>
                                         <td><input type="text" value="Consulenza individuale personalizzata" class="cell-input"></td>
-                                        <td>
-                                            <input type="color" value="#3498db" class="cell-color">
-                                        </td>
                                         <td>
                                             <select class="cell-select status-select">
                                                 <option value="attivo" selected>Attivo</option>
@@ -114,9 +110,6 @@ function getPopupContent(type) {
                                         <td><input type="number" value="45" min="1" max="480" class="cell-input duration-input"></td>
                                         <td><input type="text" value="Servizio base standard" class="cell-input"></td>
                                         <td>
-                                            <input type="color" value="#e74c3c" class="cell-color">
-                                        </td>
-                                        <td>
                                             <select class="cell-select status-select">
                                                 <option value="attivo" selected>Attivo</option>
                                                 <option value="inattivo">Inattivo</option>
@@ -133,9 +126,6 @@ function getPopupContent(type) {
                                         <td><input type="number" value="100.00" step="0.01" min="0" class="cell-input price-input"></td>
                                         <td><input type="number" value="120" min="1" max="480" class="cell-input duration-input"></td>
                                         <td><input type="text" value="Pacchetto completo premium" class="cell-input"></td>
-                                        <td>
-                                            <input type="color" value="#2ecc71" class="cell-color">
-                                        </td>
                                         <td>
                                             <select class="cell-select status-select">
                                                 <option value="attivo" selected>Attivo</option>
@@ -619,9 +609,6 @@ window.addNewService = function() {
         <td><input type="number" value="30" min="1" max="480" placeholder="30" class="cell-input duration-input new-service"></td>
         <td><input type="text" value="" placeholder="Descrizione servizio" class="cell-input new-service"></td>
         <td>
-            <input type="color" value="#3498db" class="cell-color new-service">
-        </td>
-        <td>
             <select class="cell-select status-select new-service">
                 <option value="attivo" selected>Attivo</option>
                 <option value="inattivo">Inattivo</option>
@@ -693,8 +680,7 @@ window.saveAllServices = function() {
             prezzo: parseFloat(inputs[1].value) || 0,
             tempoMinuti: parseInt(inputs[2].value) || 30,
             descrizione: inputs[3].value.trim(),
-            colore: inputs[4].value,
-            stato: inputs[5].value
+            stato: inputs[4].value
         };
         
         // Validazione base
