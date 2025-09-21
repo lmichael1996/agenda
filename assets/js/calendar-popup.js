@@ -54,18 +54,114 @@ function getPopupContent(type) {
     switch (type) {
         case 'servizi':
             contentDiv.innerHTML = `
-                <h2>Gestione Servizi</h2>
-                <div>
-                    <h3>Servizi Disponibili</h3>
-                    <ul>
-                        <li>Consulenza Personalizzata</li>
-                        <li>Servizio Standard</li>
-                        <li>Pacchetto Premium</li>
-                    </ul>
+                <div class="calendar-header">
+                    <h2>Gestione Servizi</h2>
+                    <p>Aggiungi e modifica servizi disponibili</p>
                 </div>
-                <div class="popup-actions">
-                    <button onclick="alert('Nuovo servizio')" class="popup-btn popup-btn-primary">Aggiungi Servizio</button>
-                    <button onclick="alert('Modifica servizio')" class="popup-btn popup-btn-secondary">Modifica Servizio</button>
+                
+                <div class="calendar-body">
+                    <div class="services-section">
+                        <div class="services-toolbar">
+                            <button onclick="addNewService()" class="toolbar-btn btn-add">
+                                <span>➕</span> Nuovo Servizio
+                            </button>
+                            <button onclick="deleteSelectedServices()" class="toolbar-btn btn-delete">
+                                <span>🗑️</span> Elimina Selezionati
+                            </button>
+                        </div>
+
+                        <div class="services-table-container">
+                            <table class="excel-table" id="services-table">
+                                <thead>
+                                    <tr>
+                                        <th class="select-col">
+                                            <input type="checkbox" id="select-all-services" onchange="toggleSelectAllServices()">
+                                        </th>
+                                        <th class="service-name-col">Nome Servizio</th>
+                                        <th class="price-col">Prezzo (€)</th>
+                                        <th class="duration-col">Tempo (min)</th>
+                                        <th class="description-col">Descrizione</th>
+                                        <th class="color-col">Colore</th>
+                                        <th class="status-col">Stato</th>
+                                        <th class="actions-col">Azioni</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="services-tbody">
+                                    <tr data-service-id="1">
+                                        <td><input type="checkbox" class="row-select-service"></td>
+                                        <td><input type="text" value="Consulenza Personalizzata" class="cell-input"></td>
+                                        <td><input type="number" value="50.00" step="0.01" min="0" class="cell-input price-input"></td>
+                                        <td><input type="number" value="60" min="1" max="480" class="cell-input duration-input"></td>
+                                        <td><input type="text" value="Consulenza individuale personalizzata" class="cell-input"></td>
+                                        <td>
+                                            <input type="color" value="#3498db" class="cell-color">
+                                        </td>
+                                        <td>
+                                            <select class="cell-select status-select">
+                                                <option value="attivo" selected>Attivo</option>
+                                                <option value="inattivo">Inattivo</option>
+                                                <option value="sospeso">Sospeso</option>
+                                            </select>
+                                        </td>
+                                        <td class="actions-cell">
+                                            <button onclick="deleteService(1)" class="action-btn btn-delete-single" title="Elimina">🗑️</button>
+                                        </td>
+                                    </tr>
+                                    <tr data-service-id="2">
+                                        <td><input type="checkbox" class="row-select-service"></td>
+                                        <td><input type="text" value="Servizio Standard" class="cell-input"></td>
+                                        <td><input type="number" value="30.00" step="0.01" min="0" class="cell-input price-input"></td>
+                                        <td><input type="number" value="45" min="1" max="480" class="cell-input duration-input"></td>
+                                        <td><input type="text" value="Servizio base standard" class="cell-input"></td>
+                                        <td>
+                                            <input type="color" value="#e74c3c" class="cell-color">
+                                        </td>
+                                        <td>
+                                            <select class="cell-select status-select">
+                                                <option value="attivo" selected>Attivo</option>
+                                                <option value="inattivo">Inattivo</option>
+                                                <option value="sospeso">Sospeso</option>
+                                            </select>
+                                        </td>
+                                        <td class="actions-cell">
+                                            <button onclick="deleteService(2)" class="action-btn btn-delete-single" title="Elimina">🗑️</button>
+                                        </td>
+                                    </tr>
+                                    <tr data-service-id="3">
+                                        <td><input type="checkbox" class="row-select-service"></td>
+                                        <td><input type="text" value="Pacchetto Premium" class="cell-input"></td>
+                                        <td><input type="number" value="100.00" step="0.01" min="0" class="cell-input price-input"></td>
+                                        <td><input type="number" value="120" min="1" max="480" class="cell-input duration-input"></td>
+                                        <td><input type="text" value="Pacchetto completo premium" class="cell-input"></td>
+                                        <td>
+                                            <input type="color" value="#2ecc71" class="cell-color">
+                                        </td>
+                                        <td>
+                                            <select class="cell-select status-select">
+                                                <option value="attivo" selected>Attivo</option>
+                                                <option value="inattivo">Inattivo</option>
+                                                <option value="sospeso">Sospeso</option>
+                                            </select>
+                                        </td>
+                                        <td class="actions-cell">
+                                            <button onclick="deleteService(3)" class="action-btn btn-delete-single" title="Elimina">🗑️</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="services-stats">
+                            <span class="stat-item">Totale servizi: <strong id="total-services">3</strong></span>
+                            <span class="stat-item">Selezionati: <strong id="selected-services">0</strong></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="calendar-footer">
+                    <button onclick="saveAllServices()" class="save-btn">
+                        Salva Tutti i Servizi
+                    </button>
                 </div>
             `;
             break;
@@ -95,10 +191,7 @@ function getPopupContent(type) {
                                         <th class="select-col">
                                             <input type="checkbox" id="select-all" onchange="toggleSelectAll()">
                                         </th>
-                                        <th class="name-col">Nome</th>
                                         <th class="username-col">Username</th>
-                                        <th class="role-col">Ruolo</th>
-                                        <th class="phone-col">Telefono</th>
                                         <th class="password-col">Password</th>
                                         <th class="confirm-password-col">Conferma Password</th>
                                         <th class="color-col">Colore</th>
@@ -109,17 +202,7 @@ function getPopupContent(type) {
                                 <tbody id="users-tbody">
                                     <tr data-user-id="1">
                                         <td><input type="checkbox" class="row-select"></td>
-                                        <td><input type="text" value="Mario Rossi" class="cell-input"></td>
                                         <td><input type="text" value="mario.rossi" class="cell-input"></td>
-                                        <td>
-                                            <select class="cell-select">
-                                                <option value="cliente" selected>Cliente</option>
-                                                <option value="admin">Admin</option>
-                                                <option value="operatore">Operatore</option>
-                                                <option value="viewer">Visualizzatore</option>
-                                            </select>
-                                        </td>
-                                        <td><input type="tel" value="+39 333 1234567" class="cell-input"></td>
                                         <td><input type="password" value="" placeholder="Password" class="cell-input"></td>
                                         <td><input type="password" value="" placeholder="Conferma Password" class="cell-input"></td>
                                         <td>
@@ -138,17 +221,7 @@ function getPopupContent(type) {
                                     </tr>
                                     <tr data-user-id="2">
                                         <td><input type="checkbox" class="row-select"></td>
-                                        <td><input type="text" value="Laura Bianchi" class="cell-input"></td>
                                         <td><input type="text" value="laura.bianchi" class="cell-input"></td>
-                                        <td>
-                                            <select class="cell-select">
-                                                <option value="cliente">Cliente</option>
-                                                <option value="admin" selected>Admin</option>
-                                                <option value="operatore">Operatore</option>
-                                                <option value="viewer">Visualizzatore</option>
-                                            </select>
-                                        </td>
-                                        <td><input type="tel" value="+39 347 9876543" class="cell-input"></td>
                                         <td><input type="password" value="" placeholder="Password" class="cell-input"></td>
                                         <td><input type="password" value="" placeholder="Conferma Password" class="cell-input"></td>
                                         <td>
@@ -167,17 +240,7 @@ function getPopupContent(type) {
                                     </tr>
                                     <tr data-user-id="3">
                                         <td><input type="checkbox" class="row-select"></td>
-                                        <td><input type="text" value="Giuseppe Verdi" class="cell-input"></td>
                                         <td><input type="text" value="giuseppe.verdi" class="cell-input"></td>
-                                        <td>
-                                            <select class="cell-select">
-                                                <option value="cliente">Cliente</option>
-                                                <option value="admin">Admin</option>
-                                                <option value="operatore" selected>Operatore</option>
-                                                <option value="viewer">Visualizzatore</option>
-                                            </select>
-                                        </td>
-                                        <td><input type="tel" value="+39 320 5555444" class="cell-input"></td>
                                         <td><input type="password" value="" placeholder="Password" class="cell-input"></td>
                                         <td><input type="password" value="" placeholder="Conferma Password" class="cell-input"></td>
                                         <td>
@@ -407,6 +470,7 @@ window.saveOrarioConfig = function() {
 
 // Funzioni gestione utenti tipo Excel
 let userIdCounter = 4; // Contatore per nuovi utenti
+let serviceIdCounter = 4; // Contatore per nuovi servizi
 
 window.addNewUser = function() {
     const tbody = document.getElementById('users-tbody');
@@ -415,17 +479,7 @@ window.addNewUser = function() {
     
     newRow.innerHTML = `
         <td><input type="checkbox" class="row-select"></td>
-        <td><input type="text" value="" placeholder="Nome utente" class="cell-input new-user"></td>
         <td><input type="text" value="" placeholder="username" class="cell-input new-user"></td>
-        <td>
-            <select class="cell-select new-user">
-                <option value="cliente" selected>Cliente</option>
-                <option value="admin">Admin</option>
-                <option value="operatore">Operatore</option>
-                <option value="viewer">Visualizzatore</option>
-            </select>
-        </td>
-        <td><input type="tel" value="" placeholder="+39 xxx xxxxxxx" class="cell-input new-user"></td>
         <td><input type="password" value="" placeholder="Password" class="cell-input new-user"></td>
         <td><input type="password" value="" placeholder="Conferma Password" class="cell-input new-user"></td>
         <td>
@@ -445,7 +499,7 @@ window.addNewUser = function() {
     
     tbody.appendChild(newRow);
     
-    // Focus sul nome del nuovo utente
+    // Focus sull'username del nuovo utente
     newRow.querySelector('input[type="text"]').focus();
     
     userIdCounter++;
@@ -499,21 +553,18 @@ window.saveAllUsers = function() {
         
         const user = {
             id: userId,
-            nome: inputs[0].value.trim(),
-            username: inputs[1].value.trim(),
-            ruolo: inputs[2].value,
-            telefono: inputs[3].value.trim(),
-            password: inputs[4].value,
-            confermaPassword: inputs[5].value,
-            colore: inputs[6].value,
-            stato: inputs[7].value
+            username: inputs[0].value.trim(),
+            password: inputs[1].value,
+            confermaPassword: inputs[2].value,
+            colore: inputs[3].value,
+            stato: inputs[4].value
         };
         
         // Validazione base
-        if (user.nome && user.username) {
+        if (user.username) {
             // Verifica corrispondenza password se sono entrambe compilate
             if (user.password && user.password !== user.confermaPassword) {
-                alert(`⚠️ Le password per ${user.nome} non corrispondono!`);
+                alert(`⚠️ Le password per ${user.username} non corrispondono!`);
                 return;
             }
             users.push(user);
@@ -547,4 +598,131 @@ document.addEventListener('change', function(e) {
     if (e.target.classList.contains('row-select')) {
         updateUserStats();
     }
+    if (e.target.classList.contains('row-select-service')) {
+        updateServiceStats();
+    }
+    if (e.target.classList.contains('price-input') || e.target.classList.contains('duration-input')) {
+        updateServiceStats();
+    }
 });
+
+// Funzioni gestione servizi semplificato
+window.addNewService = function() {
+    const tbody = document.getElementById('services-tbody');
+    const newRow = document.createElement('tr');
+    newRow.setAttribute('data-service-id', serviceIdCounter);
+    
+    newRow.innerHTML = `
+        <td><input type="checkbox" class="row-select-service"></td>
+        <td><input type="text" value="" placeholder="Nome servizio" class="cell-input new-service"></td>
+        <td><input type="number" value="0.00" step="0.01" min="0" placeholder="0.00" class="cell-input price-input new-service"></td>
+        <td><input type="number" value="30" min="1" max="480" placeholder="30" class="cell-input duration-input new-service"></td>
+        <td><input type="text" value="" placeholder="Descrizione servizio" class="cell-input new-service"></td>
+        <td>
+            <input type="color" value="#3498db" class="cell-color new-service">
+        </td>
+        <td>
+            <select class="cell-select status-select new-service">
+                <option value="attivo" selected>Attivo</option>
+                <option value="inattivo">Inattivo</option>
+                <option value="sospeso">Sospeso</option>
+            </select>
+        </td>
+        <td class="actions-cell">
+            <button onclick="deleteService(${serviceIdCounter})" class="action-btn btn-delete-single" title="Elimina">🗑️</button>
+        </td>
+    `;
+    
+    tbody.appendChild(newRow);
+    
+    // Focus sul nome del nuovo servizio
+    newRow.querySelector('input[type="text"]').focus();
+    
+    serviceIdCounter++;
+    updateServiceStats();
+};
+
+window.deleteService = function(serviceId) {
+    if (confirm('Sei sicuro di voler eliminare questo servizio?')) {
+        const row = document.querySelector(`tr[data-service-id="${serviceId}"]`);
+        if (row) {
+            row.remove();
+            updateServiceStats();
+        }
+    }
+};
+
+window.deleteSelectedServices = function() {
+    const selectedRows = document.querySelectorAll('.row-select-service:checked');
+    if (selectedRows.length === 0) {
+        alert('Seleziona almeno un servizio da eliminare');
+        return;
+    }
+    
+    if (confirm(`Sei sicuro di voler eliminare ${selectedRows.length} servizi selezionati?`)) {
+        selectedRows.forEach(checkbox => {
+            checkbox.closest('tr').remove();
+        });
+        updateServiceStats();
+        document.getElementById('select-all-services').checked = false;
+    }
+};
+
+window.toggleSelectAllServices = function() {
+    const selectAll = document.getElementById('select-all-services');
+    const rowSelects = document.querySelectorAll('.row-select-service');
+    
+    rowSelects.forEach(checkbox => {
+        checkbox.checked = selectAll.checked;
+    });
+    
+    updateServiceStats();
+};
+
+window.saveAllServices = function() {
+    const rows = document.querySelectorAll('#services-tbody tr');
+    const services = [];
+    
+    rows.forEach(row => {
+        const serviceId = row.getAttribute('data-service-id');
+        const inputs = row.querySelectorAll('.cell-input, .cell-select, .cell-color');
+        
+        const service = {
+            id: serviceId,
+            nome: inputs[0].value.trim(),
+            prezzo: parseFloat(inputs[1].value) || 0,
+            tempoMinuti: parseInt(inputs[2].value) || 30,
+            descrizione: inputs[3].value.trim(),
+            colore: inputs[4].value,
+            stato: inputs[5].value
+        };
+        
+        // Validazione base
+        if (service.nome && service.prezzo >= 0 && service.tempoMinuti > 0) {
+            services.push(service);
+        }
+    });
+    
+    // Salva nel localStorage
+    localStorage.setItem('servicesData', JSON.stringify(services));
+    
+    // Feedback visivo
+    alert(`✅ Salvati ${services.length} servizi!`);
+    
+    // Rimuovi evidenziazione dai nuovi servizi
+    document.querySelectorAll('.new-service').forEach(element => {
+        element.classList.remove('new-service');
+    });
+};
+
+function updateServiceStats() {
+    const totalServices = document.querySelectorAll('#services-tbody tr').length;
+    const selectedServices = document.querySelectorAll('.row-select-service:checked').length;
+    
+    if (document.getElementById('total-services')) {
+        document.getElementById('total-services').textContent = totalServices;
+    }
+    if (document.getElementById('selected-services')) {
+        document.getElementById('selected-services').textContent = selectedServices;
+    }
+}
