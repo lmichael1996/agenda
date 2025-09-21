@@ -112,6 +112,7 @@
     border: 1px solid #ccc;
     border-radius: 4px;
     font-size: 14px;
+    text-align: center;
 }
 
 .popup-form-group input:focus,
@@ -193,6 +194,7 @@
     .popup-form-group select {
         margin-left: 0;
         width: 100%;
+        text-align: center;
     }
     
     .popup-actions {
@@ -371,6 +373,7 @@
     font-size: 1rem;
     cursor: pointer;
     transition: all 0.3s ease;
+    text-align: center;
 }
 
 .styled-select:focus {
@@ -737,6 +740,7 @@
     border-radius: 2px;
     font-weight: bold;
     width: 100%;
+    text-align: center;
 }
 
 .tech-select:focus {
@@ -1148,6 +1152,7 @@
     height: 40px;
     background: white;
     box-sizing: border-box;
+    text-align: center;
 }
 
 .schedule-stats {
@@ -1181,6 +1186,7 @@
     height: 32px;
     line-height: 1.2;
     box-sizing: border-box;
+    text-align: center;
 }
 
 .cell-select:focus {
