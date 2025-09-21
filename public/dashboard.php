@@ -53,9 +53,9 @@ $currentDate = $today->format('Y-m-d');
         <div class="sidebar-toggle">
             <img src="../assets/images/menu-icon.png" alt="Menu" class="menu-icon">
         </div>
-        <a href="#" onclick="openPopup('service')" data-popup="services">Servizi</a>
-        <a href="#" onclick="openPopup('user')" data-popup="users">Utenti</a>
-        <a href="#" onclick="openPopup('schedule')" data-popup="schedule">Orario</a>
+        <a href="#" data-action="openPopup" data-popup-type="service" data-popup="services">Servizi</a>
+        <a href="#" data-action="openPopup" data-popup-type="user" data-popup="users">Utenti</a>
+        <a href="#" data-action="openPopup" data-popup-type="schedule" data-popup="schedule">Orario</a>
     </div>
 
     <!-- Top Menu Controls -->
@@ -129,7 +129,11 @@ $currentDate = $today->format('Y-m-d');
     <script src="../assets/js/lateral-menu.js"></script>
     <script type="module" src="../assets/js/calendar-date.js"></script>
     <script type="module" src="../assets/js/calendar-events.js"></script>
-    <script type="module" src="../assets/js/calendar-popup.js"></script>
+    <!-- popup scripts -->
+    <script src="../assets/js/calendar-popup.js"></script>
+    <script src="../assets/js/popup/popup-services.js"></script>
+    <script src="../assets/js/popup/popup-users.js"></script>
+    <script src="../assets/js/popup/popup-schedule.js"></script>
 
 </body>
 </html>
