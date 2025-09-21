@@ -53,9 +53,9 @@ $currentDate = $today->format('Y-m-d');
         <div class="sidebar-toggle">
             <img src="../assets/images/menu-icon.png" alt="Menu" class="menu-icon">
         </div>
-        <a href="#" onclick="openPopup('servizi')" data-popup="servizi">Servizi</a>
-        <a href="#" onclick="openPopup('utenti')" data-popup="utenti">Utenti</a>
-        <a href="#" onclick="openPopup('orario')" data-popup="orario">Orario</a>
+        <a href="#" onclick="openPopup('service')" data-popup="services">Servizi</a>
+        <a href="#" onclick="openPopup('user')" data-popup="users">Utenti</a>
+        <a href="#" onclick="openPopup('schedule')" data-popup="schedule">Orario</a>
     </div>
 
     <!-- Top Menu Controls -->

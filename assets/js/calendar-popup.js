@@ -52,7 +52,7 @@ function getPopupContent(type) {
     const contentDiv = document.createElement('div');
     
     switch (type) {
-        case 'servizi':
+        case 'service':
             contentDiv.innerHTML = `
                 <div class="calendar-header">
                     <h2>Gestione Servizi</h2>
@@ -85,7 +85,7 @@ function getPopupContent(type) {
                                         <th class="actions-col">Azioni</th>
                                     </tr>
                                 </thead>
-                                <tbody id="services-tbody">
+                                <tbody id="services-list">
                                     <tr data-service-id="1">
                                         <td><input type="checkbox" class="row-select-service"></td>
                                         <td><input type="text" value="Consulenza Personalizzata" class="cell-input"></td>
@@ -155,8 +155,8 @@ function getPopupContent(type) {
                 </div>
             `;
             break;
-            
-        case 'utenti':
+
+        case 'user':
             contentDiv.innerHTML = `
                 <div class="calendar-header">
                     <h2>Gestione Utenti</h2>
@@ -179,7 +179,7 @@ function getPopupContent(type) {
                                 <thead>
                                     <tr>
                                         <th class="select-col">
-                                            <input type="checkbox" id="select-all" onchange="toggleSelectAll()">
+                                            <input type="checkbox" id="select-all-users" onchange="toggleSelectAll()">
                                         </th>
                                         <th class="username-col">Username</th>
                                         <th class="password-col">Password</th>
@@ -189,7 +189,7 @@ function getPopupContent(type) {
                                         <th class="actions-col">Azioni</th>
                                     </tr>
                                 </thead>
-                                <tbody id="users-tbody">
+                                <tbody id="users-list">
                                     <tr data-user-id="1">
                                         <td><input type="checkbox" class="row-select"></td>
                                         <td><input type="text" value="mario.rossi" class="cell-input"></td>
@@ -266,8 +266,8 @@ function getPopupContent(type) {
                 </div>
             `;
             break;
-            
-        case 'orario':
+
+        case 'schedule':
             contentDiv.innerHTML = `
                 <div class="calendar-header">
                     <h2>Configurazione Orari</h2>
@@ -280,11 +280,11 @@ function getPopupContent(type) {
                         <div class="time-row">
                             <div class="time-field">
                                 <label>Apertura</label>
-                                <input type="time" id="orario-apertura" value="08:00">
+                                <input type="time" id="opening-time" value="08:00">
                             </div>
                             <div class="time-field">
                                 <label>Chiusura</label>
-                                <input type="time" id="orario-chiusura" value="18:00">
+                                <input type="time" id="closing-time" value="18:00">
                             </div>
                         </div>
                     </div>
@@ -293,18 +293,18 @@ function getPopupContent(type) {
                         <h3>Pausa Pranzo</h3>
                         <div class="break-toggle">
                             <label>
-                                <input type="checkbox" id="pausa-pranzo" checked>
+                                <input type="checkbox" id="lunch-break" checked>
                                 <span>Abilita pausa pranzo</span>
                             </label>
                         </div>
-                        <div id="pausa-config" class="time-row">
+                        <div id="break-config" class="time-row">
                             <div class="time-field">
                                 <label>Dalle</label>
-                                <input type="time" id="pausa-inizio" value="12:30">
+                                <input type="time" id="break-start" value="12:30">
                             </div>
                             <div class="time-field">
                                 <label>Alle</label>
-                                <input type="time" id="pausa-fine" value="13:30">
+                                <input type="time" id="break-end" value="13:30">
                             </div>
                         </div>
                     </div>
@@ -463,7 +463,12 @@ let userIdCounter = 4; // Contatore per nuovi utenti
 let serviceIdCounter = 4; // Contatore per nuovi servizi
 
 window.addNewUser = function() {
-    const tbody = document.getElementById('users-tbody');
+    const tbody = document.getElementById('users-list');
+    if (!tbody) {
+        console.error('Elemento users-list non trovato');
+        return;
+    }
+    
     const newRow = document.createElement('tr');
     newRow.setAttribute('data-user-id', userIdCounter);
     
@@ -518,28 +523,32 @@ window.deleteSelectedUsers = function() {
             checkbox.closest('tr').remove();
         });
         updateUserStats();
-        document.getElementById('select-all').checked = false;
+        const selectAllCheckbox = document.getElementById('select-all-users');
+        if (selectAllCheckbox) {
+            selectAllCheckbox.checked = false;
+        }
     }
 };
 
 window.toggleSelectAll = function() {
-    const selectAll = document.getElementById('select-all');
+    const selectAll = document.getElementById('select-all-users');
     const rowSelects = document.querySelectorAll('.row-select');
     
-    rowSelects.forEach(checkbox => {
-        checkbox.checked = selectAll.checked;
-    });
-    
-    updateUserStats();
+    if (selectAll && rowSelects.length > 0) {
+        rowSelects.forEach(checkbox => {
+            checkbox.checked = selectAll.checked;
+        });
+        updateUserStats();
+    }
 };
 
 window.saveAllUsers = function() {
-    const rows = document.querySelectorAll('#users-tbody tr');
+    const rows = document.querySelectorAll('#users-list tr');
     const users = [];
     
     rows.forEach(row => {
         const userId = row.getAttribute('data-user-id');
-        const inputs = row.querySelectorAll('.cell-input, .cell-select');
+        const inputs = row.querySelectorAll('.cell-input, .cell-select, .cell-color');
         
         const user = {
             id: userId,
@@ -574,13 +583,17 @@ window.saveAllUsers = function() {
 };
 
 function updateUserStats() {
-    const totalUsers = document.querySelectorAll('#users-tbody tr').length;
+    const totalUsers = document.querySelectorAll('#users-list tr').length;
     const activeUsers = document.querySelectorAll('.status-select option[value="attivo"]:checked').length;
     const selectedUsers = document.querySelectorAll('.row-select:checked').length;
     
-    document.getElementById('total-users').textContent = totalUsers;
-    document.getElementById('active-users').textContent = activeUsers;
-    document.getElementById('selected-users').textContent = selectedUsers;
+    const totalUsersEl = document.getElementById('total-users');
+    const activeUsersEl = document.getElementById('active-users');
+    const selectedUsersEl = document.getElementById('selected-users');
+    
+    if (totalUsersEl) totalUsersEl.textContent = totalUsers;
+    if (activeUsersEl) activeUsersEl.textContent = activeUsers;
+    if (selectedUsersEl) selectedUsersEl.textContent = selectedUsers;
 }
 
 // Event listener per aggiornare stats quando cambia selezione
@@ -598,7 +611,12 @@ document.addEventListener('change', function(e) {
 
 // Funzioni gestione servizi semplificato
 window.addNewService = function() {
-    const tbody = document.getElementById('services-tbody');
+    const tbody = document.getElementById('services-list');
+    if (!tbody) {
+        console.error('Elemento services-list non trovato');
+        return;
+    }
+    
     const newRow = document.createElement('tr');
     newRow.setAttribute('data-service-id', serviceIdCounter);
     
@@ -667,7 +685,7 @@ window.toggleSelectAllServices = function() {
 };
 
 window.saveAllServices = function() {
-    const rows = document.querySelectorAll('#services-tbody tr');
+    const rows = document.querySelectorAll('#services-list tr');
     const services = [];
     
     rows.forEach(row => {
@@ -702,13 +720,16 @@ window.saveAllServices = function() {
 };
 
 function updateServiceStats() {
-    const totalServices = document.querySelectorAll('#services-tbody tr').length;
+    const totalServices = document.querySelectorAll('#services-list tr').length;
     const selectedServices = document.querySelectorAll('.row-select-service:checked').length;
     
-    if (document.getElementById('total-services')) {
-        document.getElementById('total-services').textContent = totalServices;
+    const totalServicesEl = document.getElementById('total-services');
+    const selectedServicesEl = document.getElementById('selected-services');
+    
+    if (totalServicesEl) {
+        totalServicesEl.textContent = totalServices;
     }
-    if (document.getElementById('selected-services')) {
-        document.getElementById('selected-services').textContent = selectedServices;
+    if (selectedServicesEl) {
+        selectedServicesEl.textContent = selectedServices;
     }
 }
