@@ -44,6 +44,7 @@ $currentDate = $today->format('Y-m-d');
     <link rel="stylesheet" href="../assets/css/calendar-events.css">
     <link rel="stylesheet" href="../assets/css/week-calendar.css">
     <link rel="stylesheet" href="../assets/css/lateral-menu.css">
+    <link rel="stylesheet" href="../assets/css/popup-styles.css">
 </head>
 <body>
     
@@ -52,9 +53,9 @@ $currentDate = $today->format('Y-m-d');
         <div class="sidebar-toggle">
             <img src="../assets/images/menu-icon.png" alt="Menu" class="menu-icon">
         </div>
-        <a href="#">Servizi</a>
-        <a href="#">Utenti</a>
-        <a href="#">Orario</a>
+        <a href="#" onclick="openPopup('servizi')" data-popup="servizi">Servizi</a>
+        <a href="#" onclick="openPopup('utenti')" data-popup="utenti">Utenti</a>
+        <a href="#" onclick="openPopup('orario')" data-popup="orario">Orario</a>
     </div>
 
     <!-- Top Menu Controls -->
@@ -125,10 +126,10 @@ $currentDate = $today->format('Y-m-d');
     </div>
 
     <!-- JavaScript -->
-    <script src="../assets/js/date-utils.js"></script>
     <script src="../assets/js/lateral-menu.js"></script>
-    <script src="../assets/js/calendar-date.js"></script>
-    <script src="../assets/js/calendar-events.js"></script>
+    <script type="module" src="../assets/js/calendar-date.js"></script>
+    <script type="module" src="../assets/js/calendar-events.js"></script>
+    <script type="module" src="../assets/js/calendar-popup.js"></script>
 
 </body>
 </html>

@@ -1,0 +1,818 @@
+/* Stili per popup modali */
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.popup-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    max-width: 800px;
+    width: 90%;
+    max-height: 85vh;
+    overflow-y: auto;
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+}
+
+.popup-close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #999;
+    transition: color 0.2s ease;
+}
+
+.popup-close-btn:hover {
+    color: #333;
+}
+
+/* Contenuto popup */
+.popup-content h2 {
+    margin-top: 0;
+    color: #333;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 0.5rem;
+}
+
+.popup-content h3 {
+    color: #555;
+    margin-bottom: 1rem;
+}
+
+.popup-content ul {
+    margin: 0;
+    padding-left: 1.5rem;
+}
+
+.popup-content li {
+    margin-bottom: 0.5rem;
+    color: #666;
+}
+
+/* Tabella utenti */
+.popup-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+}
+
+.popup-table th {
+    background: #f5f5f5;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    text-align: left;
+    font-weight: 600;
+    color: #333;
+}
+
+.popup-table td {
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    color: #555;
+}
+
+.popup-table tr:hover {
+    background: #f9f9f9;
+}
+
+/* Form controlli orario */
+.popup-form-group {
+    margin: 1rem 0;
+    display: flex;
+    align-items: center;
+}
+
+.popup-form-group label {
+    color: #555;
+    font-weight: 500;
+    min-width: 150px;
+}
+
+.popup-form-group input,
+.popup-form-group select {
+    margin-left: 1rem;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.popup-form-group input:focus,
+.popup-form-group select:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+/* Pulsanti azione */
+.popup-actions {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.popup-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.popup-btn-primary {
+    background: #007bff;
+    color: white;
+}
+
+.popup-btn-primary:hover {
+    background: #0056b3;
+    transform: translateY(-1px);
+}
+
+.popup-btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.popup-btn-secondary:hover {
+    background: #545b62;
+    transform: translateY(-1px);
+}
+
+.popup-btn-success {
+    background: #28a745;
+    color: white;
+}
+
+.popup-btn-success:hover {
+    background: #1e7e34;
+    transform: translateY(-1px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .popup-content {
+        padding: 1.5rem;
+        margin: 1rem;
+        max-width: calc(100% - 2rem);
+    }
+    
+    .popup-form-group {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .popup-form-group label {
+        min-width: auto;
+        margin-bottom: 0.5rem;
+    }
+    
+    .popup-form-group input,
+    .popup-form-group select {
+        margin-left: 0;
+        width: 100%;
+    }
+    
+    .popup-actions {
+        flex-direction: column;
+    }
+    
+    .popup-btn {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+/* Stili migliorati per popup orario */
+.popup-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.popup-header h2 {
+    margin: 0 0 0.5rem 0;
+    color: #2c3e50;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.popup-subtitle {
+    margin: 0;
+    color: #7f8c8d;
+    font-size: 0.95rem;
+}
+
+.popup-body {
+    margin-bottom: 2rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+.form-section {
+    margin-bottom: 1rem;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid #3498db;
+}
+
+.form-section.full-width {
+    grid-column: 1 / -1;
+}
+
+.section-title {
+    margin: 0 0 1rem 0;
+    color: #2c3e50;
+    font-size: 1.1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-row {
+    display: flex;
+    gap: 1.5rem;
+    align-items: end;
+}
+
+.form-field {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.field-label {
+    font-weight: 500;
+    color: #34495e;
+    font-size: 0.9rem;
+}
+
+.time-input {
+    padding: 0.75rem;
+    border: 2px solid #e1e8ed;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.time-input:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.checkbox-wrapper {
+    margin-bottom: 1rem;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+.styled-checkbox {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.checkbox-text {
+    user-select: none;
+}
+
+.pausa-times {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #ddd;
+}
+
+.days-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 0.75rem;
+}
+
+.day-checkbox {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: white;
+    border: 2px solid #e1e8ed;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.day-checkbox:hover {
+    border-color: #3498db;
+    background: #f8fcff;
+}
+
+.day-checkbox input[type="checkbox"] {
+    margin: 0;
+}
+
+.day-checkbox input[type="checkbox"]:checked + span {
+    color: #3498db;
+    font-weight: 600;
+}
+
+.day-checkbox.weekend {
+    border-color: #f39c12;
+}
+
+.day-checkbox.weekend:hover {
+    border-color: #e67e22;
+    background: #fef9e7;
+}
+
+.styled-select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #e1e8ed;
+    border-radius: 6px;
+    background: white;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.styled-select:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.popup-footer {
+    text-align: center;
+    padding-top: 1.5rem;
+    border-top: 2px solid #f0f0f0;
+}
+
+.btn-save {
+    background: linear-gradient(135deg, #27ae60, #2ecc71);
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0 auto;
+    box-shadow: 0 4px 12px rgba(46, 204, 113, 0.3);
+}
+
+.btn-save:hover {
+    background: linear-gradient(135deg, #229954, #27ae60);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(46, 204, 113, 0.4);
+}
+
+.btn-save:active {
+    transform: translateY(0);
+}
+
+.btn-icon {
+    font-size: 1.1rem;
+}
+
+.btn-text {
+    font-size: 1rem;
+}
+
+/* Stile semplice per calendario */
+.calendar-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #ddd;
+}
+
+.calendar-header h2 {
+    margin: 0 0 0.5rem 0;
+    color: #333;
+    font-size: 1.5rem;
+    font-weight: 500;
+}
+
+.calendar-header p {
+    margin: 0;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.calendar-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.time-section,
+.break-section {
+    background: #f9f9f9;
+    padding: 1.5rem;
+    border-radius: 6px;
+    border: 1px solid #e0e0e0;
+}
+
+.days-section,
+.timezone-section {
+    grid-column: 1 / -1;
+    background: #f9f9f9;
+    padding: 1.5rem;
+    border-radius: 6px;
+    border: 1px solid #e0e0e0;
+    margin-top: 1rem;
+}
+
+.time-section h3,
+.break-section h3,
+.days-section h3,
+.timezone-section h3 {
+    margin: 0 0 1rem 0;
+    color: #333;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.time-row {
+    display: flex;
+    gap: 1rem;
+}
+
+.time-field {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.time-field label {
+    font-weight: 500;
+    color: #555;
+    font-size: 0.9rem;
+}
+
+.time-field input[type="time"],
+.timezone-section select {
+    padding: 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+    background: white;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.timezone-section select {
+    min-width: 100%;
+    max-width: 100%;
+}
+
+.time-field input[type="time"]:focus,
+.timezone-section select:focus {
+    outline: none;
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.1);
+}
+
+.break-toggle {
+    margin-bottom: 1rem;
+}
+
+.break-toggle label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-weight: 500;
+    color: #555;
+}
+
+.days-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0.75rem;
+}
+
+.days-list label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.days-list label:hover {
+    border-color: #4a90e2;
+    background: #f0f7ff;
+}
+
+.days-list input[type="checkbox"]:checked + span {
+    font-weight: 600;
+    color: #4a90e2;
+}
+
+.calendar-footer {
+    text-align: center;
+    padding-top: 1.5rem;
+    border-top: 1px solid #ddd;
+}
+
+.save-btn {
+    background: #4a90e2;
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.save-btn:hover {
+    background: #357abd;
+    transform: translateY(-1px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .calendar-body {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .time-row {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .days-list {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.tech-subtitle {
+    font-family: 'Courier New', monospace;
+    color: #7f8c8d;
+    font-style: italic;
+    margin: 0.5rem 0;
+    font-size: 0.9rem;
+}
+
+.tech-border {
+    height: 2px;
+    background: linear-gradient(90deg, #3498db, transparent);
+    margin: 1rem 0;
+}
+
+.tech-layout {
+    background: #ffffff;
+    border: 1px solid #e1e8ed;
+    border-radius: 4px;
+    padding: 1rem;
+}
+
+.tech-panel {
+    background: #f8f9fa;
+    border: 1px solid #e1e8ed;
+    border-left: 4px solid #3498db;
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+.tech-panel::before {
+    content: "//";
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    color: #bdc3c7;
+    font-family: 'Courier New', monospace;
+    font-size: 0.8rem;
+}
+
+.tech-header {
+    font-family: 'Courier New', monospace;
+    color: #2c3e50;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 1rem;
+    margin: 0 0 1rem 0;
+}
+
+.tech-label {
+    font-family: 'Courier New', monospace;
+    color: #ccc;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+}
+
+.tech-input {
+    font-family: 'Courier New', monospace;
+    background: #2a2a2a;
+    border: 1px solid #555;
+    color: #00ff00;
+    padding: 0.75rem;
+    border-radius: 2px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.tech-input:focus {
+    outline: none;
+    border-color: #00ff00;
+    box-shadow: 0 0 8px rgba(0, 255, 0, 0.3);
+    background: #1a1a1a;
+}
+
+.tech-checkbox-label {
+    font-family: 'Courier New', monospace;
+    color: #ccc;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.tech-text {
+    color: #00ff00;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.tech-days-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.5rem;
+}
+
+.tech-day {
+    font-family: 'Courier New', monospace;
+    background: #2a2a2a;
+    border: 1px solid #555;
+    color: #ccc;
+    padding: 0.75rem 0.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 2px;
+}
+
+.tech-day:hover {
+    border-color: #00ff00;
+    background: #1a1a1a;
+    color: #00ff00;
+}
+
+.tech-day input[type="checkbox"]:checked + span {
+    color: #00ff00;
+    font-weight: bold;
+}
+
+.tech-day.weekend {
+    border-color: #ff6600;
+}
+
+.tech-day.weekend:hover {
+    border-color: #ff6600;
+    color: #ff6600;
+}
+
+.tech-select {
+    font-family: 'Courier New', monospace;
+    background: #2a2a2a;
+    border: 1px solid #555;
+    color: #00ff00;
+    padding: 0.75rem;
+    border-radius: 2px;
+    font-weight: bold;
+    width: 100%;
+}
+
+.tech-select:focus {
+    outline: none;
+    border-color: #00ff00;
+    box-shadow: 0 0 8px rgba(0, 255, 0, 0.3);
+}
+
+.tech-footer {
+    background: #1a1a1a;
+    border-top: 2px solid #333;
+    padding: 1.5rem;
+    text-align: center;
+    position: relative;
+}
+
+.tech-save-btn {
+    font-family: 'Courier New', monospace;
+    background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
+    border: 2px solid #00ff00;
+    color: #00ff00;
+    padding: 1rem 2rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0 auto;
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.2);
+}
+
+.tech-save-btn:hover {
+    background: linear-gradient(135deg, #00ff00, #00cc00);
+    color: #000;
+    transform: translateY(-2px);
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+}
+
+.tech-icon {
+    font-size: 1.2rem;
+}
+
+.tech-btn-text {
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.tech-status {
+    font-family: 'Courier New', monospace;
+    color: #555;
+    font-size: 0.8rem;
+    margin-top: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Responsive design per popup rettangolare */
+@media (max-width: 768px) {
+    .popup-content {
+        max-width: 95%;
+        padding: 1.5rem;
+    }
+    
+    .popup-body {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .form-section.full-width {
+        grid-column: 1;
+    }
+    
+    .days-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
