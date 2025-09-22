@@ -1,11 +1,46 @@
 <?php
 /**
- * Configurazione semplificata Agenda
+ * Configurazione agenda
+ * @author Michael Leanza
  */
 
-// Impostazioni base
+// Definisci costante solo se non già definita
+if (!defined('AGENDA_APP')) {
+    define('AGENDA_APP', true);
+}
+
+// Configurazione base
 date_default_timezone_set('Europe/Rome');
-session_start();
+
+// Inizializza sessione solo se non già attiva
+if (session_status() === PHP_SESSION_NONE) {
+    session_start([
+        'cookie_lifetime' => 0,
+        'cookie_secure' => isset($_SERVER['HTTPS']),
+        'cookie_httponly' => true,
+        'cookie_samesite' => 'Strict',
+        'use_strict_mode' => true,
+        'sid_length' => 48,
+        'sid_bits_per_character' => 6
+    ]);
+}
+
+// Sistema sicurezza
+function generateCSRFToken() {
+    if (!isset($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+}
+
+function verifyCSRFToken($token) {
+    return isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
+}
+
+function initSecurity() {
+    // Funzione placeholder per compatibilità
+    return true;
+}
 
 // Costanti calendario
 define('CALENDAR_START_HOUR', 8);

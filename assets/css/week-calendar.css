@@ -1,4 +1,9 @@
-/* Base styles */
+/**
+ * Stylesheet calendario settimanale
+ * @author Michael Leanza
+ */
+
+/* Stili base */
 body {
     margin: 0;
     padding: 0;
@@ -11,7 +16,7 @@ body {
     min-height: 100vh;
 }
 
-/* Calendar header */
+/* Layout calendario */
 .calendar-header-row {
     display: grid;
     grid-template-columns: 48px repeat(7, 1fr);

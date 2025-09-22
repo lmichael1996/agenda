@@ -1,22 +1,25 @@
 <?php
-// Configurazione generale API
+/**
+ * Configurazione API Sistema Agenda
+ * @author Michael Leanza
+ */
+
+// Informazioni API
 define('API_VERSION', '1.0.0');
 define('API_DEBUG', true);
-
-// Base URL per le API
 define('API_BASE_URL', '/api/');
 
-// Costanti per i repository
+// Limiti repository
 define('DEFAULT_LIMIT', 100);
 define('MAX_LIMIT', 1000);
 
-// Costanti per la validazione
+// Validazioni
 define('MIN_PASSWORD_LENGTH', 6);
 define('MAX_USERNAME_LENGTH', 50);
 define('MAX_SERVICE_NAME_LENGTH', 100);
 define('MAX_DESCRIPTION_LENGTH', 500);
 
-// Costanti per gli orari
+// Orari
 define('MIN_WORKING_HOUR', 6);
 define('MAX_WORKING_HOUR', 23);
 

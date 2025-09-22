@@ -1,10 +1,10 @@
 <?php
-require_once __DIR__ . '/../../config/database.php';
-
 /**
- * Base Database Repository Class
- * Gestisce la connessione al database e fornisce metodi comuni
+ * Classe base Repository
+ * @author Michael Leanza
  */
+
+require_once __DIR__ . '/../../config/database.php';
 
 abstract class BaseRepository {
     protected $db;
@@ -14,16 +14,10 @@ abstract class BaseRepository {
         $this->connect();
     }
     
-    /**
-     * Stabilisce la connessione al database
-     */
     private function connect() {
         $this->db = Database::getConnection();
     }
     
-    /**
-     * Esegue una query SELECT
-     */
     protected function select($query, $params = []) {
         try {
             $stmt = $this->db->prepare($query);

@@ -3,6 +3,8 @@
  * Utilizza ApiClient per operazioni specifiche del business logic
  */
 
+import { ApiClient } from './api-client.js';
+
 class DatabaseManager {
     constructor() {
         this.api = window.apiClient || new ApiClient();
@@ -398,7 +400,10 @@ class DatabaseManager {
 // Istanza globale del database manager
 const dbManager = new DatabaseManager();
 
-// Esporta per uso in moduli
+// Esporta per uso in moduli ES6
+export { DatabaseManager, dbManager };
+
+// Esporta per uso in moduli CommonJS
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { DatabaseManager, dbManager };
 }

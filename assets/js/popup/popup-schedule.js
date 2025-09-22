@@ -1,15 +1,17 @@
-// ========== SCHEDULE MANAGEMENT ==========
+/**
+ * Gestione popup configurazione orari
+ * @author Michael Leanza
+ */
 
-// Day names and timezones configuration
+// Import moduli
+import { dbManager } from '../api/database-manager.js';
+import { apiClient, ApiUtils } from '../api/api-client.js';
+
+// Configurazioni
 const DAY_NAMES = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'];
 const DAY_MAP = {
-    'Lunedì': 'monday',
-    'Martedì': 'tuesday', 
-    'Mercoledì': 'wednesday',
-    'Giovedì': 'thursday',
-    'Venerdì': 'friday',
-    'Sabato': 'saturday',
-    'Domenica': 'sunday'
+    'Lunedì': 'monday', 'Martedì': 'tuesday', 'Mercoledì': 'wednesday',
+    'Giovedì': 'thursday', 'Venerdì': 'friday', 'Sabato': 'saturday', 'Domenica': 'sunday'
 };
 
 const TIMEZONES = [
@@ -32,7 +34,7 @@ const TIMEZONES = [
     { value: "UTC", label: "UTC (Universal)" }
 ];
 
-// Schedule configuration (default values)
+// Configurazione default
 let scheduleConfig = {
     working_days: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
     start_time: '09:00',
@@ -41,64 +43,129 @@ let scheduleConfig = {
     lunch_break_end: '13:30'
 };
 
-// API helper functions
-async function apiRequest(url, options = {}) {
-    // Usa il nuovo DatabaseManager se disponibile
-    if (window.dbManager && url === 'schedule.php') {
-        if (options.method === 'PUT') {
-            const configData = JSON.parse(options.body);
-            const result = await window.dbManager.updateScheduleConfiguration(configData);
-            return { success: true, data: result };
-        } else {
-            const result = await window.dbManager.getScheduleConfiguration();
-            return { success: true, data: result };
-        }
-    }
-    
-    // Fallback al metodo originale
+// Funzioni API database
+async function getScheduleConfig() {
     try {
-        const response = await fetch(`/api/${url}`, {
-            headers: {
-                'Content-Type': 'application/json',
-                ...options.headers
-            },
-            ...options
-        });
-        
-        const data = await response.json();
-        
-        if (!response.ok) {
-            throw new Error(data.message || `HTTP error! status: ${response.status}`);
-        }
-        
-        return data;
+        const result = await dbManager.getScheduleConfiguration();
+        return { success: true, data: result };
     } catch (error) {
-        console.error('API Error:', error);
-        throw error;
+        console.error('Database Error:', error);
+        // Fallback configurazione default
+        const defaultConfig = {
+            working_days: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
+            start_time: '09:00', end_time: '18:00',
+            lunch_break_start: '12:30', lunch_break_end: '13:30',
+            timezone: 'Europe/Rome'
+        };
+        return { success: true, data: defaultConfig };
     }
 }
 
-// Load schedule configuration from API
+async function updateScheduleConfig(configData) {
+    try {
+        const result = await dbManager.updateScheduleConfiguration(configData);
+        return { success: true, data: result };
+    } catch (error) {
+        console.error('Database Error:', error);
+        // Fallback localStorage
+        try {
+            const legacyConfig = {
+                giorniLavorativi: convertWorkingDaysToLegacy(
+                    typeof configData.working_days === 'string' ? 
+                    JSON.parse(configData.working_days) : configData.working_days
+                ),
+                apertura: configData.start_time, chiusura: configData.end_time,
+                pausaInizio: configData.lunch_break_start, pausaFine: configData.lunch_break_end,
+                fusoOrario: configData.timezone
+            };
+            localStorage.setItem('orarioConfig', JSON.stringify(legacyConfig));
+            return { success: true, data: configData };
+        } catch (e) {
+            throw new Error('Impossibile salvare la configurazione');
+        }
+    }
+}
+
+async function resetScheduleConfig() {
+    try {
+        console.log('🔄 Resetting schedule configuration to defaults...');
+        const result = await dbManager.resetScheduleConfiguration();
+        return { success: true, data: result };
+    } catch (error) {
+        console.error('❌ Database Error:', error);
+        
+        // Fallback: reset ai valori di default hardcoded
+        console.log('⚠️ Fallback to hardcoded defaults');
+        const defaultConfig = {
+            working_days: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
+            start_time: '09:00',
+            end_time: '18:00',
+            lunch_break_start: '12:30',
+            lunch_break_end: '13:30',
+            timezone: 'Europe/Rome'
+        };
+        
+        // Rimuovi la configurazione da localStorage
+        localStorage.removeItem('orarioConfig');
+        
+        return { success: true, data: defaultConfig };
+    }
+}
+
+// Load schedule configuration from database
 async function loadScheduleConfig() {
     try {
-        const response = await apiRequest('schedule.php');
+        const response = await getScheduleConfig();
+        
         if (response.success && response.data) {
-            scheduleConfig = response.data;
-            console.log('Schedule config loaded from API:', scheduleConfig);
+            // Se riceviamo un array, prendi il primo elemento
+            const config = Array.isArray(response.data) ? response.data[0] : response.data;
+            
+            if (config) {
+                // Converti i working_days da stringa a array se necessario
+                if (typeof config.working_days === 'string') {
+                    try {
+                        config.working_days = JSON.parse(config.working_days);
+                    } catch (e) {
+                        // Se il parsing fallisce, prova a splittare per virgola
+                        config.working_days = config.working_days.split(',').map(day => day.trim());
+                    }
+                }
+                
+                scheduleConfig = {
+                    working_days: config.working_days || ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
+                    start_time: config.start_time || '09:00',
+                    end_time: config.end_time || '18:00',
+                    lunch_break_start: config.lunch_break_start || null,
+                    lunch_break_end: config.lunch_break_end || null,
+                    timezone: config.timezone || 'Europe/Rome'
+                };
+                
+                console.log('✅ Schedule config loaded from database:', scheduleConfig);
+                return;
+            }
         }
+        
+        console.log('⚠️ No schedule config found in database, using defaults');
+        
     } catch (error) {
-        console.error('Failed to load schedule config from API:', error);
-        // Fallback to localStorage if API fails
+        console.error('❌ Failed to load schedule config from database:', error);
+        
+        // Fallback to localStorage if database fails
         const savedConfig = localStorage.getItem('orarioConfig');
         if (savedConfig) {
             try {
                 const config = JSON.parse(savedConfig);
                 // Convert old format to new format
                 scheduleConfig = convertOldConfig(config);
+                console.log('✅ Fallback: loaded from localStorage:', scheduleConfig);
+                return;
             } catch (e) {
-                console.error('Failed to parse localStorage config:', e);
+                console.error('❌ Failed to parse localStorage config:', e);
             }
         }
+        
+        console.log('⚠️ Using default schedule configuration');
     }
 }
 
@@ -124,33 +191,56 @@ function convertOldConfig(oldConfig) {
     };
 }
 
-// Save schedule configuration to API
+// Save schedule configuration to database
 async function saveScheduleConfig(config) {
     try {
-        const response = await apiRequest('schedule.php', {
-            method: 'PUT',
-            body: JSON.stringify(config)
-        });
+        // Assicurati che working_days sia un array serializzato correttamente
+        const configToSave = {
+            ...config,
+            working_days: Array.isArray(config.working_days) ? 
+                JSON.stringify(config.working_days) : config.working_days
+        };
+        
+        const response = await updateScheduleConfig(configToSave);
         
         if (response.success) {
-            console.log('Schedule config saved to API:', response);
+            console.log('✅ Schedule config saved to database successfully:', response);
+            scheduleConfig = config; // Aggiorna la configurazione locale
             return true;
         }
         
         throw new Error(response.message || 'Failed to save configuration');
+        
     } catch (error) {
-        console.error('Failed to save schedule config to API:', error);
+        console.error('❌ Failed to save schedule config to database:', error);
         
         // Fallback to localStorage
         try {
-            localStorage.setItem('orarioConfig', JSON.stringify(config));
-            console.log('Saved to localStorage as fallback');
+            // Converti il formato per localStorage (compatibilità)
+            const legacyConfig = {
+                giorniLavorativi: convertWorkingDaysToLegacy(config.working_days),
+                apertura: config.start_time,
+                chiusura: config.end_time,
+                pausaInizio: config.lunch_break_start,
+                pausaFine: config.lunch_break_end,
+                fusoOrario: config.timezone
+            };
+            
+            localStorage.setItem('orarioConfig', JSON.stringify(legacyConfig));
+            console.log('✅ Saved to localStorage as fallback');
+            scheduleConfig = config; // Aggiorna la configurazione locale
             return true;
         } catch (e) {
-            console.error('Failed to save to localStorage:', e);
+            console.error('❌ Failed to save to localStorage:', e);
             return false;
         }
     }
+}
+
+// Converti working_days per compatibilità con il formato legacy
+function convertWorkingDaysToLegacy(workingDays) {
+    const dayNames = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    return dayNames.map(day => workingDays.includes(day));
 }
 
 // Generate working days HTML
@@ -271,15 +361,15 @@ window.saveOrarioConfig = async function() {
         
         if (success) {
             scheduleConfig = config;
-            alert('✅ Configurazione salvata con successo!');
+            ApiUtils.showSuccess('Configurazione salvata con successo!');
             closePopup('popup-schedule');
         } else {
-            alert('❌ Errore nel salvataggio della configurazione');
+            ApiUtils.showError('Errore nel salvataggio della configurazione');
         }
         
     } catch (error) {
         console.error('Error saving schedule config:', error);
-        alert('❌ Errore nel salvataggio: ' + error.message);
+        ApiUtils.showError('Errore nel salvataggio: ' + ApiUtils.handleError(error));
     }
 };
 
@@ -287,22 +377,67 @@ window.saveOrarioConfig = async function() {
 window.resetOrarioConfig = async function() {
     if (confirm('Sei sicuro di voler ripristinare la configurazione di default?')) {
         try {
-            const response = await apiRequest('schedule.php/reset');
+            const response = await resetScheduleConfig();
             
-            if (response.success) {
-                scheduleConfig = response.data;
-                alert('✅ Configurazione ripristinata ai valori di default!');
+            if (response.success && response.data) {
+                // Se riceviamo un array, prendi il primo elemento
+                const config = Array.isArray(response.data) ? response.data[0] : response.data;
                 
-                // Ricarica il popup con i nuovi valori
-                const popup = document.getElementById('popup-schedule');
-                if (popup) {
-                    popup.innerHTML = getSchedulePopupContent();
-                    setupLunchBreakToggle();
+                if (config) {
+                    // Converti i working_days da stringa a array se necessario
+                    if (typeof config.working_days === 'string') {
+                        try {
+                            config.working_days = JSON.parse(config.working_days);
+                        } catch (e) {
+                            config.working_days = config.working_days.split(',').map(day => day.trim());
+                        }
+                    }
+                    
+                    scheduleConfig = {
+                        working_days: config.working_days || ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
+                        start_time: config.start_time || '09:00',
+                        end_time: config.end_time || '18:00',
+                        lunch_break_start: config.lunch_break_start || null,
+                        lunch_break_end: config.lunch_break_end || null,
+                        timezone: config.timezone || 'Europe/Rome'
+                    };
+                    
+                    console.log('✅ Configuration reset successfully:', scheduleConfig);
+                    alert('✅ Configurazione ripristinata ai valori di default!');
+                    
+                    // Ricarica il popup con i nuovi valori
+                    const popup = document.getElementById('popup-schedule');
+                    if (popup) {
+                        popup.innerHTML = getSchedulePopupContent();
+                        setupLunchBreakToggle();
+                    }
+                } else {
+                    throw new Error('No data received from reset database call');
                 }
+            } else {
+                throw new Error('Reset database call failed');
             }
         } catch (error) {
-            console.error('Error resetting schedule config:', error);
-            alert('❌ Errore nel ripristino: ' + error.message);
+            console.error('❌ Error resetting schedule config:', error);
+            
+            // Fallback: reset to hardcoded defaults
+            scheduleConfig = {
+                working_days: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
+                start_time: '09:00',
+                end_time: '18:00',
+                lunch_break_start: '12:30',
+                lunch_break_end: '13:30',
+                timezone: 'Europe/Rome'
+            };
+            
+            alert('⚠️ Ripristino ai valori di default locali (errore database: ' + error.message + ')');
+            
+            // Ricarica il popup con i nuovi valori
+            const popup = document.getElementById('popup-schedule');
+            if (popup) {
+                popup.innerHTML = getSchedulePopupContent();
+                setupLunchBreakToggle();
+            }
         }
     }
 };
@@ -423,5 +558,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Carica la configurazione iniziale
-    loadScheduleConfig();
+    setTimeout(async () => {
+        await loadScheduleConfig();
+        console.log('📅 Schedule popup initialized with config:', scheduleConfig);
+    }, 500);
 });

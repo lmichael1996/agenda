@@ -4,7 +4,7 @@
  */
 
 class ApiClient {
-    constructor(baseUrl = '/api/endpoints/') {
+    constructor(baseUrl = '/agenda/api/endpoints/') {
         this.baseUrl = baseUrl;
         this.defaultHeaders = {
             'Content-Type': 'application/json',
@@ -359,7 +359,10 @@ const ApiUtils = {
 // Istanza globale del client API
 const apiClient = new ApiClient();
 
-// Esporta per uso in moduli
+// Esporta per uso in moduli ES6
+export { ApiClient, ApiError, ApiUtils, apiClient };
+
+// Esporta per uso in moduli CommonJS
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { ApiClient, ApiError, ApiUtils, apiClient };
 }

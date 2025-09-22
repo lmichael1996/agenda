@@ -4,16 +4,13 @@
  */
 
 require_once '../config/simple_config.php';
+require_once '../config/secure_auth.php';
 require_once '../config/calendar_functions.php';
+
 setSecurityHeaders();
 
-// Controllo autenticazione - redirect a index se non autenticato
-if (empty($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
-    // Imposta flag per permettere accesso al login
-    $_SESSION['from_index'] = true;
-    header('Location: ../index.php');
-    exit;
-}
+// Controllo autenticazione sicuro
+requireAuthentication();
 
 // Genera dati per il calendario
 $days = getCurrentWeekDays();
@@ -56,11 +53,14 @@ $currentDate = $today->format('Y-m-d');
         <a href="#" data-action="openPopup" data-popup-type="service" data-popup="services">Servizi</a>
         <a href="#" data-action="openPopup" data-popup-type="user" data-popup="users">Utenti</a>
         <a href="#" data-action="openPopup" data-popup-type="schedule" data-popup="schedule">Orario</a>
+        <hr style="border: 1px solid #ddd; margin: 10px 0;">
+        <a href="logout.php" style="color: #dc3545;" onclick="return confirm('Sei sicuro di voler uscire?')">🚪 Logout</a>
     </div>
 
     <!-- Top Menu Controls -->
     <div class="dashboard-controls">
         <div class="controls-left">
+            <span class="user-info">Benvenuto, <?php echo htmlspecialchars($_SESSION['username']); ?>!</span>
             <select id="set-view" onmouseover="this.style.cursor='pointer'">
                 <option value="week">Settimana</option>
                 <option value="day">Giorno</option>
@@ -133,7 +133,7 @@ $currentDate = $today->format('Y-m-d');
     <script src="../assets/js/calendar-popup.js"></script>
     <script src="../assets/js/popup/popup-services.js"></script>
     <script src="../assets/js/popup/popup-users.js"></script>
-    <script src="../assets/js/popup/popup-schedule.js"></script>
+    <script type="module" src="../assets/js/popup/popup-schedule.js"></script>
 
 </body>
 </html>
