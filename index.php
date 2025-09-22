@@ -1,33 +1,34 @@
 <?php
 /**
- * Punto di ingresso applicazione Agenda
- * @author Michael Leanza
+ * Gateway di sicurezza - Punto di ingresso agenda
+ * Controlla accessi e autorizza il passaggio al login
  */
 
-// Inizializza sessione solo se non già attiva
+// Avvia sessione
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Header sicurezza
+// Headers di sicurezza
 header('X-Frame-Options: DENY');
 header('X-Content-Type-Options: nosniff');
 header('Referrer-Policy: no-referrer');
 header('X-XSS-Protection: 1; mode=block');
 
-// Controlli accesso base
-$isGet = $_SERVER['REQUEST_METHOD'] === 'GET';
-$noParams = empty($_GET);
-$noReferer = empty($_SERVER['HTTP_REFERER']);
-$userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+// Controlli accesso
+$isGet = $_SERVER['REQUEST_METHOD'] === 'GET';           // Solo richieste GET
+$noParams = empty($_GET);                                // Nessun parametro
+$noReferer = empty($_SERVER['HTTP_REFERER']);            // Accesso diretto
+$userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';          // Browser valido
 
+// Se tutti i controlli passano, autorizza l'accesso
 if ($isGet && $noParams && $noReferer && !empty(trim($userAgent))) {
-    $_SESSION['from_index'] = true;
+    $_SESSION['from_index'] = true;  // Flag di autorizzazione
     header('Location: public/login.php');
     exit;
 }
 
-http_response_code(403);
-echo 'Accesso non autorizzato.';
+// Blocca accessi non autorizzati
+header('Location: public/access-denied.php');
 exit;
 ?>

@@ -1,16 +1,45 @@
 <?php
 /**
  * Dashboard principale - Calendario settimanale
+ * Accesso riservato agli utenti autenticati
  */
 
-require_once '../config/simple_config.php';
-require_once '../config/secure_auth.php';
-require_once '../config/calendar_functions.php';
+// Carica configurazione e controlli di sicurezza
+require_once '../config/config.php';
 
-setSecurityHeaders();
+// Il file config.php già gestisce la protezione per dashboard.php
+// Controlli aggiuntivi di sicurezza per la sessione
 
-// Controllo autenticazione sicuro
-requireAuthentication();
+// Verifica integrità sessione (anti session hijacking)
+if (isset($_SESSION['user_agent_hash'])) {
+    $currentUserAgentHash = hash('sha256', $_SERVER['HTTP_USER_AGENT'] ?? '');
+    if (!hash_equals($_SESSION['user_agent_hash'], $currentUserAgentHash)) {
+        session_destroy();
+        $_SESSION['login_error'] = 'Sessione non valida per motivi di sicurezza';
+        header('Location: login.php');
+        exit;
+    }
+}
+
+// Verifica IP (opzionale, per maggiore sicurezza)
+if (isset($_SESSION['login_ip'])) {
+    $currentIP = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    if ($_SESSION['login_ip'] !== $currentIP) {
+        // Log cambio IP sospetto
+        error_log("IP change detected for user {$_SESSION['user_id']}: {$_SESSION['login_ip']} -> {$currentIP}");
+    }
+}
+
+// Headers di sicurezza aggiuntivi
+header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: SAMEORIGIN');
+header('Referrer-Policy: strict-origin-when-cross-origin');
+header('Cache-Control: no-cache, no-store, must-revalidate');
+header('Pragma: no-cache');
+header('Expires: 0');
+
+// Carica funzioni calendario (dopo verifiche sicurezza)
+require_once '../utils/calendar_functions.php';
 
 // Genera dati per il calendario
 $days = getCurrentWeekDays();
@@ -53,14 +82,12 @@ $currentDate = $today->format('Y-m-d');
         <a href="#" data-action="openPopup" data-popup-type="service" data-popup="services">Servizi</a>
         <a href="#" data-action="openPopup" data-popup-type="user" data-popup="users">Utenti</a>
         <a href="#" data-action="openPopup" data-popup-type="schedule" data-popup="schedule">Orario</a>
-        <hr style="border: 1px solid #ddd; margin: 10px 0;">
-        <a href="logout.php" style="color: #dc3545;" onclick="return confirm('Sei sicuro di voler uscire?')">🚪 Logout</a>
+        <a href="logout.php" style="color: #dc3545;" onclick="return confirm('Sei sicuro di voler uscire?')">Logout</a>
     </div>
 
     <!-- Top Menu Controls -->
     <div class="dashboard-controls">
         <div class="controls-left">
-            <span class="user-info">Benvenuto, <?php echo htmlspecialchars($_SESSION['username']); ?>!</span>
             <select id="set-view" onmouseover="this.style.cursor='pointer'">
                 <option value="week">Settimana</option>
                 <option value="day">Giorno</option>

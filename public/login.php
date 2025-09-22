@@ -1,20 +1,11 @@
 <?php
-// Inizializza sessione
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-// Definisci costante app
-if (!defined('AGENDA_APP')) {
-    define('AGENDA_APP', true);
-}
-
 // Carica configurazione
-require_once '../config/simple_config.php';
+require_once '../config/config.php';
 
-// Controlli accesso
-if (empty($_SESSION['from_index'])) {
-    $_SESSION['from_index'] = true;
+// Se già autenticato, redirect al dashboard
+if (!empty($_SESSION['user_authenticated']) && !empty($_SESSION['user_id'])) {
+    header('Location: dashboard.php');
+    exit;
 }
 
 // Genera token CSRF
