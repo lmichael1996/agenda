@@ -1,4 +1,8 @@
 /* Stili per popup modali */
+* {
+    font-family: 'Courier New', monospace !important;
+}
+
 .popup-overlay {
     position: fixed;
     top: 0;
