@@ -8,9 +8,6 @@ if (!defined('AGENDA_APP')) {
     define('AGENDA_APP', true);
 }
 
-// Configurazione base
-date_default_timezone_set('Europe/Rome');
-
 // Sessione semplice
 if (session_status() === PHP_SESSION_NONE) {
     session_start();

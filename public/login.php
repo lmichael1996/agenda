@@ -2,12 +2,6 @@
 // Carica configurazione
 require_once '../config/config.php';
 
-// Se già autenticato, redirect al dashboard
-if (!empty($_SESSION['user_authenticated']) && !empty($_SESSION['user_id'])) {
-    header('Location: dashboard.php');
-    exit;
-}
-
 // Genera token CSRF
 $csrfToken = generateCSRFToken();
 
