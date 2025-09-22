@@ -51,7 +51,11 @@ header('Cache-Control: no-cache, no-store, must-revalidate');
 header('Pragma: no-cache');
 header('Expires: 0');
 
-// Redirect al punto di ingresso
-header('Location: ../index.php');
+// Inizia nuova sessione per flag autorizzazione
+session_start();
+$_SESSION['from_index'] = true;  // Autorizza accesso al login
+
+// Redirect diretto al login
+header('Location: login.php');
 exit;
 ?>

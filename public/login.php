@@ -17,8 +17,13 @@ try {
 $loginError = $_SESSION['login_error'] ?? '';
 unset($_SESSION['login_error']);
 
-// Conta tentativi falliti
-$failedAttempts = $_SESSION['failed_login_attempts'] ?? 0;
+// Conta tentativi falliti (stesso sistema di auth.php)
+$loginAttempts = $_SESSION['login_attempts'] ?? 0;
+$lastAttempt = $_SESSION['last_attempt'] ?? 0;
+
+// Calcola se è bloccato
+$isBlocked = $loginAttempts >= 5 && (time() - $lastAttempt) < 600;
+$remainingTime = $isBlocked ? ceil((600 - (time() - $lastAttempt)) / 60) : 0;
 ?>
 
 <!DOCTYPE html>
@@ -39,15 +44,21 @@ $failedAttempts = $_SESSION['failed_login_attempts'] ?? 0;
             </div>
         <?php endif; ?>
         
-        <?php if ($failedAttempts > 0): ?>
+        <?php if ($isBlocked): ?>
             <div class="attempts-warning">
-                ⚠️ Tentativi falliti: <?= $failedAttempts ?>/5
-                <?php if ($failedAttempts >= 3): ?>
+                🚫 Account bloccato per sicurezza<br>
+                Riprova tra <?= $remainingTime ?> minuti
+            </div>
+        <?php elseif ($loginAttempts > 0): ?>
+            <div class="attempts-warning">
+                ⚠️ Tentativi falliti: <?= $loginAttempts ?>/5
+                <?php if ($loginAttempts >= 3): ?>
                     <br>Sicurezza rafforzata attivata.
                 <?php endif; ?>
             </div>
         <?php endif; ?>
         
+        <?php if (!$isBlocked): ?>
         <form method="post" action="../config/auth.php">
             <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
             <input type="text" name="username" placeholder="Username" required autocomplete="username">
@@ -73,6 +84,11 @@ $failedAttempts = $_SESSION['failed_login_attempts'] ?? 0;
             
             <input type="submit" value="Accedi">
         </form>
+        <?php else: ?>
+            <p style="text-align: center; color: #666; margin-top: 20px;">
+                Form di login temporaneamente disabilitato per sicurezza
+            </p>
+        <?php endif; ?>
     </div>
 
     <script src="../assets/js/calendar-login.js"></script>

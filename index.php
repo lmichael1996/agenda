@@ -18,12 +18,11 @@ header('X-XSS-Protection: 1; mode=block');
 // Controlli accesso
 $isGet = $_SERVER['REQUEST_METHOD'] === 'GET';           // Solo richieste GET
 $noParams = empty($_GET);                                // Nessun parametro
-$referer = $_SERVER['HTTP_REFERER'] ?? '';
-$validReferer = empty($referer) || strpos($referer, '/logout.php') !== false; // Accesso diretto o da logout
+$noReferer = empty($_SERVER['HTTP_REFERER']);            // Accesso diretto
 $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';          // Browser valido
 
 // Se tutti i controlli passano, autorizza l'accesso
-if ($isGet && $noParams && $validReferer && !empty(trim($userAgent))) {
+if ($isGet && $noParams && $noReferer && !empty(trim($userAgent))) {
     $_SESSION['from_index'] = true;  // Flag di autorizzazione
     header('Location: public/login.php');
     exit;
