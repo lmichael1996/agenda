@@ -17,15 +17,17 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/captcha.php';
 
-// Rate limiting base
+// Sistema di sicurezza equilibrato
 if (!isset($_SESSION['login_attempts'])) {
     $_SESSION['login_attempts'] = 0;
     $_SESSION['last_attempt'] = 0;
 }
 
-// Troppi tentativi (max 5 in 10 minuti)
-if ($_SESSION['login_attempts'] >= 5 && (time() - $_SESSION['last_attempt']) < 600) {
-    $_SESSION['login_error'] = 'Troppi tentativi. Riprova tra 10 minuti.';
+// Blocco progressivo: 3 tentativi = 2 min, 5+ tentativi = 5 min
+$blockTime = $_SESSION['login_attempts'] >= 5 ? 300 : ($_SESSION['login_attempts'] >= 3 ? 120 : 0);
+if ($_SESSION['login_attempts'] >= 3 && (time() - $_SESSION['last_attempt']) < $blockTime) {
+    $waitTime = ceil(($blockTime - (time() - $_SESSION['last_attempt'])) / 60);
+    $_SESSION['login_error'] = "Accesso limitato. Riprova tra {$waitTime} minuto" . ($waitTime > 1 ? 'i' : '') . ".";
     header('Location: ../public/login.php');
     exit;
 }
@@ -53,14 +55,15 @@ try {
         throw new Exception('Username contiene caratteri non validi');
     }
     
-    // Verifica CAPTCHA
+    // Verifica CAPTCHA (sempre richiesta)
     $challengeId = $_POST['challenge_id'] ?? '';
     $captchaSolved = $_POST['captcha_solved'] ?? '';
+    $captchaType = $_POST['captcha_type'] ?? 'required';
     
     if (!CaptchaManager::verifyCaptcha($challengeId, $captchaSolved)) {
         $_SESSION['login_attempts']++;
         $_SESSION['last_attempt'] = time();
-        throw new Exception('Verifica CAPTCHA fallita');
+        throw new Exception('Verifica anti-bot fallita');
     }
     
     // Credenziali con hash sicuri

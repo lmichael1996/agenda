@@ -17,13 +17,14 @@ try {
 $loginError = $_SESSION['login_error'] ?? '';
 unset($_SESSION['login_error']);
 
-// Conta tentativi falliti (stesso sistema di auth.php)
+// Sistema di sicurezza equilibrato
 $loginAttempts = $_SESSION['login_attempts'] ?? 0;
 $lastAttempt = $_SESSION['last_attempt'] ?? 0;
 
-// Calcola se è bloccato
-$isBlocked = $loginAttempts >= 5 && (time() - $lastAttempt) < 600;
-$remainingTime = $isBlocked ? ceil((600 - (time() - $lastAttempt)) / 60) : 0;
+// Blocco progressivo: 3 tentativi = 2 min, 5+ tentativi = 5 min
+$blockTime = $loginAttempts >= 5 ? 300 : ($loginAttempts >= 3 ? 120 : 0);
+$isBlocked = $loginAttempts >= 3 && (time() - $lastAttempt) < $blockTime;
+$remainingTime = $isBlocked ? ceil(($blockTime - (time() - $lastAttempt)) / 60) : 0;
 ?>
 
 <!DOCTYPE html>
@@ -46,15 +47,13 @@ $remainingTime = $isBlocked ? ceil((600 - (time() - $lastAttempt)) / 60) : 0;
         
         <?php if ($isBlocked): ?>
             <div class="attempts-warning">
-                🚫 Account bloccato per sicurezza<br>
-                Riprova tra <?= $remainingTime ?> minuti
+                � Accesso temporaneamente limitato<br>
+                Riprova tra <?= $remainingTime ?> minuto<?= $remainingTime > 1 ? 'i' : '' ?>
             </div>
         <?php elseif ($loginAttempts > 0): ?>
-            <div class="attempts-warning">
-                ⚠️ Tentativi falliti: <?= $loginAttempts ?>/5
-                <?php if ($loginAttempts >= 3): ?>
-                    <br>Sicurezza rafforzata attivata.
-                <?php endif; ?>
+            <div class="attempts-info">
+                ⚠️ Tentativi: <?= $loginAttempts ?>/5
+                <br><small>Sistema di sicurezza attivo</small>
             </div>
         <?php endif; ?>
         
@@ -64,7 +63,7 @@ $remainingTime = $isBlocked ? ceil((600 - (time() - $lastAttempt)) / 60) : 0;
             <input type="text" name="username" placeholder="Username" required autocomplete="username">
             <input type="password" name="password" placeholder="Password" required autocomplete="current-password">
             
-            <!-- CAPTCHA Essenziale -->
+            <!-- CAPTCHA Sempre Presente -->
             <div class="captcha-container">
                 <div class="captcha-header" id="captcha-header">
                     <div class="recaptcha-checkbox">
@@ -78,16 +77,17 @@ $remainingTime = $isBlocked ? ceil((600 - (time() - $lastAttempt)) / 60) : 0;
                 </div>
                 
                 <input type="hidden" name="captcha_solved" id="captcha-solved" value="">
-                <input type="hidden" name="captcha_type" value="checkbox">
+                <input type="hidden" name="captcha_type" value="required">
                 <input type="hidden" name="challenge_id" value="<?= $captcha['challenge_id'] ?? '' ?>">
             </div>
             
             <input type="submit" value="Accedi">
         </form>
         <?php else: ?>
-            <p style="text-align: center; color: #666; margin-top: 20px;">
-                Form di login temporaneamente disabilitato per sicurezza
-            </p>
+            <div class="temporary-block">
+                <p>🕐 Accesso temporaneamente limitato per sicurezza</p>
+                <small>I tentativi di accesso verranno riattivati automaticamente</small>
+            </div>
         <?php endif; ?>
     </div>
 
