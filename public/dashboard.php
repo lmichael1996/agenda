@@ -82,7 +82,7 @@ $currentDate = $today->format('Y-m-d');
         <a data-action="openPopup" data-popup-type="service" data-popup="services">Servizi</a>
         <a data-action="openPopup" data-popup-type="user" data-popup="users">Utenti</a>
         <a data-action="openPopup" data-popup-type="schedule" data-popup="schedule">Orario</a>
-        <a href="logout.php" style="color: #dc3545;" onclick="return confirm('Sei sicuro di voler uscire?')">Logout</a>
+        <a href="logout.php" class="logout" onclick="return confirm('Sei sicuro di voler uscire?')">Logout</a>
     </div>
 
     <!-- Top Menu Controls -->
