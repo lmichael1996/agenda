@@ -52,3 +52,12 @@
 .sidebar a:hover { 
     background: #e0e0e0; 
 }
+
+.sidebar a.logout {
+    color: #dc3545;
+}
+
+.sidebar a.logout:hover {
+    background: #f8d7da;
+    color: #721c24;
+}

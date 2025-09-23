@@ -36,18 +36,21 @@ function generateServiceRow(service) {
         id: service.id || 0,
         name: service.name || '',
         price: Number(service.price) || 0,
-        durationMinutes: Number(service.durationMinutes) || 15,
+        durationMinutes: Number(service.durationMinutes) || 30,
         description: service.description || '',
         status: service.status || 'attivo'
     };
     
+    // Formato prezzo con 2 decimali
+    const formattedPrice = safeService.price.toFixed(2);
+    
     return `
         <tr data-service-id="${safeService.id}">
             <td><input type="checkbox" class="row-select-service"></td>
-            <td><input type="text" value="${safeService.name}" class="cell-input"></td>
-            <td><input type="number" value="${safeService.price.toFixed(2)}" step="0.01" min="0" class="cell-input price-input"></td>
+            <td><input type="text" value="${safeService.name}" class="cell-input" placeholder="Nome del servizio"></td>
+            <td><input type="number" value="${formattedPrice}" step="0.50" min="0" class="cell-input price-input"></td>
             <td><input type="number" value="${safeService.durationMinutes}" step="15" min="15" max="480" class="cell-input duration-input"></td>
-            <td><input type="text" value="${safeService.description}" class="cell-input"></td>
+            <td><input type="text" value="${safeService.description}" class="cell-input" placeholder="Descrizione breve"></td>
             <td>
                 <select class="cell-select status-select">
                     <option value="attivo" ${safeService.status === 'attivo' ? 'selected' : ''}>Attivo</option>
@@ -99,12 +102,14 @@ function generateServicesRows() {
     return servicesList.map(service => generateServiceRow(service)).join('');
 }
 
-// Template HTML per il popup servizi
+// Template HTML per il popup servizi in stile moderno
 function getServicesPopupContent() {
+    const activeServices = servicesList.filter(s => s.status === 'attivo').length;
+    
     return `
         <div class="calendar-header">
             <h2>Gestione Servizi</h2>
-            <p>Aggiungi e modifica servizi disponibili</p>
+            <p>Aggiungi e modifica servizi del sistema</p>
         </div>
         
         <div class="calendar-body">
@@ -127,7 +132,7 @@ function getServicesPopupContent() {
                                 </th>
                                 <th class="service-name-col">Nome Servizio</th>
                                 <th class="price-col">Prezzo (€)</th>
-                                <th class="duration-col">Tempo (min)</th>
+                                <th class="duration-col">Durata (min)</th>
                                 <th class="description-col">Descrizione</th>
                                 <th class="status-col">Stato</th>
                                 <th class="actions-col">Azioni</th>
@@ -141,6 +146,7 @@ function getServicesPopupContent() {
 
                 <div class="services-stats">
                     <span class="stat-item">Totale servizi: <strong id="total-services">${servicesList.length}</strong></span>
+                    <span class="stat-item">Attivi: <strong id="active-services">${activeServices}</strong></span>
                     <span class="stat-item">Selezionati: <strong id="selected-services">0</strong></span>
                 </div>
             </div>
@@ -160,7 +166,7 @@ window.addNewService = function() {
         id: serviceIdCounter,
         name: "",
         price: 0.00,
-        durationMinutes: 15,
+        durationMinutes: 30,
         description: "",
         status: "attivo"
     };
@@ -177,10 +183,10 @@ window.addNewService = function() {
     newRow.setAttribute('data-service-id', serviceIdCounter);
     newRow.innerHTML = `
         <td><input type="checkbox" class="row-select-service"></td>
-        <td><input type="text" value="" placeholder="Nome servizio" class="cell-input new-service"></td>
-        <td><input type="number" value="10.00" step="1.00" min="0" class="cell-input price-input new-service"></td>
-        <td><input type="number" value="15" step="15" min="15" max="480" placeholder="30" class="cell-input duration-input new-service"></td>
-        <td><input type="text" value="" placeholder="Descrizione servizio" class="cell-input new-service"></td>
+        <td><input type="text" value="" placeholder="Nome del servizio" class="cell-input new-service"></td>
+        <td><input type="number" value="25.00" step="0.50" min="0" class="cell-input price-input new-service"></td>
+        <td><input type="number" value="30" step="15" min="15" max="480" class="cell-input duration-input new-service"></td>
+        <td><input type="text" value="" placeholder="Descrizione breve" class="cell-input new-service"></td>
         <td>
             <select class="cell-select status-select new-service">
                 <option value="attivo" selected>Attivo</option>
@@ -293,12 +299,15 @@ function syncServicesFromUI() {
 
 function updateServiceStats() {
     const totalServices = document.querySelectorAll('#services-list tr').length;
+    const activeServices = document.querySelectorAll('.status-select option[value="attivo"]:checked').length;
     const selectedServices = document.querySelectorAll('.row-select-service:checked').length;
     
     const totalEl = document.getElementById('total-services');
+    const activeEl = document.getElementById('active-services');
     const selectedEl = document.getElementById('selected-services');
     
     if (totalEl) totalEl.textContent = totalServices;
+    if (activeEl) activeEl.textContent = activeServices;
     if (selectedEl) selectedEl.textContent = selectedServices;
 }
 
@@ -338,9 +347,67 @@ function loadSavedServices() {
     }
 }
 
+// Funzione per bloccare input da tastiera sui campi durata ma mantenere freccette
+function blockKeyboardInputOnDuration() {
+    // Seleziona tutti i campi duration-input esistenti e futuri
+    document.addEventListener('keydown', function(e) {
+        // Controlla se l'elemento attivo è un campo duration-input
+        if (e.target && e.target.classList.contains('duration-input')) {
+            // Codici tasti permessi: Tab(9), Enter(13), Esc(27), Frecce(37-40), Backspace(8), Delete(46)
+            const allowedKeys = [9, 13, 27, 37, 38, 39, 40, 8, 46];
+            
+            // Blocca tutti i numeri (48-57 e 96-105) e lettere
+            if ((e.keyCode >= 48 && e.keyCode <= 57) || // numeri riga superiore
+                (e.keyCode >= 96 && e.keyCode <= 105) || // numpad numeri
+                (e.keyCode >= 65 && e.keyCode <= 90) || // lettere
+                (e.keyCode >= 186 && e.keyCode <= 222)) { // simboli
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+            
+            // Permetti solo i tasti nella lista allowedKeys
+            if (!allowedKeys.includes(e.keyCode)) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        }
+    });
+    
+    // Blocca anche paste, cut e copy sui campi duration
+    document.addEventListener('paste', function(e) {
+        if (e.target && e.target.classList.contains('duration-input')) {
+            e.preventDefault();
+        }
+    });
+    
+    document.addEventListener('cut', function(e) {
+        if (e.target && e.target.classList.contains('duration-input')) {
+            e.preventDefault();
+        }
+    });
+    
+    document.addEventListener('copy', function(e) {
+        if (e.target && e.target.classList.contains('duration-input')) {
+            e.preventDefault();
+        }
+    });
+    
+    // Blocca wheel per evitare cambi accidentali con rotellina mouse
+    document.addEventListener('wheel', function(e) {
+        if (e.target && e.target.classList.contains('duration-input') && e.target === document.activeElement) {
+            e.preventDefault();
+        }
+    });
+}
+
 // Inizializza quando il popup servizi viene aperto
 document.addEventListener('DOMContentLoaded', function() {
     // Auto-carica i servizi quando viene aperto il popup
+
+    blockKeyboardInputOnDuration();
+
     document.addEventListener('click', function(e) {
         if (e.target.getAttribute('data-action') === 'openPopup' && 
             e.target.getAttribute('data-popup-type') === 'service') {

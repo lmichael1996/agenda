@@ -102,3 +102,69 @@ body {
     border-right: 2px solid #222;
 }
 
+/* Stili per sistema unificato */
+.day:hover {
+    background-color: #e9ecef;
+    border-color: #000000;
+    cursor: pointer;
+}
+
+.day.selected {
+    background-color: #007bff;
+    border-color: #0056b3;
+    color: white;
+}
+
+.search-highlight {
+    animation: highlight-pulse 2s ease-in-out;
+    box-shadow: 0 0 10px #ffc107;
+}
+
+@keyframes highlight-pulse {
+    0%, 100% { background-color: transparent; }
+    50% { background-color: #fff3cd; }
+}
+
+.notes-panel {
+    position: fixed;
+    top: 60px;
+    right: -300px;
+    width: 280px;
+    height: calc(100vh - 60px);
+    background: #fff;
+    border-left: 1px solid #ddd;
+    transition: right 0.3s ease;
+    z-index: 1000;
+}
+
+.notes-panel.visible {
+    right: 0;
+}
+
+/* Layout responsive per sistema unificato */
+@media (max-width: 768px) {
+    .mobile-layout .dashboard-controls {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .mobile-layout .calendar-grid {
+        font-size: 0.8em;
+    }
+    
+    .mobile-layout .notes-panel {
+        width: 100%;
+        right: -100%;
+    }
+}
+
+@media (max-width: 1024px) {
+    .tablet-layout .dashboard-controls {
+        font-size: 0.9em;
+    }
+    
+    .tablet-layout .calendar-grid {
+        min-width: 800px;
+    }
+}
+

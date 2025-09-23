@@ -80,7 +80,7 @@ function getUsersPopupContent() {
                                     <input type="checkbox" id="select-all-users" data-action="toggleSelectAll">
                                 </th>
                                 <th class="username-col">Username</th>
-                                <th class="password-col">Password</th>
+                                <th class="password-col">Vecchia Password</th>
                                 <th class="confirm-password-col">Conferma Password</th>
                                 <th class="color-col">Colore</th>
                                 <th class="status-col">Stato</th>

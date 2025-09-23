@@ -65,4 +65,24 @@ input[type="submit"]:hover, input[type="submit"]:focus {
 
 .controls-right {
     justify-content: flex-end;
+    width: 300px;
+    overflow: hidden;
+    position: relative;
+}
+
+.motivational-text {
+    font-style: italic;
+    font-weight: bold;
+    animation: marquee-scroll 12s linear infinite;
+    white-space: nowrap;
+    display: inline-block;
+}
+
+@keyframes marquee-scroll {
+    0% {
+        transform: translateX(100%);
+    }
+    100% {
+        transform: translateX(-100%);
+    }
 }

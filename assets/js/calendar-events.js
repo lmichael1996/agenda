@@ -1,14 +1,6 @@
-// Inizializzazione del calendario
-import { Calendar } from './classes/calendar.js';
+import { WorkspaceController } from './classes/workspace-controller.js';
 
-window.addEventListener('DOMContentLoaded', function() {
-    console.log('Inizializzazione calendario...');
-    
-    // Crea una nuova istanza del calendario
-    const calendar = new Calendar('.calendar-grid .day');
-
-    // Rendi l'istanza accessibile globalmente solo per debug (opzionale)
-    window.calendar = calendar;
-
-    console.log('Calendario inizializzato con successo!');
+// Inizializzazione automatica quando il DOM è pronto
+document.addEventListener('DOMContentLoaded', () => {
+    window.workspaceController = new WorkspaceController();
 });

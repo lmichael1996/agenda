@@ -1,565 +1,488 @@
-/**
- * Gestione popup configurazione orari
- * @author Michael Leanza
- */
+// ========== GESTIONE ORARI ==========
+let scheduleIdCounter = 3;
 
-// Import moduli
-import { dbManager } from '../api/database-manager.js';
-import { apiClient, ApiUtils } from '../api/api-client.js';
-
-// Configurazioni
-const DAY_NAMES = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'];
-const DAY_MAP = {
-    'Lunedì': 'monday', 'Martedì': 'tuesday', 'Mercoledì': 'wednesday',
-    'Giovedì': 'thursday', 'Venerdì': 'friday', 'Sabato': 'saturday', 'Domenica': 'sunday'
-};
-
-const TIMEZONES = [
-    { value: "Europe/London", label: "Londra (UTC+0)" },
-    { value: "Europe/Rome", label: "Roma (UTC+1)" },
-    { value: "Europe/Paris", label: "Parigi (UTC+1)" },
-    { value: "Europe/Berlin", label: "Berlino (UTC+1)" },
-    { value: "Europe/Madrid", label: "Madrid (UTC+1)" },
-    { value: "Europe/Athens", label: "Atene (UTC+2)" },
-    { value: "Europe/Moscow", label: "Mosca (UTC+3)" },
-    { value: "America/New_York", label: "New York (UTC-5)" },
-    { value: "America/Chicago", label: "Chicago (UTC-6)" },
-    { value: "America/Los_Angeles", label: "Los Angeles (UTC-8)" },
-    { value: "America/Sao_Paulo", label: "San Paolo (UTC-3)" },
-    { value: "Asia/Dubai", label: "Dubai (UTC+4)" },
-    { value: "Asia/Mumbai", label: "Mumbai (UTC+5:30)" },
-    { value: "Asia/Shanghai", label: "Shanghai (UTC+8)" },
-    { value: "Asia/Tokyo", label: "Tokyo (UTC+9)" },
-    { value: "Australia/Sydney", label: "Sydney (UTC+10)" },
-    { value: "UTC", label: "UTC (Universal)" }
+// Lista orari semplificata
+let schedulesList = [
+    {
+        id: 1,
+        name: "Orario Bloccato",
+        startDate: "",
+        endDate: "",
+        startTime: "09:00",
+        endTime: "18:00",
+        closureDays: ['sabato', 'domenica']
+    },
+    {
+        id: 2,
+        name: "Orario Estivo",
+        startDate: "2025-06-01",
+        endDate: "2025-08-31",
+        startTime: "08:00",
+        endTime: "17:00",
+        closureDays: ['sabato', 'domenica']
+    }
 ];
 
-// Configurazione default
-let scheduleConfig = {
-    working_days: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
-    start_time: '09:00',
-    end_time: '18:00',
-    lunch_break_start: '12:30',
-    lunch_break_end: '13:30'
+// ========== FUNZIONI PRINCIPALI ==========
+
+// Inizializzazione popup orari
+window.initSchedulePopup = function() {
+    if (typeof PopupManager !== 'undefined' && PopupManager.currentPopup) {
+        // Carica i dati salvati se esistono
+        loadSchedulesFromStorage();
+        
+        // Mostra il popup
+        PopupManager.currentPopup.innerHTML = getSchedulePopupContent();
+        PopupManager.currentPopup.style.display = 'block';
+        
+        // Inizializza i listener degli eventi
+        initializeScheduleEventListeners();
+        
+        // Aggiorna le statistiche
+        updateScheduleStats();
+    }
 };
 
-// Funzioni API database
-async function getScheduleConfig() {
-    try {
-        const result = await dbManager.getScheduleConfiguration();
-        return { success: true, data: result };
-    } catch (error) {
-        console.error('Database Error:', error);
-        // Fallback configurazione default
-        const defaultConfig = {
-            working_days: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
-            start_time: '09:00', end_time: '18:00',
-            lunch_break_start: '12:30', lunch_break_end: '13:30',
-            timezone: 'Europe/Rome'
-        };
-        return { success: true, data: defaultConfig };
-    }
-}
-
-async function updateScheduleConfig(configData) {
-    try {
-        const result = await dbManager.updateScheduleConfiguration(configData);
-        return { success: true, data: result };
-    } catch (error) {
-        console.error('Database Error:', error);
-        // Fallback localStorage
+// Carica orari dal localStorage
+function loadSchedulesFromStorage() {
+    const saved = localStorage.getItem('calendar_schedules');
+    if (saved) {
         try {
-            const legacyConfig = {
-                giorniLavorativi: convertWorkingDaysToLegacy(
-                    typeof configData.working_days === 'string' ? 
-                    JSON.parse(configData.working_days) : configData.working_days
-                ),
-                apertura: configData.start_time, chiusura: configData.end_time,
-                pausaInizio: configData.lunch_break_start, pausaFine: configData.lunch_break_end,
-                fusoOrario: configData.timezone
-            };
-            localStorage.setItem('orarioConfig', JSON.stringify(legacyConfig));
-            return { success: true, data: configData };
+            const data = JSON.parse(saved);
+            schedulesList = data.schedules || schedulesList;
+            scheduleIdCounter = data.counter || scheduleIdCounter;
         } catch (e) {
-            throw new Error('Impossibile salvare la configurazione');
+            console.error('Errore nel caricamento orari:', e);
         }
     }
 }
 
-async function resetScheduleConfig() {
+// Salva orari nel localStorage
+function saveSchedulesToStorage() {
     try {
-        console.log('🔄 Resetting schedule configuration to defaults...');
-        const result = await dbManager.resetScheduleConfiguration();
-        return { success: true, data: result };
-    } catch (error) {
-        console.error('❌ Database Error:', error);
-        
-        // Fallback: reset ai valori di default hardcoded
-        console.log('⚠️ Fallback to hardcoded defaults');
-        const defaultConfig = {
-            working_days: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
-            start_time: '09:00',
-            end_time: '18:00',
-            lunch_break_start: '12:30',
-            lunch_break_end: '13:30',
-            timezone: 'Europe/Rome'
-        };
-        
-        // Rimuovi la configurazione da localStorage
-        localStorage.removeItem('orarioConfig');
-        
-        return { success: true, data: defaultConfig };
+        localStorage.setItem('calendar_schedules', JSON.stringify({
+            schedules: schedulesList,
+            counter: scheduleIdCounter
+        }));
+        console.log('Orari salvati correttamente');
+    } catch (e) {
+        console.error('Errore nel salvataggio orari:', e);
     }
 }
 
-// Load schedule configuration from database
-async function loadScheduleConfig() {
-    try {
-        const response = await getScheduleConfig();
-        
-        if (response.success && response.data) {
-            // Se riceviamo un array, prendi il primo elemento
-            const config = Array.isArray(response.data) ? response.data[0] : response.data;
-            
-            if (config) {
-                // Converti i working_days da stringa a array se necessario
-                if (typeof config.working_days === 'string') {
-                    try {
-                        config.working_days = JSON.parse(config.working_days);
-                    } catch (e) {
-                        // Se il parsing fallisce, prova a splittare per virgola
-                        config.working_days = config.working_days.split(',').map(day => day.trim());
-                    }
-                }
-                
-                scheduleConfig = {
-                    working_days: config.working_days || ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
-                    start_time: config.start_time || '09:00',
-                    end_time: config.end_time || '18:00',
-                    lunch_break_start: config.lunch_break_start || null,
-                    lunch_break_end: config.lunch_break_end || null,
-                    timezone: config.timezone || 'Europe/Rome'
-                };
-                
-                console.log('✅ Schedule config loaded from database:', scheduleConfig);
-                return;
-            }
-        }
-        
-        console.log('⚠️ No schedule config found in database, using defaults');
-        
-    } catch (error) {
-        console.error('❌ Failed to load schedule config from database:', error);
-        
-        // Fallback to localStorage if database fails
-        const savedConfig = localStorage.getItem('orarioConfig');
-        if (savedConfig) {
-            try {
-                const config = JSON.parse(savedConfig);
-                // Convert old format to new format
-                scheduleConfig = convertOldConfig(config);
-                console.log('✅ Fallback: loaded from localStorage:', scheduleConfig);
-                return;
-            } catch (e) {
-                console.error('❌ Failed to parse localStorage config:', e);
-            }
-        }
-        
-        console.log('⚠️ Using default schedule configuration');
-    }
-}
+// ========== TEMPLATE HTML ==========
 
-// Convert old localStorage format to new API format
-function convertOldConfig(oldConfig) {
-    const workingDaysList = [];
-    const dayNames = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-    
-    if (oldConfig.giorniLavorativi && Array.isArray(oldConfig.giorniLavorativi)) {
-        oldConfig.giorniLavorativi.forEach((isWorking, index) => {
-            if (isWorking && dayNames[index]) {
-                workingDaysList.push(dayNames[index]);
-            }
-        });
-    }
-    
-    return {
-        working_days: workingDaysList.length > 0 ? workingDaysList : ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
-        start_time: oldConfig.apertura || '09:00',
-        end_time: oldConfig.chiusura || '18:00',
-        lunch_break_start: oldConfig.pausaInizio || '12:30',
-        lunch_break_end: oldConfig.pausaFine || '13:30'
-    };
-}
-
-// Save schedule configuration to database
-async function saveScheduleConfig(config) {
-    try {
-        // Assicurati che working_days sia un array serializzato correttamente
-        const configToSave = {
-            ...config,
-            working_days: Array.isArray(config.working_days) ? 
-                JSON.stringify(config.working_days) : config.working_days
-        };
-        
-        const response = await updateScheduleConfig(configToSave);
-        
-        if (response.success) {
-            console.log('✅ Schedule config saved to database successfully:', response);
-            scheduleConfig = config; // Aggiorna la configurazione locale
-            return true;
-        }
-        
-        throw new Error(response.message || 'Failed to save configuration');
-        
-    } catch (error) {
-        console.error('❌ Failed to save schedule config to database:', error);
-        
-        // Fallback to localStorage
-        try {
-            // Converti il formato per localStorage (compatibilità)
-            const legacyConfig = {
-                giorniLavorativi: convertWorkingDaysToLegacy(config.working_days),
-                apertura: config.start_time,
-                chiusura: config.end_time,
-                pausaInizio: config.lunch_break_start,
-                pausaFine: config.lunch_break_end,
-                fusoOrario: config.timezone
-            };
-            
-            localStorage.setItem('orarioConfig', JSON.stringify(legacyConfig));
-            console.log('✅ Saved to localStorage as fallback');
-            scheduleConfig = config; // Aggiorna la configurazione locale
-            return true;
-        } catch (e) {
-            console.error('❌ Failed to save to localStorage:', e);
-            return false;
-        }
-    }
-}
-
-// Converti working_days per compatibilità con il formato legacy
-function convertWorkingDaysToLegacy(workingDays) {
-    const dayNames = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-    return dayNames.map(day => workingDays.includes(day));
-}
-
-// Generate working days HTML
-function generateWorkingDays() {
-    return DAY_NAMES.map((day, index) => {
-        const dayKey = DAY_MAP[day];
-        const isChecked = scheduleConfig.working_days.includes(dayKey);
-        return `<label><input type="checkbox" data-day="${dayKey}" ${isChecked ? 'checked' : ''}> ${day}</label>`;
-    }).join('');
-}
-
-// Generate timezone select HTML
-function generateTimezoneSelect() {
-    const currentTimezone = scheduleConfig.timezone || 'Europe/Rome';
-    return TIMEZONES.map(tz => 
-        `<option value="${tz.value}" ${currentTimezone === tz.value ? 'selected' : ''}>${tz.label}</option>`
-    ).join('');
-}
-
-// Template HTML for schedule popup
+// Template HTML per il popup orari
 function getSchedulePopupContent() {
-    const lunchBreakEnabled = scheduleConfig.lunch_break_start && scheduleConfig.lunch_break_end;
-    
     return `
         <div class="calendar-header">
-            <h2>Configurazione Orari</h2>
-            <p>Imposta i tuoi orari di lavoro</p>
+            <h2>Gestione Orari</h2>
+            <p>Aggiungi e modifica orari del sistema</p>
         </div>
         
         <div class="calendar-body">
-            <div class="time-section">
-                <h3>Orari di Lavoro</h3>
-                <div class="time-row">
-                    <div class="time-field">
-                        <label>Apertura</label>
-                        <input type="time" id="opening-time" value="${scheduleConfig.start_time}">
-                    </div>
-                    <div class="time-field">
-                        <label>Chiusura</label>
-                        <input type="time" id="closing-time" value="${scheduleConfig.end_time}">
-                    </div>
+            <div class="schedules-section">
+                <div class="schedules-toolbar">
+                    <button data-action="addNewSchedule" class="toolbar-btn btn-add">
+                        <span>➕</span> Nuovo Orario
+                    </button>
+                    <button data-action="deleteSelectedSchedules" class="toolbar-btn btn-delete">
+                        <span>🗑️</span> Elimina Selezionati
+                    </button>
                 </div>
-            </div>
 
-            <div class="break-section">
-                <h3>Pausa Pranzo</h3>
-                <div class="break-toggle">
-                    <label>
-                        <input type="checkbox" id="lunch-break" ${lunchBreakEnabled ? 'checked' : ''}>
-                        <span>Abilita pausa pranzo</span>
-                    </label>
+                <div class="schedules-table-container">
+                    <table class="excel-table" id="schedules-table">
+                        <thead>
+                            <tr>
+                                <th class="select-col">
+                                    <input type="checkbox" id="select-all-schedules" data-action="toggleSelectAll">
+                                </th>
+                                <th class="name-col">Nome Orario</th>
+                                <th class="start-date-col">Data Inizio</th>
+                                <th class="end-date-col">Data Fine</th>
+                                <th class="start-time-col">Ora Inizio</th>
+                                <th class="end-time-col">Ora Fine</th>
+                                <th class="closure-days-col">Giorni Chiusura</th>
+                                <th class="actions-col">Azioni</th>
+                            </tr>
+                        </thead>
+                        <tbody id="schedules-list">
+                            ${generateSchedulesRows()}
+                        </tbody>
+                    </table>
                 </div>
-                <div id="break-config" class="time-row">
-                    <div class="time-field">
-                        <label>Dalle</label>
-                        <input type="time" id="break-start" value="${scheduleConfig.lunch_break_start}">
-                    </div>
-                    <div class="time-field">
-                        <label>Alle</label>
-                        <input type="time" id="break-end" value="${scheduleConfig.lunch_break_end}">
-                    </div>
-                </div>
-            </div>
 
-            <div class="days-section">
-                <h3>Giorni Lavorativi</h3>
-                <div class="working-days">
-                    ${generateWorkingDays()}
+                <div class="schedules-stats">
+                    <span class="stat-item">Totale orari: <strong id="total-schedules">${schedulesList.length}</strong></span>
+                    <span class="stat-item">Selezionati: <strong id="selected-schedules">0</strong></span>
                 </div>
-            </div>
-
-            <div class="timezone-section">
-                <h3>Fuso Orario</h3>
-                <select id="fuso-orario">
-                    ${generateTimezoneSelect()}
-                </select>
             </div>
         </div>
         
         <div class="calendar-footer">
-            <button data-action="saveOrarioConfig" class="save-btn">
-                Salva Configurazione
-            </button>
-            <button data-action="resetOrarioConfig" class="reset-btn" style="margin-left: 10px; background-color: #f44336;">
-                Reset Default
+            <button data-action="saveAllSchedules" class="save-btn">
+                Salva Tutti gli Orari
             </button>
         </div>
     `;
 }
 
-// Gestione configurazione orari
-window.saveOrarioConfig = async function() {
-    try {
-        // Raccogli i valori dal form
-        const workingDays = [];
-        document.querySelectorAll('.working-days input[type="checkbox"]:checked').forEach(checkbox => {
-            workingDays.push(checkbox.getAttribute('data-day'));
-        });
-        
-        const config = {
-            working_days: workingDays,
-            start_time: document.getElementById('opening-time')?.value || '09:00',
-            end_time: document.getElementById('closing-time')?.value || '18:00',
-            lunch_break_start: document.getElementById('lunch-break')?.checked ? 
-                (document.getElementById('break-start')?.value || '12:30') : null,
-            lunch_break_end: document.getElementById('lunch-break')?.checked ? 
-                (document.getElementById('break-end')?.value || '13:30') : null,
-            timezone: document.getElementById('fuso-orario')?.value || 'Europe/Rome'
-        };
-        
-        // Validazione
-        if (!validateScheduleConfig(config)) {
-            return;
-        }
-        
-        // Salva via API
-        const success = await saveScheduleConfig(config);
-        
-        if (success) {
-            scheduleConfig = config;
-            ApiUtils.showSuccess('Configurazione salvata con successo!');
-            closePopup('popup-schedule');
-        } else {
-            ApiUtils.showError('Errore nel salvataggio della configurazione');
-        }
-        
-    } catch (error) {
-        console.error('Error saving schedule config:', error);
-        ApiUtils.showError('Errore nel salvataggio: ' + ApiUtils.handleError(error));
+// Genera le righe degli orari
+function generateSchedulesRows() {
+    if (!schedulesList.length) {
+        return '<tr><td colspan="8" class="no-data">Nessun orario configurato</td></tr>';
     }
-};
-
-// Reset configurazione ai valori di default
-window.resetOrarioConfig = async function() {
-    if (confirm('Sei sicuro di voler ripristinare la configurazione di default?')) {
-        try {
-            const response = await resetScheduleConfig();
-            
-            if (response.success && response.data) {
-                // Se riceviamo un array, prendi il primo elemento
-                const config = Array.isArray(response.data) ? response.data[0] : response.data;
-                
-                if (config) {
-                    // Converti i working_days da stringa a array se necessario
-                    if (typeof config.working_days === 'string') {
-                        try {
-                            config.working_days = JSON.parse(config.working_days);
-                        } catch (e) {
-                            config.working_days = config.working_days.split(',').map(day => day.trim());
-                        }
-                    }
-                    
-                    scheduleConfig = {
-                        working_days: config.working_days || ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
-                        start_time: config.start_time || '09:00',
-                        end_time: config.end_time || '18:00',
-                        lunch_break_start: config.lunch_break_start || null,
-                        lunch_break_end: config.lunch_break_end || null,
-                        timezone: config.timezone || 'Europe/Rome'
-                    };
-                    
-                    console.log('✅ Configuration reset successfully:', scheduleConfig);
-                    alert('✅ Configurazione ripristinata ai valori di default!');
-                    
-                    // Ricarica il popup con i nuovi valori
-                    const popup = document.getElementById('popup-schedule');
-                    if (popup) {
-                        popup.innerHTML = getSchedulePopupContent();
-                        setupLunchBreakToggle();
-                    }
-                } else {
-                    throw new Error('No data received from reset database call');
-                }
-            } else {
-                throw new Error('Reset database call failed');
-            }
-        } catch (error) {
-            console.error('❌ Error resetting schedule config:', error);
-            
-            // Fallback: reset to hardcoded defaults
-            scheduleConfig = {
-                working_days: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
-                start_time: '09:00',
-                end_time: '18:00',
-                lunch_break_start: '12:30',
-                lunch_break_end: '13:30',
-                timezone: 'Europe/Rome'
-            };
-            
-            alert('⚠️ Ripristino ai valori di default locali (errore database: ' + error.message + ')');
-            
-            // Ricarica il popup con i nuovi valori
-            const popup = document.getElementById('popup-schedule');
-            if (popup) {
-                popup.innerHTML = getSchedulePopupContent();
-                setupLunchBreakToggle();
-            }
-        }
-    }
-};
-
-// Gestione pausa pranzo
-function setupLunchBreakToggle() {
-    const lunchBreakCheckbox = document.getElementById('lunch-break');
-    const breakConfig = document.getElementById('break-config');
     
-    if (lunchBreakCheckbox && breakConfig) {
-        lunchBreakCheckbox.addEventListener('change', function() {
-            breakConfig.style.display = this.checked ? 'flex' : 'none';
-        });
-        
-        // Imposta lo stato iniziale
-        breakConfig.style.display = lunchBreakCheckbox.checked ? 'flex' : 'none';
-    }
+    return schedulesList.map(schedule => generateScheduleRow(schedule)).join('');
 }
 
-// Carica configurazione salvata
-async function loadSavedScheduleConfig() {
-    await loadScheduleConfig();
-    
-    try {
-        // Carica orari di lavoro
-        const openingTime = document.getElementById('opening-time');
-        const closingTime = document.getElementById('closing-time');
-        if (openingTime) openingTime.value = scheduleConfig.start_time || '09:00';
-        if (closingTime) closingTime.value = scheduleConfig.end_time || '18:00';
-        
-        // Carica configurazione pausa pranzo
-        const lunchBreak = document.getElementById('lunch-break');
-        const breakStart = document.getElementById('break-start');
-        const breakEnd = document.getElementById('break-end');
-        const hasLunchBreak = scheduleConfig.lunch_break_start && scheduleConfig.lunch_break_end;
-        
-        if (lunchBreak) lunchBreak.checked = hasLunchBreak;
-        if (breakStart) breakStart.value = scheduleConfig.lunch_break_start || '12:30';
-        if (breakEnd) breakEnd.value = scheduleConfig.lunch_break_end || '13:30';
-        
-        // Carica fuso orario
-        const timezone = document.getElementById('fuso-orario');
-        if (timezone) timezone.value = scheduleConfig.timezone || 'Europe/Rome';
-        
-        // Carica giorni lavorativi
-        const dayCheckboxes = document.querySelectorAll('.working-days input[type="checkbox"]');
-        dayCheckboxes.forEach(checkbox => {
-            const dayKey = checkbox.getAttribute('data-day');
-            checkbox.checked = scheduleConfig.working_days.includes(dayKey);
-        });
-        
-        // Applica la logica della pausa pranzo
-        setupLunchBreakToggle();
-        
-        console.log('Configurazione orari caricata:', scheduleConfig);
-    } catch (error) {
-        console.error('Errore nel caricamento della configurazione orari:', error);
-    }
-}
+// ========== FUNZIONI DI SUPPORTO ==========
 
-// Validazione orari
-function validateScheduleConfig(config = null) {
-    const configToValidate = config || {
-        start_time: document.getElementById('opening-time')?.value,
-        end_time: document.getElementById('closing-time')?.value,
-        lunch_break_start: document.getElementById('break-start')?.value,
-        lunch_break_end: document.getElementById('break-end')?.value,
-        working_days: Array.from(document.querySelectorAll('.working-days input[type="checkbox"]:checked'))
-            .map(cb => cb.getAttribute('data-day'))
+// Aggiunge un nuovo orario
+window.addNewSchedule = function() {
+    const newSchedule = {
+        id: scheduleIdCounter,
+        name: "",
+        startDate: new Date().toISOString().split('T')[0],
+        endDate: new Date(Date.now() + 30*24*60*60*1000).toISOString().split('T')[0], // +30 giorni
+        startTime: "09:00",
+        endTime: "18:00",
+        closureDays: []
     };
     
-    // Verifica che l'orario di chiusura sia dopo quello di apertura
-    if (configToValidate.start_time && configToValidate.end_time && 
-        configToValidate.start_time >= configToValidate.end_time) {
-        alert('⚠️ L\'orario di chiusura deve essere successivo a quello di apertura!');
-        return false;
+    schedulesList.push(newSchedule);
+    
+    const tbody = document.getElementById('schedules-list');
+    if (!tbody) {
+        console.error('Elemento schedules-list non trovato');
+        return;
     }
     
-    // Verifica gli orari della pausa pranzo se abilitata
-    const lunchBreakEnabled = document.getElementById('lunch-break')?.checked;
-    if (lunchBreakEnabled && configToValidate.lunch_break_start && configToValidate.lunch_break_end) {
-        if (configToValidate.lunch_break_start >= configToValidate.lunch_break_end) {
-            alert('⚠️ L\'orario di fine pausa deve essere successivo a quello di inizio!');
-            return false;
-        }
-        
-        if (configToValidate.start_time && configToValidate.lunch_break_start < configToValidate.start_time) {
-            alert('⚠️ La pausa pranzo non può iniziare prima dell\'apertura!');
-            return false;
-        }
-        
-        if (configToValidate.end_time && configToValidate.lunch_break_end > configToValidate.end_time) {
-            alert('⚠️ La pausa pranzo non può finire dopo la chiusura!');
-            return false;
-        }
+    const newRow = document.createElement('tr');
+    newRow.setAttribute('data-schedule-id', scheduleIdCounter);
+    newRow.innerHTML = `
+        <td><input type="checkbox" class="row-select"></td>
+        <td><input type="text" value="" placeholder="Nome orario..." class="cell-input new-schedule"></td>
+        <td><input type="date" value="${newSchedule.startDate}" class="cell-input new-schedule"></td>
+        <td><input type="date" value="${newSchedule.endDate}" class="cell-input new-schedule"></td>
+        <td><input type="time" value="09:00" class="cell-input new-schedule"></td>
+        <td><input type="time" value="18:00" class="cell-input new-schedule"></td>
+        <td>
+            <select multiple class="cell-select closure-days-select new-schedule">
+                <option value="lunedi">Lunedì</option>
+                <option value="martedi">Martedì</option>
+                <option value="mercoledi">Mercoledì</option>
+                <option value="giovedi">Giovedì</option>
+                <option value="venerdi">Venerdì</option>
+                <option value="sabato" selected>Sabato</option>
+                <option value="domenica" selected>Domenica</option>
+            </select>
+        </td>
+        <td class="actions-cell">
+            <button data-action="deleteSchedule" data-schedule-id="${scheduleIdCounter}" class="action-btn btn-delete-single" title="Elimina">🗑️</button>
+        </td>
+    `;
+    
+    // Se c'è la riga "nessun dato", la rimuoviamo
+    const noDataRow = tbody.querySelector('.no-data');
+    if (noDataRow) {
+        noDataRow.parentElement.remove();
     }
     
-    // Verifica che almeno un giorno sia selezionato
-    if (!configToValidate.working_days || configToValidate.working_days.length === 0) {
-        alert('⚠️ Seleziona almeno un giorno lavorativo!');
-        return false;
-    }
+    tbody.appendChild(newRow);
     
-    return true;
+    scheduleIdCounter++;
+    updateScheduleStats();
+    
+    // Focus sul nome del nuovo orario
+    const nameInput = newRow.querySelector('input[type="text"]');
+    if (nameInput) {
+        nameInput.focus();
+        nameInput.select();
+    }
+};
+
+// Genera una singola riga di orario
+function generateScheduleRow(schedule) {
+    // Verifica se è la prima riga e se ha date vuote (per bloccare i valori)
+    const isFirstRowWithEmptyDates = schedule.id === 1 && (!schedule.startDate || !schedule.endDate);
+    const disabledAttr = isFirstRowWithEmptyDates ? 'disabled' : '';
+    const blockedClass = isFirstRowWithEmptyDates ? 'blocked-row' : '';
+    
+    // Se è bloccata, mostra celle vuote per le date
+    const startDateValue = isFirstRowWithEmptyDates ? '' : schedule.startDate;
+    const endDateValue = isFirstRowWithEmptyDates ? '' : schedule.endDate;
+    
+    return `
+        <tr data-schedule-id="${schedule.id}" class="${blockedClass}">
+            <td><input type="checkbox" class="row-select"></td>
+            <td><input type="text" value="${schedule.name}" placeholder="Nome orario..." class="cell-input" ${disabledAttr}></td>
+            <td>${isFirstRowWithEmptyDates ? '<span class="empty-cell">-</span>' : `<input type="date" value="${startDateValue}" class="cell-input">`}</td>
+            <td>${isFirstRowWithEmptyDates ? '<span class="empty-cell">-</span>' : `<input type="date" value="${endDateValue}" class="cell-input">`}</td>
+            <td><input type="time" value="${schedule.startTime}" class="cell-input"></td>
+            <td><input type="time" value="${schedule.endTime}" class="cell-input"></td>
+            <td>
+                <select multiple class="cell-select closure-days-select">
+                    <option value="lunedi" ${schedule.closureDays.includes('lunedi') ? 'selected' : ''}>Lunedì</option>
+                    <option value="martedi" ${schedule.closureDays.includes('martedi') ? 'selected' : ''}>Martedì</option>
+                    <option value="mercoledi" ${schedule.closureDays.includes('mercoledi') ? 'selected' : ''}>Mercoledì</option>
+                    <option value="giovedi" ${schedule.closureDays.includes('giovedi') ? 'selected' : ''}>Giovedì</option>
+                    <option value="venerdi" ${schedule.closureDays.includes('venerdi') ? 'selected' : ''}>Venerdì</option>
+                    <option value="sabato" ${schedule.closureDays.includes('sabato') ? 'selected' : ''}>Sabato</option>
+                    <option value="domenica" ${schedule.closureDays.includes('domenica') ? 'selected' : ''}>Domenica</option>
+                </select>
+            </td>
+            <td class="actions-cell">
+                ${isFirstRowWithEmptyDates ? '' : `<button data-action="deleteSchedule" data-schedule-id="${schedule.id}" class="action-btn btn-delete-single" title="Elimina">🗑️</button>`}
+            </td>
+        </tr>
+    `;
 }
 
-// Inizializza quando il popup orari viene aperto
-document.addEventListener('DOMContentLoaded', function() {
-    // Auto-carica la configurazione quando viene aperto il popup
-    document.addEventListener('click', function(e) {
-        if (e.target.getAttribute('data-action') === 'openPopup' && 
-            e.target.getAttribute('data-popup-type') === 'schedule') {
-            setTimeout(async () => {
-                await loadSavedScheduleConfig();
-                setupLunchBreakToggle();
-            }, 100);
+// Aggiorna stato del seleziona tutto
+function updateSelectAllState() {
+    const selectAllCheckbox = document.getElementById('select-all-schedules');
+    if (!selectAllCheckbox) return;
+    
+    const checkboxes = document.querySelectorAll('.row-select');
+    const checkedCount = document.querySelectorAll('.row-select:checked').length;
+    
+    selectAllCheckbox.checked = checkedCount === checkboxes.length && checkboxes.length > 0;
+    updateScheduleStats();
+}
+
+// Toggle seleziona tutto
+window.toggleSelectAll = function() {
+    const selectAll = document.getElementById('select-all-schedules');
+    const checkboxes = document.querySelectorAll('.row-select');
+    
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = selectAll.checked;
+    });
+    
+    updateScheduleStats();
+}
+
+// Elimina orario singolo
+window.deleteSchedule = function(scheduleId) {
+    // Blocca eliminazione della prima riga se ha date vuote
+    if (scheduleId === 1) {
+        const firstSchedule = schedulesList.find(s => s.id === 1);
+        if (firstSchedule && (!firstSchedule.startDate || !firstSchedule.endDate)) {
+            alert('Non è possibile eliminare l\'orario bloccato con date vuote');
+            return;
+        }
+    }
+    
+    if (confirm('Sei sicuro di voler eliminare questo orario?')) {
+        const index = schedulesList.findIndex(s => s.id === parseInt(scheduleId));
+        if (index > -1) {
+            schedulesList.splice(index, 1);
+            
+            const row = document.querySelector(`tr[data-schedule-id="${scheduleId}"]`);
+            if (row) {
+                row.remove();
+            }
+            
+            // Se non ci sono più orari, mostra messaggio
+            const tbody = document.getElementById('schedules-list');
+            if (tbody && tbody.children.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="no-data">Nessun orario configurato</td></tr>';
+            }
+            
+            updateScheduleStats();
+        }
+    }
+};
+
+// Elimina orari selezionati
+window.deleteSelectedSchedules = function() {
+    const selectedCheckboxes = document.querySelectorAll('.row-select:checked');
+    
+    if (selectedCheckboxes.length === 0) {
+        alert('Seleziona almeno un orario da eliminare');
+        return;
+    }
+    
+    // Controlla se tra gli selezionati c'è la prima riga bloccata
+    const idsToDelete = Array.from(selectedCheckboxes).map(cb => {
+        const row = cb.closest('tr');
+        return parseInt(row.getAttribute('data-schedule-id'));
+    });
+    
+    // Verifica se c'è l'orario bloccato tra quelli selezionati
+    const hasBlockedSchedule = idsToDelete.includes(1);
+    if (hasBlockedSchedule) {
+        const firstSchedule = schedulesList.find(s => s.id === 1);
+        if (firstSchedule && (!firstSchedule.startDate || !firstSchedule.endDate)) {
+            alert('Non è possibile eliminare l\'orario bloccato con date vuote dalla selezione');
+            return;
+        }
+    }
+    
+    if (confirm(`Sei sicuro di voler eliminare ${selectedCheckboxes.length} orari selezionati?`)) {
+        // Rimuovi dalla lista
+        schedulesList = schedulesList.filter(s => !idsToDelete.includes(s.id));
+        
+        // Rimuovi dal DOM
+        idsToDelete.forEach(id => {
+            const row = document.querySelector(`tr[data-schedule-id="${id}"]`);
+            if (row) row.remove();
+        });
+        
+        // Se non ci sono più orari, mostra messaggio
+        const tbody = document.getElementById('schedules-list');
+        if (tbody && tbody.children.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" class="no-data">Nessun orario configurato</td></tr>';
+        }
+        
+        updateScheduleStats();
+        
+        // Resetta seleziona tutto
+        const selectAll = document.getElementById('select-all-schedules');
+        if (selectAll) selectAll.checked = false;
+    }
+};
+
+// Aggiorna statistiche
+function updateScheduleStats() {
+    const totalSchedules = document.querySelectorAll('#schedules-list tr').length;
+    const selectedSchedules = document.querySelectorAll('.row-select:checked').length;
+    
+    const totalElement = document.getElementById('total-schedules');
+    const selectedElement = document.getElementById('selected-schedules');
+    
+    if (totalElement) {
+        // Se c'è la riga "nessun dato", il totale è 0
+        const noDataRow = document.querySelector('#schedules-list .no-data');
+        totalElement.textContent = noDataRow ? '0' : schedulesList.length;
+    }
+    
+    if (selectedElement) {
+        selectedElement.textContent = selectedSchedules;
+    }
+}
+
+// Sincronizza tutti gli orari dal DOM
+function syncSchedulesFromUI() {
+    const rows = document.querySelectorAll('#schedules-list tr[data-schedule-id]');
+    
+    rows.forEach(row => {
+        const scheduleId = parseInt(row.getAttribute('data-schedule-id'));
+        
+        // Skip sincronizzazione per la prima riga se è bloccata
+        if (scheduleId === 1) {
+            const firstSchedule = schedulesList.find(s => s.id === 1);
+            if (firstSchedule && (!firstSchedule.startDate || !firstSchedule.endDate)) {
+                console.log('Saltata sincronizzazione riga bloccata ID:', scheduleId);
+                return; // Skip sincronizzazione per riga bloccata
+            }
+        }
+        
+        const inputs = row.querySelectorAll('.cell-input, .cell-select');
+        
+        const scheduleData = {
+            id: scheduleId,
+            name: inputs[0]?.value?.trim() || '',
+            startDate: inputs[1]?.value || new Date().toISOString().split('T')[0],
+            endDate: inputs[2]?.value || new Date(Date.now() + 30*24*60*60*1000).toISOString().split('T')[0],
+            startTime: inputs[3]?.value || '09:00',
+            endTime: inputs[4]?.value || '18:00',
+            closureDays: inputs[5] ? Array.from(inputs[5].selectedOptions).map(option => option.value) : []
+        };
+        
+        // Trova e aggiorna l'orario nella lista
+        const scheduleIndex = schedulesList.findIndex(s => s.id === scheduleId);
+        if (scheduleIndex !== -1) {
+            schedulesList[scheduleIndex] = scheduleData;
+        }
+    });
+}
+
+// Salva tutti gli orari
+window.saveAllSchedules = function() {
+    try {
+        // Sincronizza i dati dal DOM
+        syncSchedulesFromUI();
+        
+        // Salva nel localStorage
+        saveSchedulesToStorage();
+        
+        alert('Tutti gli orari sono stati salvati correttamente!');
+        
+        // Rimuovi evidenziazione dai nuovi orari
+        document.querySelectorAll('.new-schedule').forEach(element => {
+            element.classList.remove('new-schedule');
+        });
+        
+        // Chiudi il popup se esiste
+        if (typeof PopupManager !== 'undefined' && PopupManager.closePopup) {
+            PopupManager.closePopup();
+        }
+    } catch (error) {
+        console.error('Errore nel salvataggio:', error);
+        alert('Si è verificato un errore durante il salvataggio degli orari.');
+    }
+};
+
+// ========== INIZIALIZZAZIONE EVENTI ==========
+
+function initializeScheduleEventListeners() {
+    const popupElement = PopupManager?.currentPopup;
+    if (!popupElement) return;
+    
+    // Event delegation per i pulsanti
+    popupElement.addEventListener('click', function(e) {
+        const target = e.target.closest('[data-action]');
+        if (!target) return;
+        
+        const action = target.getAttribute('data-action');
+        console.log('Azione popup orari:', action);
+        
+        switch (action) {
+            case 'addNewSchedule':
+                addNewSchedule();
+                break;
+            case 'deleteSelectedSchedules':
+                deleteSelectedSchedules();
+                break;
+            case 'deleteSchedule':
+                const scheduleId = target.getAttribute('data-schedule-id');
+                if (scheduleId) deleteSchedule(parseInt(scheduleId));
+                break;
+            case 'toggleSelectAll':
+                toggleSelectAll();
+                break;
+            case 'saveAllSchedules':
+                saveAllSchedules();
+                break;
+        }
+        
+        e.preventDefault();
+        e.stopPropagation();
+    });
+    
+    // Event listener per auto-salvataggio su input/change
+    popupElement.addEventListener('input', function(e) {
+        if (e.target.classList.contains('cell-input') || e.target.classList.contains('cell-select')) {
+            // Auto-salva dopo 500ms dall'ultimo input
+            clearTimeout(window.scheduleAutoSaveTimeout);
+            window.scheduleAutoSaveTimeout = setTimeout(() => {
+                syncSchedulesFromUI();
+                // Non salvare automaticamente, solo sincronizzare
+            }, 500);
         }
     });
     
-    // Carica la configurazione iniziale
-    setTimeout(async () => {
-        await loadScheduleConfig();
-        console.log('📅 Schedule popup initialized with config:', scheduleConfig);
-    }, 500);
-});
+    popupElement.addEventListener('change', function(e) {
+        if (e.target.classList.contains('cell-select')) {
+            syncSchedulesFromUI();
+        }
+        if (e.target.classList.contains('row-select')) {
+            updateSelectAllState();
+        }
+    });
+    
+    console.log('Event listeners per popup orari inizializzati');
+}

@@ -70,7 +70,7 @@ $currentDate = $today->format('Y-m-d');
     <link rel="stylesheet" href="../assets/css/calendar-events.css">
     <link rel="stylesheet" href="../assets/css/week-calendar.css">
     <link rel="stylesheet" href="../assets/css/lateral-menu.css">
-    <link rel="stylesheet" href="../assets/css/popup-styles.css">
+    <link rel="stylesheet" href="../assets/css/popup.css">
 </head>
 <body>
     
@@ -79,9 +79,9 @@ $currentDate = $today->format('Y-m-d');
         <div class="sidebar-toggle">
             <img src="../assets/images/menu-icon.png" alt="Menu" class="menu-icon">
         </div>
-        <a href="#" data-action="openPopup" data-popup-type="service" data-popup="services">Servizi</a>
-        <a href="#" data-action="openPopup" data-popup-type="user" data-popup="users">Utenti</a>
-        <a href="#" data-action="openPopup" data-popup-type="schedule" data-popup="schedule">Orario</a>
+        <a data-action="openPopup" data-popup-type="service" data-popup="services">Servizi</a>
+        <a data-action="openPopup" data-popup-type="user" data-popup="users">Utenti</a>
+        <a data-action="openPopup" data-popup-type="schedule" data-popup="schedule">Orario</a>
         <a href="logout.php" style="color: #dc3545;" onclick="return confirm('Sei sicuro di voler uscire?')">Logout</a>
     </div>
 
@@ -154,13 +154,12 @@ $currentDate = $today->format('Y-m-d');
 
     <!-- JavaScript -->
     <script src="../assets/js/lateral-menu.js"></script>
-    <script type="module" src="../assets/js/calendar-date.js"></script>
     <script type="module" src="../assets/js/calendar-events.js"></script>
     <!-- popup scripts -->
     <script src="../assets/js/calendar-popup.js"></script>
     <script src="../assets/js/popup/popup-services.js"></script>
     <script src="../assets/js/popup/popup-users.js"></script>
-    <script type="module" src="../assets/js/popup/popup-schedule.js"></script>
+    <script src="../assets/js/popup/popup-schedule.js"></script>
 
 </body>
 </html>
