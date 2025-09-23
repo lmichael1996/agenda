@@ -1,115 +1,119 @@
-/* CSS Login Semplificato */
+/* LOGIN CSS - Struttura Semplificata */
+
+/* === BASE === */
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
 body {
     font-family: 'Courier New', monospace;
-    background: url('../images/background.png') center fixed no-repeat;
+    background: url('../images/background.png') center no-repeat fixed;
     margin: 0;
+    padding: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
     min-height: 100vh;
 }
 
-.login-box {
+/* === CONTENITORE PRINCIPALE === */
+.login-box, .error-box {
     background: rgba(255, 255, 255, 0.9);
     border-radius: 12px;
     padding: 40px;
     max-width: 400px;
     width: 90%;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
     text-align: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
-.login-box h2 {
+.login-box h2, .error-box h2 {
     color: #111;
     margin-bottom: 30px;
     font-size: 2rem;
 }
 
+/* === MESSAGGI === */
 .error-message {
-    color: #d32f2f;
     background: #ffebee;
-    padding: 10px;
-    border-radius: 4px;
-    margin-bottom: 15px;
+    color: #d32f2f;
     border: 1px solid #ffcdd2;
 }
 
 .attempts-warning {
     background: linear-gradient(135deg, #ffa726, #ff9800);
     color: white;
-    padding: 12px 15px;
-    border-radius: 8px;
-    margin-bottom: 15px;
     border-left: 4px solid #f57c00;
-    font-size: 14px;
-    text-align: center;
-    box-shadow: 0 2px 8px rgba(255, 167, 38, 0.3);
     animation: slideInDown 0.3s ease;
 }
 
 .attempts-info {
     background: linear-gradient(135deg, #42a5f5, #2196f3);
     color: white;
-    padding: 10px 15px;
-    border-radius: 8px;
-    margin-bottom: 15px;
     border-left: 4px solid #1976d2;
-    font-size: 13px;
-    text-align: center;
-    box-shadow: 0 2px 8px rgba(66, 165, 245, 0.3);
-}
-
-.attempts-info small {
-    font-size: 11px;
-    opacity: 0.9;
 }
 
 .security-notice {
     background: linear-gradient(135deg, #e8f5e8, #c8e6c9);
     color: #2e7d32;
-    padding: 10px 15px;
-    border-radius: 8px;
-    margin-bottom: 15px;
     border-left: 4px solid #4caf50;
-    font-size: 13px;
-    text-align: center;
-    box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);
 }
 
 .temporary-block {
     background: linear-gradient(135deg, #78909c, #607d8b);
     color: white;
-    padding: 20px;
-    border-radius: 8px;
-    text-align: center;
-    margin-top: 20px;
     border-left: 4px solid #455a64;
+    margin-top: 20px;
 }
 
-.temporary-block p {
-    margin-bottom: 8px;
+.error-message, .attempts-warning, .attempts-info, .security-notice, .temporary-block {
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    font-size: 14px;
+}
+
+/* === FORM === */
+input[type="text"], input[type="password"], input[type="submit"] {
+    font-family: inherit;
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0;
+    border-radius: 8px;
     font-size: 16px;
+    border: 1px solid #222;
 }
 
-.temporary-block small {
-    font-size: 12px;
-    opacity: 0.8;
+input[type="text"], input[type="password"] {
+    background: #fff;
 }
 
-/* CAPTCHA Adattivo */
+input[type="text"]:focus, input[type="password"]:focus {
+    border-color: #444;
+    outline: none;
+}
+
+input[type="submit"] {
+    background: #222;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+input[type="submit"]:hover {
+    background: #444;
+}
+
+/* === CAPTCHA === */
 .captcha-container {
     background: linear-gradient(135deg, #f8f9fa, #e9ecef);
     border: 2px solid #dee2e6;
     border-radius: 12px;
     margin: 20px 0;
     padding: 20px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
-    opacity: 1;
-}
-
-.captcha-container[style*="display: none"] {
-    display: none !important;
 }
 
 .captcha-container:hover {
@@ -132,27 +136,18 @@ body {
     background: linear-gradient(135deg, #ffffff, #f8f9fa);
     margin-right: 15px;
     position: relative;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.4s ease;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .custom-checkbox:hover {
     border-color: #495057;
     transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.custom-checkbox.loading {
-    border-color: #1976d2;
-    background: linear-gradient(135deg, #e3f2fd, #bbdefb);
-    animation: pulse 1.5s infinite;
 }
 
 .custom-checkbox.verified {
     background: linear-gradient(135deg, #4caf50, #388e3c);
     border-color: #2e7d32;
-    box-shadow: 0 4px 16px rgba(76, 175, 80, 0.4);
-    animation: checkmark 0.5s ease;
 }
 
 .custom-checkbox.verified::after {
@@ -164,14 +159,6 @@ body {
     transform: translate(-50%, -50%);
     font-size: 18px;
     font-weight: bold;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-}
-
-.recaptcha-text {
-    font-size: 16px;
-    color: #343a40;
-    font-weight: 500;
-    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
 }
 
 .spinner {
@@ -188,142 +175,62 @@ body {
     transform: translate(-50%, -50%);
 }
 
+/* === ANIMAZIONI === */
 @keyframes spin {
     0% { transform: translate(-50%, -50%) rotate(0deg); }
     100% { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
-}
-
-@keyframes checkmark {
-    0% { transform: scale(0.8); }
-    50% { transform: scale(1.1); }
-    100% { transform: scale(1); }
-}
-
 @keyframes slideInDown {
-    from {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-/* Form Inputs */
-input[type="text"], input[type="password"], input[type="submit"] {
-    font-family: 'Courier New', monospace;
-    width: 100%;
-    padding: 12px;
-    margin: 8px 0;
-    border-radius: 8px;
-    font-size: 16px;
-    box-sizing: border-box;
-}
-
-input[type="text"], input[type="password"] {
-    border: 1px solid #222;
-    background: #fff;
-}
-
-input[type="text"]:focus, input[type="password"]:focus {
-    border-color: #444;
-    outline: none;
-}
-
-input[type="submit"] {
-    background: #222;
-    color: #fff;
-    border: none;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-input[type="submit"]:hover {
-    background: #444;
-}
-
-@media (max-width: 480px) {
-    .login-box {
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+    .login-box, .error-box {
         padding: 20px;
-        width: 95%;
+        margin: 10px;
+        border-radius: 8px;
     }
-}
-
-/* Stili per pagine di errore */
-.error-box {
-    background: rgba(255, 255, 255, 0.95);
-    padding: 40px;
-    border-radius: 15px;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    max-width: 500px;
-    width: 90%;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.error-box h2 {
-    color: #333;
-    margin-bottom: 20px;
-    font-size: 28px;
-    font-weight: bold;
-}
-
-.home-button {
-    display: inline-block;
-    background: #222;
-    color: white;
-    padding: 12px 25px;
-    border-radius: 8px;
-    text-decoration: none;
-    margin: 15px 0;
-    font-family: 'Courier New', monospace;
-    font-weight: bold;
-    transition: background 0.3s ease;
-}
-
-.home-button:hover {
-    background: #444;
-    transform: translateY(-2px);
-}
-
-.error-details {
-    font-size: 12px;
-    color: #666;
-    margin-top: 25px;
-    line-height: 1.6;
-}
-
-.error-details strong {
-    color: #333;
-    display: block;
-    margin-bottom: 8px;
-}
-
-.support-text {
-    font-size: 11px;
-    color: #999;
-    margin-top: 30px;
-    font-style: italic;
-}
-
-/* Indicatore di sicurezza */
-.security-indicator {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    font-size: 12px;
-    color: #666;
-    margin-top: 20px;
-    padding: 8px;
-    background: rgba(76, 175, 80, 0.1);
-    border-radius: 6px;
-    border: 1px solid rgba(76, 175, 80, 0.2);
+    
+    .login-box h2, .error-box h2 {
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+    }
+    
+    .error-message, .attempts-warning, .attempts-info, .security-notice {
+        padding: 8px 12px;
+        font-size: 12px;
+        margin-bottom: 12px;
+    }
+    
+    .captcha-container {
+        margin: 15px 0;
+        padding: 12px;
+        border-radius: 6px;
+    }
+    
+    .custom-checkbox {
+        width: 24px;
+        height: 24px;
+        border-width: 2px;
+        margin-right: 8px;
+    }
+    
+    input[type="text"], input[type="password"], input[type="submit"] {
+        padding: 12px;
+        margin: 6px 0;
+        border-radius: 6px;
+        -webkit-appearance: none;
+        appearance: none;
+    }
+    
+    input[type="submit"]:active {
+        transform: scale(0.98);
+    }
+    
+    .attempts-warning {
+        animation: none;
+    }
 }
