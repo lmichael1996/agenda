@@ -1,6 +1,8 @@
 <?php
 /**
- * Logout sicuro con pulizia completa sessione
+ * Logout con pulizia totale del sistema
+ * Reset completo: sessioni, cookie, cache, file temporanei
+ * Riporta il sistema allo stato iniziale "come nuovo"
  */
 
 // Inizia sessione se non già attiva
@@ -26,7 +28,7 @@ if (isset($_SESSION['user_id'])) {
     $_SESSION['auth_logs'][] = $logEntry;
 }
 
-// Pulizia completa della sessione
+// Pulizia completa e reset totale del sistema
 $_SESSION = array();
 
 // Cancella cookie di sessione se presente
@@ -38,24 +40,50 @@ if (ini_get("session.use_cookies")) {
     );
 }
 
+// Cancella tutti i cookie dell'applicazione
+$cookiesToClear = ['PHPSESSID', 'auth_token', 'user_pref', 'captcha_state'];
+foreach ($cookiesToClear as $cookieName) {
+    if (isset($_COOKIE[$cookieName])) {
+        setcookie($cookieName, '', time() - 3600, '/');
+        setcookie($cookieName, '', time() - 3600, '/', $_SERVER['HTTP_HOST']);
+    }
+}
+
 // Distruggi la sessione
 session_destroy();
 
+// Pulizia file temporanei di sessione (se accessibili)
+try {
+    $sessionPath = session_save_path() ?: sys_get_temp_dir();
+    $sessionName = session_name();
+    $pattern = $sessionPath . '/sess_*';
+    
+    // Tenta di pulire i file di sessione dell'utente corrente
+    $files = glob($pattern);
+    if ($files) {
+        foreach ($files as $file) {
+            if (is_writable($file)) {
+                @unlink($file);
+            }
+        }
+    }
+} catch (Exception $e) {
+    // Ignora errori di pulizia file temporanei
+}
+
 // Cancella eventuali header di autenticazione
 header_remove('Authorization');
+header_remove('WWW-Authenticate');
 
-// Headers di sicurezza
+// Headers di sicurezza e reset cache
 header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: DENY');
-header('Cache-Control: no-cache, no-store, must-revalidate');
+header('Cache-Control: no-cache, no-store, must-revalidate, private');
 header('Pragma: no-cache');
-header('Expires: 0');
+header('Expires: Thu, 01 Jan 1970 00:00:00 GMT');
+header('Clear-Site-Data: "cache", "cookies", "storage"');
 
-// Inizia nuova sessione per flag autorizzazione
-session_start();
-$_SESSION['from_index'] = true;  // Autorizza accesso al login
-
-// Redirect diretto al login
-header('Location: login.php');
+// Reset completo: torna all'index per ripartire da zero
+header('Location: ../index.php?from=logout');
 exit;
 ?>
