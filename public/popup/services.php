@@ -23,7 +23,7 @@ $defaultServices = [
     [
         'id' => 1,
         'name' => 'Consulenza Personalizzata',
-        'price' => 50.00,
+        'price' => 50,
         'durationMinutes' => 60,
         'description' => 'Consulenza individuale personalizzata',
         'status' => 'disponibile'
@@ -31,7 +31,7 @@ $defaultServices = [
     [
         'id' => 2,
         'name' => 'Servizio Standard',
-        'price' => 30.00,
+        'price' => 30,
         'durationMinutes' => 45,
         'description' => 'Servizio base standard',
         'status' => 'disponibile'
@@ -39,7 +39,7 @@ $defaultServices = [
     [
         'id' => 3,
         'name' => 'Pacchetto Premium',
-        'price' => 100.00,
+        'price' => 100,
         'durationMinutes' => 120,
         'description' => 'Pacchetto completo premium',
         'status' => 'disponibile'
@@ -60,7 +60,6 @@ $defaultServices = [
     <div class="popup-window-container">
         <div class="window-header">
             <span class="header-title">Gestione Servizi</span>
-            <button class="close-btn" onclick="window.close()" title="Chiudi finestra">✖</button>
         </div>
 
         <div class="calendar-body" style="padding:4px;">

@@ -25,7 +25,7 @@ body {
 .window-header {
     background: linear-gradient(135deg, #000 0%, #333 100%);
     color: #fff;
-    padding: 6px 12px;
+    height: 28px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -244,7 +244,16 @@ select.closure-days-select,
     text-align-last: center;
 }
 
+/* Stili specifici per gestione servizi */
+.service-name-col { width: 180px; }
+.price-col { width: 100px; }
+.duration-col { width: 90px; }
+.description-col { width: 250px; }
 
+/* Stili specifici per gestione utenti */
+.username-col { width: 160px; }
+.password-col, .confirm-password-col { width: 120px; }
+.color-col { width: 60px; }
 
 .cell-color {
     width: 40px;

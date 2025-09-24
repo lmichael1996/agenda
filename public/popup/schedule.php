@@ -45,7 +45,6 @@ $sampleSchedules = [
     <div class="popup-window-container">
         <div class="window-header">
             <span class="header-title">Gestione Orario</span>
-            <button class="close-btn" onclick="window.close()" title="Chiudi finestra">✖</button>
         </div>
 
         <div class="calendar-body" style="padding:4px;">
@@ -77,8 +76,20 @@ $sampleSchedules = [
                                     <td><input type="text" value="<?= htmlspecialchars($schedule['name']) ?>" placeholder="Nome orario..." class="cell-input"></td>
                                     <td><input type="date" value="<?= $schedule['startDate'] ?>" class="cell-input"></td>
                                     <td><input type="date" value="<?= $schedule['endDate'] ?>" class="cell-input"></td>
-                                    <td><input type="time" value="<?= $schedule['startTime'] ?>" class="cell-input"></td>
-                                    <td><input type="time" value="<?= $schedule['endTime'] ?>" class="cell-input"></td>
+                                    <td style="white-space:nowrap;">
+                                        <input type="number" min="0" max="23" value="<?= explode(':', $schedule['startTime'])[0] ?>" class="hour-input" style="width:44px; display:inline-block;">:<select class="minute-select" style="width:44px; display:inline-block; margin-left:2px; margin-right:0;">
+                                            <?php foreach (["00","15","30","45"] as $m): ?>
+                                                <option value="<?= $m ?>" <?= (explode(':', $schedule['startTime'])[1] == $m ? 'selected' : '') ?>><?= $m ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </td>
+                                    <td style="white-space:nowrap;">
+                                        <input type="number" min="0" max="23" value="<?= explode(':', $schedule['endTime'])[0] ?>" class="hour-input" style="width:44px; display:inline-block;">:<select class="minute-select" style="width:44px; display:inline-block; margin-left:2px; margin-right:0;">
+                                            <?php foreach (["00","15","30","45"] as $m): ?>
+                                                <option value="<?= $m ?>" <?= (explode(':', $schedule['endTime'])[1] == $m ? 'selected' : '') ?>><?= $m ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </td>
                                     <td>
                                         <select multiple class="cell-select closure-days-select">
                                             <option value="lunedi" <?= in_array('lunedi', $schedule['closureDays']) ? 'selected' : '' ?>>Lunedì</option>
@@ -121,23 +132,57 @@ $sampleSchedules = [
 
         function escapeHtml(str){ if(str===null||str===undefined) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-        function generateScheduleRow(schedule){ const closureOptions = ['lunedi','martedi','mercoledi','giovedi','venerdi','sabato','domenica'].map(d=>`<option value="${d}" ${Array.isArray(schedule.closureDays)&&schedule.closureDays.includes(d)?'selected':''}>${d.charAt(0).toUpperCase()+d.slice(1)}</option>`).join(''); return `
+        function generateScheduleRow(schedule){
+            const closureOptions = ['lunedi','martedi','mercoledi','giovedi','venerdi','sabato','domenica'].map(d=>`<option value="${d}" ${Array.isArray(schedule.closureDays)&&schedule.closureDays.includes(d)?'selected':''}>${d.charAt(0).toUpperCase()+d.slice(1)}</option>`).join('');
+            const [startHour, startMinute] = String(schedule.startTime||'09:00').split(':');
+            const [endHour, endMinute] = String(schedule.endTime||'18:00').split(':');
+            return `
             <tr data-schedule-id="${schedule.id}">
                 <td><input type="checkbox" class="row-select"></td>
                 <td><input type="text" value="${escapeHtml(schedule.name)}" class="cell-input"></td>
                 <td><input type="date" value="${escapeHtml(schedule.startDate)}" class="cell-input"></td>
                 <td><input type="date" value="${escapeHtml(schedule.endDate)}" class="cell-input"></td>
-                <td><input type="time" value="${escapeHtml(schedule.startTime)}" class="cell-input"></td>
-                <td><input type="time" value="${escapeHtml(schedule.endTime)}" class="cell-input"></td>
+                <td style="white-space:nowrap;">
+                    <input type="number" min="0" max="23" value="${escapeHtml(startHour)}" class="hour-input" style="width:44px; display:inline-block;">:<select class="minute-select" style="width:44px; display:inline-block; margin-left:2px; margin-right:0;">
+                        <option value="00" ${startMinute==="00"?"selected":""}>00</option>
+                        <option value="15" ${startMinute==="15"?"selected":""}>15</option>
+                        <option value="30" ${startMinute==="30"?"selected":""}>30</option>
+                        <option value="45" ${startMinute==="45"?"selected":""}>45</option>
+                    </select>
+                </td>
+                <td style="white-space:nowrap;">
+                    <input type="number" min="0" max="23" value="${escapeHtml(endHour)}" class="hour-input" style="width:44px; display:inline-block;">:<select class="minute-select" style="width:44px; display:inline-block; margin-left:2px; margin-right:0;">
+                        <option value="00" ${endMinute==="00"?"selected":""}>00</option>
+                        <option value="15" ${endMinute==="15"?"selected":""}>15</option>
+                        <option value="30" ${endMinute==="30"?"selected":""}>30</option>
+                        <option value="45" ${endMinute==="45"?"selected":""}>45</option>
+                    </select>
+                </td>
                 <td><select multiple class="cell-select closure-days-select">${closureOptions}</select></td>
                 <td class="actions-cell"><button class="action-btn btn-delete-single" data-schedule-id="${schedule.id}">🗑️</button></td>
-            </tr>`; }
+            </tr>`;
+        }
 
         function renderSchedulesTable(){ const tbody = document.getElementById('schedules-list'); if(!tbody) return; if(!schedulesList.length){ tbody.innerHTML='<tr><td colspan="8">Nessun orario configurato</td></tr>'; updateSelectionStats(); return; } tbody.innerHTML = schedulesList.map(generateScheduleRow).join(''); updateSelectionStats(); }
 
         function updateSelectionStats(){ document.getElementById('selected-schedules').textContent = document.querySelectorAll('.row-select:checked').length; document.getElementById('total-schedules').textContent = schedulesList.length; }
 
-        function syncRowToModel(row,id){ const schedule = schedulesList.find(s=>s.id===id); if(!schedule) return; const inputs = row.querySelectorAll('.cell-input'); schedule.name = inputs[0]?.value||''; if(inputs[1]?.type==='date') schedule.startDate = inputs[1].value||''; if(inputs[2]?.type==='date') schedule.endDate = inputs[2].value||''; schedule.startTime = inputs[3]?.value||''; schedule.endTime = inputs[4]?.value||''; saveSchedulesToStorage(); }
+        function syncRowToModel(row,id){
+            const schedule = schedulesList.find(s=>s.id===id); if(!schedule) return;
+            const inputs = row.querySelectorAll('.cell-input');
+            schedule.name = inputs[0]?.value||'';
+            if(inputs[1]?.type==='date') schedule.startDate = inputs[1].value||'';
+            if(inputs[2]?.type==='date') schedule.endDate = inputs[2].value||'';
+            // start time custom
+            const startHour = inputs[3]?.value.padStart(2,'0')||'09';
+            const startMinute = row.querySelectorAll('.minute-select')[0]?.value||'00';
+            schedule.startTime = `${startHour}:${startMinute}`;
+            // end time custom
+            const endHour = inputs[4]?.value.padStart(2,'0')||'18';
+            const endMinute = row.querySelectorAll('.minute-select')[1]?.value||'00';
+            schedule.endTime = `${endHour}:${endMinute}`;
+            saveSchedulesToStorage();
+        }
 
         function onAddSchedule(){ const newSchedule = { id: scheduleIdCounter++, name: 'Nuovo Orario '+scheduleIdCounter, startDate:'', endDate:'', startTime:'09:00', endTime:'18:00', closureDays:[] }; schedulesList.push(newSchedule); renderSchedulesTable(); saveSchedulesToStorage(); setTimeout(()=>document.querySelector(`tr[data-schedule-id="${newSchedule.id}"] input[type=text]`)?.focus(),0); }
 
@@ -175,8 +220,8 @@ $sampleSchedules = [
                 <td><input type="text" value="${escapeHtml(schedule.name)}" class="cell-input" ${disabledAttr}></td>
                 ${startDateCell}
                 ${endDateCell}
-                <td><input type="time" value="${escapeHtml(schedule.startTime)}" class="cell-input"></td>
-                <td><input type="time" value="${escapeHtml(schedule.endTime)}" class="cell-input"></td>
+                <td><input type="time" value="${escapeHtml(schedule.startTime)}" class="cell-input" step="900"></td>
+                <td><input type="time" value="${escapeHtml(schedule.endTime)}" class="cell-input" step="900"></td>
                 <td><select multiple class="cell-select closure-days-select">${closureOptions}</select></td>
                 <td class="actions-cell">${deleteBtn}</td>
             </tr>`;
@@ -197,8 +242,57 @@ $sampleSchedules = [
         function onToggleSelectAll(e){ const checked = e.target.checked; document.querySelectorAll('.row-select').forEach(cb=>cb.checked=checked); updateSelectionStats(); }
 
         document.addEventListener('click', e=>{ const b = e.target.closest('.btn-delete-single'); if(b) onDeleteSingle(parseInt(b.dataset.scheduleId)); });
-        document.addEventListener('input', e=>{ if(e.target.classList.contains('cell-input')){ const row = e.target.closest('tr'); if(!row) return; syncRowToModel(row, parseInt(row.dataset.scheduleId)); } });
-        document.addEventListener('change', e=>{ if(e.target.classList.contains('closure-days-select')){ const row = e.target.closest('tr'); const id = parseInt(row.dataset.scheduleId); const schedule = schedulesList.find(s=>s.id===id); if(schedule) schedule.closureDays = Array.from(e.target.selectedOptions).map(o=>o.value); saveSchedulesToStorage(); } if(e.target.classList.contains('row-select')||e.target.id==='select-all-schedules') updateSelectionStats(); });
+        // Funzione per validare e correggere orari (solo minuti 00, 15, 30, 45)
+        function validateTimeInput(input) {
+            if (input.type !== 'time') return;
+            const value = input.value;
+            if (!value) return;
+            
+            const [hours, minutes] = value.split(':');
+            const allowedMinutes = ['00', '15', '30', '45'];
+            
+            if (!allowedMinutes.includes(minutes)) {
+                // Trova il minuto più vicino consentito
+                const minuteNum = parseInt(minutes);
+                let closestMinute = '00';
+                
+                if (minuteNum <= 7) closestMinute = '00';
+                else if (minuteNum <= 22) closestMinute = '15';
+                else if (minuteNum <= 37) closestMinute = '30';
+                else if (minuteNum <= 52) closestMinute = '45';
+                else closestMinute = '00';
+                
+                input.value = `${hours}:${closestMinute}`;
+            }
+        }
+
+        document.addEventListener('input', e=>{ 
+            if(e.target.classList.contains('cell-input')){ 
+                // Valida input time
+                if(e.target.type === 'time') {
+                    validateTimeInput(e.target);
+                }
+                const row = e.target.closest('tr'); 
+                if(!row) return; 
+                syncRowToModel(row, parseInt(row.dataset.scheduleId)); 
+            } 
+        });
+        
+        document.addEventListener('change', e=>{ 
+            // Valida input time anche su change
+            if(e.target.type === 'time') {
+                validateTimeInput(e.target);
+            }
+            
+            if(e.target.classList.contains('closure-days-select')){ 
+                const row = e.target.closest('tr'); 
+                const id = parseInt(row.dataset.scheduleId); 
+                const schedule = schedulesList.find(s=>s.id===id); 
+                if(schedule) schedule.closureDays = Array.from(e.target.selectedOptions).map(o=>o.value); 
+                saveSchedulesToStorage(); 
+            } 
+            if(e.target.classList.contains('row-select')||e.target.id==='select-all-schedules') updateSelectionStats(); 
+        });
 
         document.addEventListener('DOMContentLoaded', ()=>{ loadSchedulesFromStorage(); renderSchedulesTable(); document.getElementById('add-schedule-btn')?.addEventListener('click', onAddSchedule); document.getElementById('delete-selected-btn')?.addEventListener('click', onDeleteSelected); document.getElementById('save-all-btn')?.addEventListener('click', onSaveAll); document.getElementById('select-all-schedules')?.addEventListener('change', onToggleSelectAll); });
     </script>

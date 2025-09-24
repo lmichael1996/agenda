@@ -81,7 +81,7 @@ $currentDate = $today->format('Y-m-d');
         <a href="#" data-popup-window="services">Servizi</a>
         <a href="#" data-popup-window="users">Utenti</a>
         <a href="#" data-popup-window="schedule">Orario</a>
-        <a href="logout.php" class="logout" onclick="return confirm('Sei sicuro di voler uscire?')">Logout</a>
+        <a href="../utils/logout.php" class="logout" onclick="return confirm('Sei sicuro di voler uscire?')">Logout</a>
     </div>
 
     <!-- Top Menu Controls -->
@@ -98,7 +98,7 @@ $currentDate = $today->format('Y-m-d');
         <div class="controls-center">
             <label for="cerca" class="control-label">Cliente:</label>
             <input type="search" autocomplete="on" id="cerca" placeholder="Cerca cliente...">
-            <input type="submit" onmouseover="this.style.cursor='pointer'" value="Cerca">
+            <input type="submit" id="client-search" onmouseover="this.style.cursor='pointer'" value="Cerca">
             <button type="button" id="note-btn" title="Note" onmouseover="this.style.cursor='pointer'">📝</button>
         </div>
         
@@ -153,6 +153,7 @@ $currentDate = $today->format('Y-m-d');
 
     <!-- JavaScript -->
     <script src="../assets/js/lateral-menu.js"></script>
+    <script src="../assets/js/top-menu.js"></script>
     <script type="module" src="../assets/js/calendar-events.js"></script>
 </body>
 </html>

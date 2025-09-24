@@ -54,7 +54,7 @@ $sampleUsers = [
     <div class="popup-window-container">
         <div class="window-header">
             <span class="header-title">Gestione Utenti</span>
-            <button class="close-btn" onclick="window.close()" title="Chiudi finestra">✖</button>
+            <!-- Pulsante chiusura rimosso -->
         </div>
 
         <div class="calendar-body" style="padding:4px;">
