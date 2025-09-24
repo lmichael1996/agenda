@@ -75,5 +75,4 @@ input[type="submit"]:hover, input[type="submit"]:focus {
     animation: marquee-scroll 12s linear infinite;
     white-space: nowrap;
     display: inline-block;
-    cursor: pointer;
 }

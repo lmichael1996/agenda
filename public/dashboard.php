@@ -79,9 +79,9 @@ $currentDate = $today->format('Y-m-d');
         <div class="sidebar-toggle">
             <img src="../assets/images/menu-icon.png" alt="Menu" class="menu-icon">
         </div>
-        <a data-action="openPopup" data-popup-type="service" data-popup="services">Servizi</a>
-        <a data-action="openPopup" data-popup-type="user" data-popup="users">Utenti</a>
-        <a data-action="openPopup" data-popup-type="schedule" data-popup="schedule">Orario</a>
+        <a href="#" data-popup-window="services">Servizi</a>
+        <a href="#" data-popup-window="users">Utenti</a>
+        <a href="#" data-popup-window="schedule">Orario</a>
         <a href="logout.php" class="logout" onclick="return confirm('Sei sicuro di voler uscire?')">Logout</a>
     </div>
 
