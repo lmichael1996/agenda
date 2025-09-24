@@ -38,16 +38,6 @@ $sampleSchedules = [
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestione Orari - Agenda</title>
     <style>
-        :root {
-            --primary-color: #000;
-            --bg-color: #fff;
-            --gray-medium: #ccc;
-            --gray-dark: #666;
-            --gray-darker: #333;
-            --border-radius: 6px;
-            --border-radius-small: 3px;
-        }
-        
         * { font-family: 'Courier New', monospace; box-sizing: border-box; }
         
         body {
@@ -55,7 +45,7 @@ $sampleSchedules = [
             padding: 0;
             background: #f5f5f5 url('../../assets/images/background.png') center center no-repeat fixed;
             background-size: auto;
-            color: var(--primary-color);
+            color: #000;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -63,119 +53,127 @@ $sampleSchedules = [
         }
         
         .popup-window-container {
-            max-width: 820px;
-            width: min(88vw, 100%);
-            background: var(--bg-color);
-            border: 1px solid black;
-            border-radius: var(--border-radius);
+            max-width: 1000px;
+            width: min(95vw, 100%);
+            background: #fff;
+            border: 2px solid #000;
+            border-radius: 6px;
             overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
         }
         
         .window-header {
-            background: var(--primary-color);
-            color: var(--bg-color);
-            padding: 12px 16px;
+            background: linear-gradient(135deg, #000 0%, #333 100%);
+            color: #fff;
+            padding: 6px 12px;
             display: flex;
             align-items: center;
-            gap: 12px;
-            border-bottom: 1px solid black;
+            justify-content: space-between;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
         }
         
-        .window-title {
+        .header-title {
             flex: 1;
             text-align: center;
             margin: 0;
-            font: normal 15px/1.2 inherit;
-            letter-spacing: 0.5px;
-            font-weight: 500;
         }
         
         button {
-            background: var(--bg-color);
-            color: var(--primary-color);
-            border: 1px solid var(--primary-color);
-            border-radius: var(--border-radius-small);
+            background: #fff;
+            color: #000;
+            border: 1px solid #000;
+            border-radius: 3px;
             cursor: pointer;
-            transition: var(--transition);
             font: inherit;
             font-weight: 500;
-            position: relative;
-            overflow: hidden;
         }
         
         button:hover {
-            background: var(--primary-color);
-            color: var(--bg-color);
+            background: #000;
+            color: #fff;
         }
         
         .close-btn { 
-            padding: 6px 10px; 
-            font-size: 9px; 
-            border-color: var(--gray-dark);
-            color: var(--gray-dark);
+            padding: 4px 8px; 
+            font-size: 10px; 
+            border: 1px solid rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            font-weight: bold;
         }
         
         .close-btn:hover {
-            background: var(--gray-dark);
-            color: var(--bg-color);
+            background: rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.5);
+            color: #fff;
+            transform: scale(1.05);
         }
         
         .toolbar-btn { 
-            padding: 8px 12px; 
-            font-size: 9px; 
-            margin: 0 2px;
-            box-shadow: var(--shadow);
+            padding: 10px 16px; 
+            font-size: 10px; 
+            margin: 0 3px;
+            font-weight: 600;
+            border-radius: 4px;
+            text-transform: uppercase;
         }
         
         .action-btn { 
             padding: 6px 8px; 
             font-size: 8px; 
             width: 100%;
-            border-color: var(--gray-darker);
+            border-color: #333;
         }
         
         .save-btn { 
-            padding: 10px 16px; 
-            font-size: 11px;
-            font-weight: 600;
-            letter-spacing: 0.3px;
-            box-shadow: var(--shadow);
+            padding: 12px 24px; 
+            font-size: 12px;
+            font-weight: 700;
+            border-radius: 6px;
+            text-transform: uppercase;
         }
         
         .schedules-toolbar {
             display: flex;
-            gap: 10px;
-            padding: 14px 16px;
-            background: var(--gray-light);
-            border-bottom: 1px solid var(--primary-color);
+            gap: 12px;
+            padding: 8px 16px;
+            background: #f8f8f8;
             justify-content: center;
+            border-bottom: 1px solid #ddd;
         }
         
         .schedules-table-container {
-            padding: 12px;
+            padding: 8px;
             overflow-x: auto;
-            background: var(--bg-color);
-            border-radius: 0 0 var(--border-radius) var(--border-radius);
+            background: #fff;
+            border-radius: 0 0 6px 6px;
         }
         
         .excel-table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 340px;
-            border: 1px solid black;
-            border-radius: var(--border-radius-small);
+            min-width: 280px;
+            border: 2px solid #000;
+            border-radius: 4px;
             overflow: hidden;
-            background: var(--bg-color);
+            background: #fff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         
         .excel-table th {
-            background: var(--primary-color);
-            color: var(--bg-color);
-            padding: 10px 6px;
-            font-size: 10px;
+            background: #000;
+            color: #fff;
+            padding: 8px 6px;
+            font-size: 9px;
             text-align: center;
-            border-right: 1px solid white;
-            font-weight: 600;
+            border-right: 1px solid #fff;
+            font-weight: 700;
+            text-transform: uppercase;
         }
         
         .excel-table th:last-child {
@@ -183,15 +181,14 @@ $sampleSchedules = [
         }
         
         .excel-table td {
-            padding: 8px 6px;
+            padding: 4px 3px;
             font-size: 9px;
-            border-bottom: 1px solid var(--primary-color);
-            border-right: 1px solid var(--primary-color);
+            border: 1px solid rgba(0,0,0,0.15);
             text-align: center;
             vertical-align: middle;
-            height: 32px;
-            background: var(--bg-color);
-            position: relative;
+            height: 28px;
+            background: #fff;
+            transition: all 0.15s ease;
         }
         
         .excel-table td:last-child {
@@ -199,70 +196,90 @@ $sampleSchedules = [
         }
         
         .excel-table tr:nth-child(even) td {
-            background: rgba(0,0,0,0.02);
+            background: rgba(0,0,0,0.03);
         }
         
         .excel-table tr:hover td {
-            background: rgba(0,0,0,0.04) !important;
+            background: rgba(0,0,0,0.06) !important;
         }
         
         .cell-input, .closure-days-select {
             width: 100%;
-            padding: 6px 8px;
-            border: 1px solid black;
-            border-radius: var(--border-radius-small);
+            padding: 3px 5px;
+            border: 1px solid rgba(0,0,0,0.2);
+            border-radius: 3px;
             text-align: center;
             font-size: 9px;
-            background: var(--bg-color);
+            background: #fff;
             font-family: inherit;
+            transition: all 0.2s ease;
         }
         
         .cell-input:focus, .closure-days-select:focus {
-            border-color: var(--primary-color);
-            border-width: 3px;
+            border-color: black;
+            border-width: 2px;
             outline: none;
-            background: rgba(0,0,0,0.02);
-            box-shadow: var(--shadow-focus), inset 0 1px 2px rgba(0,0,0,0.05), 0 0 0 1px var(--bg-color);
-            transform: scale(1.02);
+            background: rgba(0,0,0,0.03);
+            box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
         }
         
         .cell-input:hover, .closure-days-select:hover {
-            border-color: var(--gray-darker);
+            border-color: #333;
             background: rgba(0,0,0,0.01);
         }
         
-        input[type="text"].cell-input { font-size: 10px; font-weight: 500; }
+        input[type="text"].cell-input { font-size: 9px; font-weight: 500; }
+        
+        .name-col input[type="text"] { 
+            font-size: 11px; 
+            font-weight: 700; 
+            text-align: left;
+            padding-left: 6px;
+            height: 24px;
+        }
+        
         input[type="checkbox"] { 
-            width: 18px; 
-            height: 18px; 
+            width: 16px; 
+            height: 16px; 
             margin: 2px;
-            border-radius: var(--border-radius-small);
-            border: 1px solid black;
+            border-radius: 2px;
+            border: 1px solid rgba(0,0,0,0.3);
+            transition: all 0.2s ease;
+        }
+        
+        input[type="checkbox"]:hover {
+            border-color: black;
+            transform: scale(1.1);
+        }
+        
+        input[type="checkbox"]:checked {
+            background: black;
+            border-color: black;
         }
         
         /* Column widths using CSS Grid approach */
-        .select-col { width: 40px; }
-        .name-col { width: 120px; }
-        .start-date-col, .end-date-col { width: 100px; }
-        .start-time-col, .end-time-col { width: 80px; }
-        .closure-days-col { width: 120px; }
-        .actions-col { width: 60px; }
-        
-
+        .select-col { width: 30px; }
+        .name-col { width: 180px; }
+        .start-date-col, .end-date-col { width: 85px; }
+        .start-time-col, .end-time-col { width: 65px; }
+        .closure-days-col { width: 100px; }
+        .actions-col { width: 45px; }
         
         .schedules-stats {
-            padding: 12px 16px;
+            padding: 12px 20px;
             font-size: 11px;
             display: flex;
-            gap: 16px;
-            background: var(--bg-color);
-            border-top: 1px solid black;
-            color: var(--primary-color);
-            font-weight: 500;
+            gap: 20px;
+            background: #f5f5f5;
+            border-top: 1px solid #000;
+            color: #333;
+            font-weight: 600;
+            justify-content: center;
+            text-transform: uppercase;
         }
         
         .schedules-stats strong {
-            color: var(--gray-darker);
+            color: #333;
             font-weight: 600;
         }
         
@@ -287,11 +304,11 @@ $sampleSchedules = [
 
     <div class="popup-window-container">
         <div class="window-header">
-            <h1 class="window-title">Gestione Orario</h1>
+            <span class="header-title">Gestione Orario</span>
             <button class="close-btn" onclick="window.close()" title="Chiudi finestra">✖</button>
         </div>
 
-        <div class="calendar-body" style="padding:16px;">
+        <div class="calendar-body" style="padding:4px;">
             <div class="schedules-section">
 
                 <div class="schedules-toolbar">
@@ -345,7 +362,7 @@ $sampleSchedules = [
                     <span>Selezionati: <strong id="selected-schedules">0</strong></span>
                 </div>
 
-                <div style="margin-top:18px; text-align:center;">
+                <div style="margin-top:20px; margin-bottom:20px; text-align:center;">
                     <button id="save-all-btn" class="save-btn">💾 Salva Tutti gli Orari</button>
                 </div>
 
