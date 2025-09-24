@@ -70,7 +70,6 @@ $currentDate = $today->format('Y-m-d');
     <link rel="stylesheet" href="../assets/css/calendar-events.css">
     <link rel="stylesheet" href="../assets/css/week-calendar.css">
     <link rel="stylesheet" href="../assets/css/lateral-menu.css">
-    <link rel="stylesheet" href="../assets/css/popup.css">
 </head>
 <body>
     
@@ -155,11 +154,5 @@ $currentDate = $today->format('Y-m-d');
     <!-- JavaScript -->
     <script src="../assets/js/lateral-menu.js"></script>
     <script type="module" src="../assets/js/calendar-events.js"></script>
-    <!-- popup scripts -->
-    <script src="../assets/js/calendar-popup.js"></script>
-    <script src="../assets/js/popup/popup-services.js"></script>
-    <script src="../assets/js/popup/popup-users.js"></script>
-    <script src="../assets/js/popup/popup-schedule.js"></script>
-
 </body>
 </html>

@@ -3,11 +3,6 @@
  */
 const sidebar = document.getElementById("sidebar");
 
-// Configurazione
-const CLOSED_WIDTH = "0px";
-const OPEN_WIDTH = "224px";
-const TRANSITION = 'width 0.4s cubic-bezier(0.77,0,0.18,1)';
-
 // Stato
 let isOpen = false;
 let hoverTimeout = null;
@@ -16,7 +11,7 @@ function openSidebar() {
     if (isOpen) return;
     
     clearTimeout(hoverTimeout);
-    sidebar.style.width = OPEN_WIDTH;
+    sidebar.style.width = "224px";
     isOpen = true;
 }
 
@@ -24,14 +19,14 @@ function closeSidebar() {
     if (!isOpen) return;
     
     clearTimeout(hoverTimeout);
-    sidebar.style.width = CLOSED_WIDTH;
+    sidebar.style.width = "0px";
     isOpen = false;
 }
 
 // Eventi con debounce sulla sidebar
 if (sidebar) {
     // Imposta subito la transizione per evitare lentezza iniziale
-    sidebar.style.transition = TRANSITION;
+    sidebar.style.transition = 'width 0.4s cubic-bezier(0.77,0,0.18,1)';
     
     sidebar.addEventListener('mouseenter', () => {
         clearTimeout(hoverTimeout);
@@ -64,20 +59,20 @@ function openPopupWindow(type) {
         services: {
             url: 'popup/services.php',
             title: 'Gestione Servizi',
-            width: 900,
-            height: 650
+            width: 1400,
+            height: 1000
         },
         users: {
             url: 'popup/users.php', 
             title: 'Gestione Utenti',
-            width: 1000,
-            height: 700
+            width: 1300,
+            height: 850
         },
         schedule: {
             url: 'popup/schedule.php',
             title: 'Gestione Orari',
-            width: 1400,
-            height: 900
+            width: 1600,
+            height: 1000
         }
     };
     

@@ -1,417 +1,390 @@
-// ========== GESTIONE SERVIZI ==========
-let serviceIdCounter = 4;
+<?php
+/**
+ * Popup per la gestione dei servizi - Finestra separata
+ * Versione organizzata basata su popup.css
+ */
 
-// Lista servizi centralizzata
-let servicesList = [
-    {
-        id: 1,
-        name: "Consulenza Personalizzata",
-        price: 50.00,
-        durationMinutes: 60,
-        description: "Consulenza individuale personalizzata",
-        status: "attivo"
-    },
-    {
-        id: 2,
-        name: "Servizio Standard", 
-        price: 30.00,
-        durationMinutes: 45,
-        description: "Servizio base standard",
-        status: "attivo"
-    },
-    {
-        id: 3,
-        name: "Pacchetto Premium",
-        price: 100.00,
-        durationMinutes: 120,
-        description: "Pacchetto completo premium", 
-        status: "attivo"
-    }
+// Carica configurazione e controlli di sicurezza
+require_once '../../config/config.php';
+
+// Verifica autenticazione
+if (!isset($_SESSION['user_id'])) {
+    header('Location: ../login.php');
+    exit;
+}
+
+// Headers di sicurezza per popup
+header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: DENY');
+header('X-XSS-Protection: 1; mode=block');
+
+// Definizione servizi di default
+$defaultServices = [
+    [
+        'id' => 1,
+        'name' => 'Consulenza Personalizzata',
+        'price' => 50.00,
+        'durationMinutes' => 60,
+        'description' => 'Consulenza individuale personalizzata',
+        'status' => 'disponibile'
+    ],
+    [
+        'id' => 2,
+        'name' => 'Servizio Standard',
+        'price' => 30.00,
+        'durationMinutes' => 45,
+        'description' => 'Servizio base standard',
+        'status' => 'disponibile'
+    ],
+    [
+        'id' => 3,
+        'name' => 'Pacchetto Premium',
+        'price' => 100.00,
+        'durationMinutes' => 120,
+        'description' => 'Pacchetto completo premium',
+        'status' => 'disponibile'
+    ]
 ];
+?>
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestione Servizi - Agenda</title>
+    <link rel="stylesheet" href="../../assets/css/popup.css">
+    <link rel="stylesheet" href="../../assets/css/scrollbar.css">
+</head>
+<body>
 
-// Genera HTML per una singola riga servizio
-function generateServiceRow(service) {
-    // Protezione contro valori undefined
-    const safeService = {
-        id: service.id || 0,
-        name: service.name || '',
-        price: Number(service.price) || 0,
-        durationMinutes: Number(service.durationMinutes) || 30,
-        description: service.description || '',
-        status: service.status || 'attivo'
-    };
-    
-    // Formato prezzo con 2 decimali
-    const formattedPrice = safeService.price.toFixed(2);
-    
-    return `
-        <tr data-service-id="${safeService.id}">
-            <td><input type="checkbox" class="row-select-service"></td>
-            <td><input type="text" value="${safeService.name}" class="cell-input" placeholder="Nome del servizio"></td>
-            <td><input type="number" value="${formattedPrice}" step="0.50" min="0" class="cell-input price-input"></td>
-            <td><input type="number" value="${safeService.durationMinutes}" step="15" min="15" max="480" class="cell-input duration-input"></td>
-            <td><input type="text" value="${safeService.description}" class="cell-input" placeholder="Descrizione breve"></td>
-            <td>
-                <select class="cell-select status-select">
-                    <option value="attivo" ${safeService.status === 'attivo' ? 'selected' : ''}>Attivo</option>
-                    <option value="inattivo" ${safeService.status === 'inattivo' ? 'selected' : ''}>Inattivo</option>
-                    <option value="sospeso" ${safeService.status === 'sospeso' ? 'selected' : ''}>Sospeso</option>
-                </select>
-            </td>
-            <td class="actions-cell">
-                <button data-action="deleteService" data-service-id="${safeService.id}" class="action-btn btn-delete-single" title="Elimina">🗑️</button>
-            </td>
-        </tr>
-    `;
-}
-
-// Genera HTML per tutte le righe servizi
-function generateServicesRows() {
-    // Verifica di sicurezza: se servicesList è vuoto, ripristina i dati di default
-    if (!servicesList || !Array.isArray(servicesList) || servicesList.length === 0) {
-        console.warn('servicesList vuoto, ripristino dati di default');
-        servicesList = [
-            {
-                id: 1,
-                name: "Consulenza Personalizzata",
-                price: 50.00,
-                durationMinutes: 60,
-                description: "Consulenza individuale personalizzata",
-                status: "attivo"
-            },
-            {
-                id: 2,
-                name: "Servizio Standard", 
-                price: 30.00,
-                durationMinutes: 45,
-                description: "Servizio base standard",
-                status: "attivo"
-            },
-            {
-                id: 3,
-                name: "Pacchetto Premium",
-                price: 100.00,
-                durationMinutes: 120,
-                description: "Pacchetto completo premium", 
-                status: "attivo"
-            }
-        ];
-        serviceIdCounter = 4;
-    }
-    
-    return servicesList.map(service => generateServiceRow(service)).join('');
-}
-
-// Template HTML per il popup servizi in stile moderno
-function getServicesPopupContent() {
-    const activeServices = servicesList.filter(s => s.status === 'attivo').length;
-    
-    return `
-        <div class="calendar-header">
-            <h2>Gestione Servizi</h2>
-            <p>Aggiungi e modifica servizi del sistema</p>
+    <div class="popup-window-container">
+        <div class="window-header">
+            <span class="header-title">Gestione Servizi</span>
+            <button class="close-btn" onclick="window.close()" title="Chiudi finestra">✖</button>
         </div>
-        
-        <div class="calendar-body">
-            <div class="services-section">
-                <div class="services-toolbar">
-                    <button data-action="addNewService" class="toolbar-btn btn-add">
-                        <span>➕</span> Nuovo Servizio
-                    </button>
-                    <button data-action="deleteSelectedServices" class="toolbar-btn btn-delete">
-                        <span>🗑️</span> Elimina Selezionati
-                    </button>
+
+        <div class="calendar-body" style="padding:4px;">
+            <div class="schedules-section">
+
+                <div class="schedules-toolbar">
+                    <button id="add-service-btn" class="toolbar-btn">➕ Nuovo Servizio</button>
+                    <button id="delete-selected-btn" class="toolbar-btn">🗑️ Elimina Selezionati</button>
                 </div>
 
-                <div class="services-table-container">
+                <div class="schedules-table-container">
                     <table class="excel-table" id="services-table">
                         <thead>
                             <tr>
-                                <th class="select-col">
-                                    <input type="checkbox" id="select-all-services" data-action="toggleSelectAllServices">
-                                </th>
+                                <th class="select-col"><input type="checkbox" id="select-all-services"></th>
                                 <th class="service-name-col">Nome Servizio</th>
                                 <th class="price-col">Prezzo (€)</th>
                                 <th class="duration-col">Durata (min)</th>
                                 <th class="description-col">Descrizione</th>
-                                <th class="status-col">Stato</th>
                                 <th class="actions-col">Azioni</th>
                             </tr>
                         </thead>
                         <tbody id="services-list">
-                            ${generateServicesRows()}
+                            <?php foreach ($defaultServices as $service): ?>
+                                <tr data-service-id="<?= $service['id'] ?>">
+                                    <td><input type="checkbox" class="row-select"></td>
+                                    <td><input type="text" value="<?= htmlspecialchars($service['name']) ?>" placeholder="Nome servizio..." class="cell-input"></td>
+                                    <td><input type="number" value="<?= number_format($service['price'], 2) ?>" step="1" min="0" max="9999.99" class="cell-input price-input"></td>
+                                    <td><input type="number" value="<?= $service['durationMinutes'] ?>" step="15" min="15" max="480" class="cell-input duration-input"></td>
+                                    <td><textarea placeholder="Descrizione dettagliata..." class="cell-textarea" rows="2"><?= htmlspecialchars($service['description']) ?></textarea></td>
+                                    <td class="actions-cell"><button class="action-btn btn-delete-single" data-service-id="<?= $service['id'] ?>" title="Elimina">🗑️</button></td>
+                                </tr>
+                            <?php endforeach; ?>
                         </tbody>
                     </table>
                 </div>
 
                 <div class="services-stats">
-                    <span class="stat-item">Totale servizi: <strong id="total-services">${servicesList.length}</strong></span>
-                    <span class="stat-item">Attivi: <strong id="active-services">${activeServices}</strong></span>
-                    <span class="stat-item">Selezionati: <strong id="selected-services">0</strong></span>
+                    <span>Totale servizi: <strong id="total-services"><?= count($defaultServices) ?></strong></span>
+                    <span>Selezionati: <strong id="selected-services">0</strong></span>
                 </div>
+
+                <div style="margin-top:20px; margin-bottom:20px; text-align:center;">
+                    <button id="save-all-btn" class="save-btn">💾 Salva Tutti i Servizi</button>
+                </div>
+
             </div>
         </div>
-        
-        <div class="calendar-footer">
-            <button data-action="saveAllServices" class="save-btn">
-                Salva Tutti i Servizi
-            </button>
-        </div>
-    `;
-}
 
-// Funzioni gestione servizi
-window.addNewService = function() {
-    const newService = {
-        id: serviceIdCounter,
-        name: "",
-        price: 0.00,
-        durationMinutes: 30,
-        description: "",
-        status: "attivo"
-    };
-    
-    servicesList.push(newService);
-    
-    const tbody = document.getElementById('services-list');
-    if (!tbody) {
-        console.error('Elemento services-list non trovato');
-        return;
-    }
-    
-    const newRow = document.createElement('tr');
-    newRow.setAttribute('data-service-id', serviceIdCounter);
-    newRow.innerHTML = `
-        <td><input type="checkbox" class="row-select-service"></td>
-        <td><input type="text" value="" placeholder="Nome del servizio" class="cell-input new-service"></td>
-        <td><input type="number" value="25.00" step="0.50" min="0" class="cell-input price-input new-service"></td>
-        <td><input type="number" value="30" step="15" min="15" max="480" class="cell-input duration-input new-service"></td>
-        <td><input type="text" value="" placeholder="Descrizione breve" class="cell-input new-service"></td>
-        <td>
-            <select class="cell-select status-select new-service">
-                <option value="attivo" selected>Attivo</option>
-                <option value="inattivo">Inattivo</option>
-                <option value="sospeso">Sospeso</option>
-            </select>
-        </td>
-        <td class="actions-cell">
-            <button data-action="deleteService" data-service-id="${serviceIdCounter}" class="action-btn btn-delete-single" title="Elimina">🗑️</button>
-        </td>
-    `;
-    
-    tbody.appendChild(newRow);
-    newRow.querySelector('input[type="text"]').focus();
-    
-    serviceIdCounter++;
-    updateServiceStats();
-};
+    </div>
 
-window.deleteService = function(serviceId) {
-    if (confirm('Sei sicuro di voler eliminare questo servizio?')) {
-        // Rimuovi dalla variabile servicesList
-        servicesList = servicesList.filter(service => service.id != serviceId);
-        
-        // Rimuovi dalla UI
-        const row = document.querySelector(`tr[data-service-id="${serviceId}"]`);
-        if (row) {
-            row.remove();
-            updateServiceStats();
+<script>
+        // ========== GESTIONE SERVIZI ==========
+        let servicesList = <?= json_encode($defaultServices) ?>;
+        const STORAGE_KEY = 'services_data';
+        let serviceIdCounter = Math.max(...servicesList.map(s => s.id)) + 1;
+
+        // Funzioni di utilità
+        function loadServicesFromStorage() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (!raw) return;
+                const parsed = JSON.parse(raw);
+                if (Array.isArray(parsed.services)) {
+                    servicesList = parsed.services;
+                    serviceIdCounter = parsed.counter || (Math.max(...servicesList.map(s => s.id)) + 1);
+                }
+            } catch (e) {
+                console.warn('Impossibile leggere storage servizi:', e);
+            }
         }
-    }
-};
 
-window.deleteSelectedServices = function() {
-    const selectedRows = document.querySelectorAll('.row-select-service:checked');
-    if (selectedRows.length === 0) {
-        alert('Seleziona almeno un servizio da eliminare');
-        return;
-    }
-    
-    if (confirm(`Sei sicuro di voler eliminare ${selectedRows.length} servizi selezionati?`)) {
-        const selectedIds = [];
-        selectedRows.forEach(checkbox => {
-            const serviceId = checkbox.closest('tr').getAttribute('data-service-id');
-            selectedIds.push(parseInt(serviceId));
-            checkbox.closest('tr').remove();
-        });
-        
-        // Rimuovi dalla variabile servicesList
-        servicesList = servicesList.filter(service => !selectedIds.includes(service.id));
-        
-        updateServiceStats();
-        const selectAllCheckbox = document.getElementById('select-all-services');
-        if (selectAllCheckbox) {
-            selectAllCheckbox.checked = false;
+        function saveServicesToStorage() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                    services: servicesList,
+                    counter: serviceIdCounter
+                }));
+            } catch (e) {
+                console.error('Errore salvataggio storage servizi:', e);
+            }
         }
-    }
-};
 
-window.toggleSelectAllServices = function() {
-    const selectAll = document.getElementById('select-all-services');
-    const rowSelects = document.querySelectorAll('.row-select-service');
-    
-    if (selectAll && rowSelects.length > 0) {
-        rowSelects.forEach(checkbox => {
-            checkbox.checked = selectAll.checked;
-        });
-        updateServiceStats();
-    }
-};
-
-window.saveAllServices = function() {
-    // Sincronizza dati dalla UI alla variabile servicesList
-    syncServicesFromUI();
-    
-    // Salva la lista servizi aggiornata
-    localStorage.setItem('servicesData', JSON.stringify(servicesList));
-    alert(`✅ Salvati ${servicesList.length} servizi!`);
-    
-    // Rimuovi evidenziazione dai nuovi servizi
-    document.querySelectorAll('.new-service').forEach(element => {
-        element.classList.remove('new-service');
-    });
-};
-
-// Sincronizza dati dalla UI alla variabile servicesList
-function syncServicesFromUI() {
-    const rows = document.querySelectorAll('#services-list tr');
-    
-    rows.forEach(row => {
-        const serviceId = parseInt(row.getAttribute('data-service-id'));
-        const inputs = row.querySelectorAll('.cell-input, .cell-select');
-        
-        const serviceData = {
-            id: serviceId,
-            name: inputs[0]?.value?.trim() || '',
-            price: parseFloat(inputs[1]?.value) || 0,
-            durationMinutes: parseInt(inputs[2]?.value) || 15,
-            description: inputs[3]?.value?.trim() || '',
-            status: inputs[4]?.value || 'attivo'
-        };
-        
-        // Trova e aggiorna il servizio nella lista
-        const serviceIndex = servicesList.findIndex(s => s.id === serviceId);
-        if (serviceIndex !== -1) {
-            servicesList[serviceIndex] = serviceData;
+        function escapeHtml(str) {
+            if (str === null || str === undefined) return '';
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         }
-    });
-}
 
-function updateServiceStats() {
-    const totalServices = document.querySelectorAll('#services-list tr').length;
-    const activeServices = document.querySelectorAll('.status-select option[value="attivo"]:checked').length;
-    const selectedServices = document.querySelectorAll('.row-select-service:checked').length;
-    
-    const totalEl = document.getElementById('total-services');
-    const activeEl = document.getElementById('active-services');
-    const selectedEl = document.getElementById('selected-services');
-    
-    if (totalEl) totalEl.textContent = totalServices;
-    if (activeEl) activeEl.textContent = activeServices;
-    if (selectedEl) selectedEl.textContent = selectedServices;
-}
+        function validatePrice(price) {
+            const num = parseFloat(price);
+            return !isNaN(num) && num >= 0 && num <= 9999.99;
+        }
 
-// Carica dati servizi salvati
-function loadSavedServices() {
-    const savedServices = localStorage.getItem('servicesData');
-    if (savedServices) {
-        try {
-            const parsedServices = JSON.parse(savedServices);
+        function validateDuration(duration) {
+            const num = parseInt(duration);
+            return !isNaN(num) && num >= 15 && num <= 480 && num % 15 === 0;
+        }
+
+        function generateServiceRow(service) {
+            return `
+                <tr data-service-id="${service.id}">
+                    <td><input type="checkbox" class="row-select"></td>
+                    <td><input type="text" value="${escapeHtml(service.name)}" class="cell-input"></td>
+                    <td><input type="number" value="${Number(service.price).toFixed(2)}" step="1" min="0" max="9999.99" class="cell-input price-input"></td>
+                    <td><input type="number" value="${service.durationMinutes}" step="15" min="15" max="480" class="cell-input duration-input"></td>
+                    <td><textarea class="cell-textarea" rows="2" placeholder="Descrizione dettagliata...">${escapeHtml(service.description)}</textarea></td>
+                    <td class="actions-cell"><button class="action-btn btn-delete-single" data-service-id="${service.id}" title="Elimina">🗑️</button></td>
+                </tr>
+            `;
+        }
+
+        function renderServicesTable() {
+            const tbody = document.getElementById('services-list');
+            if (!tbody) return;
             
-            // Solo sostituisci se ci sono effettivamente servizi validi
-            if (Array.isArray(parsedServices) && parsedServices.length > 0) {
-                servicesList = parsedServices;
-                
-                // Aggiorna il counter con l'ID più alto + 1
-                const maxId = Math.max(...servicesList.map(s => s.id), 0);
-                serviceIdCounter = maxId + 1;
-                
-                console.log('Servizi caricati dal localStorage:', servicesList);
+            if (!servicesList.length) {
+                tbody.innerHTML = '<tr><td colspan="6">Nessun servizio configurato</td></tr>';
+                updateSelectionStats();
+                return;
+            }
+            
+            tbody.innerHTML = servicesList.map(generateServiceRow).join('');
+            updateSelectionStats();
+        }
+
+        function updateSelectionStats() {
+            const totalServices = servicesList.length;
+            const selectedServices = document.querySelectorAll('.row-select:checked').length;
+            
+            document.getElementById('total-services').textContent = totalServices;
+            document.getElementById('selected-services').textContent = selectedServices;
+        }
+
+        function syncRowToModel(row, id) {
+            const service = servicesList.find(s => s.id === id);
+            if (!service) return;
+            
+            const inputs = row.querySelectorAll('.cell-input, .cell-textarea');
+            const name = inputs[0]?.value?.trim() || '';
+            const price = parseFloat(inputs[1]?.value) || 0;
+            const duration = parseInt(inputs[2]?.value) || 15;
+            const description = inputs[3]?.value?.trim() || '';
+            
+            // Validazione
+            let hasErrors = false;
+            
+            if (!name) {
+                inputs[0].classList.add('error-highlight');
+                hasErrors = true;
             } else {
-                console.log('localStorage vuoto o non valido, mantengo dati di default');
+                inputs[0].classList.remove('error-highlight');
             }
             
-        } catch (error) {
-            console.error('Errore nel parsing del localStorage:', error);
-            console.log('Mantengo dati di default');
-        }
-    } else {
-        console.log('Nessun dato nel localStorage, uso dati di default');
-    }
-    
-    // Rigenera sempre la tabella (con dati caricati o di default)
-    const tbody = document.getElementById('services-list');
-    if (tbody) {
-        tbody.innerHTML = generateServicesRows();
-        updateServiceStats();
-    }
-}
-
-// Funzione per bloccare input da tastiera sui campi durata ma mantenere freccette
-function blockKeyboardInputOnDuration() {
-    // Seleziona tutti i campi duration-input esistenti e futuri
-    document.addEventListener('keydown', function(e) {
-        // Controlla se l'elemento attivo è un campo duration-input
-        if (e.target && e.target.classList.contains('duration-input')) {
-            // Codici tasti permessi: Tab(9), Enter(13), Esc(27), Frecce(37-40), Backspace(8), Delete(46)
-            const allowedKeys = [9, 13, 27, 37, 38, 39, 40, 8, 46];
+            if (!validatePrice(price)) {
+                inputs[1].classList.add('error-highlight');
+                hasErrors = true;
+            } else {
+                inputs[1].classList.remove('error-highlight');
+            }
             
-            // Blocca tutti i numeri (48-57 e 96-105) e lettere
-            if ((e.keyCode >= 48 && e.keyCode <= 57) || // numeri riga superiore
-                (e.keyCode >= 96 && e.keyCode <= 105) || // numpad numeri
-                (e.keyCode >= 65 && e.keyCode <= 90) || // lettere
-                (e.keyCode >= 186 && e.keyCode <= 222)) { // simboli
+            if (!validateDuration(duration)) {
+                inputs[2].classList.add('error-highlight');
+                hasErrors = true;
+            } else {
+                inputs[2].classList.remove('error-highlight');
+            }
+            
+            if (hasErrors) return false;
+            
+            // Aggiorna modello
+            service.name = name;
+            service.price = price;
+            service.durationMinutes = duration;
+            service.description = description;
+            
+            saveServicesToStorage();
+            return true;
+        }
+
+        // Gestori eventi principali
+        function onAddService() {
+            const newService = {
+                id: serviceIdCounter++,
+                name: 'Nuovo Servizio ' + serviceIdCounter,
+                price: 25.00,
+                durationMinutes: 30,
+                description: ''
+            };
+            
+            servicesList.push(newService);
+            renderServicesTable();
+            saveServicesToStorage();
+            
+            setTimeout(() => {
+                const newRow = document.querySelector(`tr[data-service-id="${newService.id}"] input[type="text"]`);
+                if (newRow) newRow.focus();
+            }, 0);
+        }
+
+        function onDeleteSingle(id) {
+            const service = servicesList.find(s => s.id === id);
+            if (!service) return;
+            
+            if (!confirm('Eliminare questo servizio?')) return;
+            
+            servicesList = servicesList.filter(s => s.id !== id);
+            renderServicesTable();
+            saveServicesToStorage();
+        }
+
+        function onDeleteSelected() {
+            const ids = Array.from(document.querySelectorAll('.row-select:checked'))
+                .map(cb => parseInt(cb.closest('tr').dataset.serviceId));
+            
+            if (ids.length === 0) {
+                alert('Nessun servizio selezionato');
+                return;
+            }
+            
+            if (!confirm(`Eliminare ${ids.length} servizio/i selezionato/i?`)) return;
+            
+            servicesList = servicesList.filter(s => !ids.includes(s.id));
+            renderServicesTable();
+            saveServicesToStorage();
+            document.getElementById('select-all-services').checked = false;
+        }
+
+        function onSaveAll() {
+            // Sincronizza tutti i dati dalla UI
+            let allValid = true;
+            document.querySelectorAll('#services-list tr[data-service-id]').forEach(row => {
+                const isValid = syncRowToModel(row, parseInt(row.dataset.serviceId));
+                if (!isValid) allValid = false;
+            });
+            
+            if (!allValid) {
+                alert('⚠️ Correggi gli errori evidenziati prima di salvare');
+                return;
+            }
+            
+            saveServicesToStorage();
+            alert('Servizi salvati correttamente!');
+        }
+
+        // Event listeners
+        document.addEventListener('click', e => {
+            const deleteBtn = e.target.closest('.btn-delete-single');
+            if (deleteBtn) {
+                const id = parseInt(deleteBtn.dataset.serviceId);
+                onDeleteSingle(id);
+            }
+        });
+
+        document.addEventListener('input', e => {
+            if (e.target.classList.contains('cell-input') || 
+                e.target.classList.contains('cell-textarea') ||
+                e.target.classList.contains('cell-textarea')) {
+                const row = e.target.closest('tr');
+                if (row) {
+                    syncRowToModel(row, parseInt(row.dataset.serviceId));
+                }
+            }
+        });
+
+        // Controlli specifici per durata
+        document.addEventListener('keydown', e => {
+            if (e.target.classList.contains('duration-input')) {
+                const allowedKeys = [9, 13, 27, 37, 38, 39, 40, 8, 46];
+                
+                if ((e.keyCode >= 48 && e.keyCode <= 57) || 
+                    (e.keyCode >= 96 && e.keyCode <= 105) || 
+                    (e.keyCode >= 65 && e.keyCode <= 90) || 
+                    (e.keyCode >= 186 && e.keyCode <= 222)) {
+                    e.preventDefault();
+                    return false;
+                }
+                
+                if (!allowedKeys.includes(e.keyCode)) {
+                    e.preventDefault();
+                    return false;
+                }
+            }
+        });
+
+        ['paste', 'cut', 'copy'].forEach(event => {
+            document.addEventListener(event, function(e) {
+                if (e.target && e.target.classList.contains('duration-input')) {
+                    e.preventDefault();
+                }
+            });
+        });
+
+        document.addEventListener('wheel', function(e) {
+            if (e.target && e.target.classList.contains('duration-input') && e.target === document.activeElement) {
                 e.preventDefault();
-                e.stopPropagation();
-                return false;
+            }
+        });
+
+        document.addEventListener('change', e => {
+            if (e.target.id === 'select-all-services') {
+                const checked = e.target.checked;
+                document.querySelectorAll('.row-select').forEach(cb => cb.checked = checked);
+                updateSelectionStats();
             }
             
-            // Permetti solo i tasti nella lista allowedKeys
-            if (!allowedKeys.includes(e.keyCode)) {
-                e.preventDefault();
-                e.stopPropagation();
-                return false;
+            if (e.target.classList.contains('row-select')) {
+                updateSelectionStats();
             }
-        }
-    });
-    
-    // Blocca anche paste, cut e copy sui campi duration
-    document.addEventListener('paste', function(e) {
-        if (e.target && e.target.classList.contains('duration-input')) {
-            e.preventDefault();
-        }
-    });
-    
-    document.addEventListener('cut', function(e) {
-        if (e.target && e.target.classList.contains('duration-input')) {
-            e.preventDefault();
-        }
-    });
-    
-    document.addEventListener('copy', function(e) {
-        if (e.target && e.target.classList.contains('duration-input')) {
-            e.preventDefault();
-        }
-    });
-    
-    // Blocca wheel per evitare cambi accidentali con rotellina mouse
-    document.addEventListener('wheel', function(e) {
-        if (e.target && e.target.classList.contains('duration-input') && e.target === document.activeElement) {
-            e.preventDefault();
-        }
-    });
-}
+        });
 
-// Inizializza quando il popup servizi viene aperto
-document.addEventListener('DOMContentLoaded', function() {
-    // Auto-carica i servizi quando viene aperto il popup
-
-    blockKeyboardInputOnDuration();
-
-    document.addEventListener('click', function(e) {
-        if (e.target.getAttribute('data-action') === 'openPopup' && 
-            e.target.getAttribute('data-popup-type') === 'service') {
-            setTimeout(loadSavedServices, 100);
-        }
-    });
-});
+        document.addEventListener('DOMContentLoaded', () => {
+            loadServicesFromStorage();
+            renderServicesTable();
+            
+            document.getElementById('add-service-btn')?.addEventListener('click', onAddService);
+            document.getElementById('delete-selected-btn')?.addEventListener('click', onDeleteSelected);
+            document.getElementById('save-all-btn')?.addEventListener('click', onSaveAll);
+            
+            document.getElementById('select-all-services')?.addEventListener('change', e => {
+                const checked = e.target.checked;
+                document.querySelectorAll('.row-select').forEach(cb => cb.checked = checked);
+                updateSelectionStats();
+            });
+        });
+</script>
+</body>
+</html>
