@@ -21,15 +21,6 @@ header('Cache-Control: no-cache, no-store, must-revalidate');
 // Dati di esempio per gli orari
 $sampleSchedules = [
     [
-        'id' => 1,
-        'name' => 'Orario Bloccato',
-        'startDate' => '',
-        'endDate' => '',
-        'startTime' => '09:00',
-        'endTime' => '18:00',
-        'closureDays' => ['sabato', 'domenica']
-    ],
-    [
         'id' => 2,
         'name' => 'Orario Estivo',
         'startDate' => '2025-06-01',
@@ -46,18 +37,15 @@ $sampleSchedules = [
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestione Orari - Agenda</title>
-    <link rel="stylesheet" href="../assets/css/scrollbar.css">
     <style>
         :root {
             --primary-color: #000;
             --bg-color: #fff;
-            --gray-light: #f8f9fa;
             --gray-medium: #ccc;
             --gray-dark: #666;
-            --shadow: 0 2px 8px rgba(0,0,0,0.1);
-            --shadow-hover: 0 4px 12px rgba(0,0,0,0.2);
-            --border-radius: 4px;
-            --transition: all 0.2s ease;
+            --gray-darker: #333;
+            --border-radius: 6px;
+            --border-radius-small: 3px;
         }
         
         * { font-family: 'Courier New', monospace; box-sizing: border-box; }
@@ -75,130 +63,182 @@ $sampleSchedules = [
         }
         
         .popup-window-container {
-            max-width: 800px;
-            width: min(85vw, 100%);
+            max-width: 820px;
+            width: min(88vw, 100%);
             background: var(--bg-color);
-            border: 1px solid var(--primary-color);
+            border: 1px solid black;
             border-radius: var(--border-radius);
             overflow: hidden;
-            box-shadow: var(--shadow);
         }
         
         .window-header {
             background: var(--primary-color);
             color: var(--bg-color);
-            padding: 8px 12px;
+            padding: 12px 16px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
+            border-bottom: 1px solid black;
         }
         
         .window-title {
             flex: 1;
             text-align: center;
             margin: 0;
-            font: normal 14px/1 inherit;
+            font: normal 15px/1.2 inherit;
+            letter-spacing: 0.5px;
+            font-weight: 500;
         }
         
         button {
             background: var(--bg-color);
             color: var(--primary-color);
             border: 1px solid var(--primary-color);
-            border-radius: 2px;
+            border-radius: var(--border-radius-small);
             cursor: pointer;
             transition: var(--transition);
             font: inherit;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
         }
         
         button:hover {
             background: var(--primary-color);
             color: var(--bg-color);
-            box-shadow: var(--shadow-hover);
-            transform: translateY(-1px);
         }
         
-        .close-btn { padding: 4px 8px; font-size: 8px; }
-        .toolbar-btn { padding: 4px 8px; font-size: 8px; }
-        .action-btn { padding: 4px 8px; font-size: 8px; width: 100%; }
-        .save-btn { padding: 6px 12px; font-size: 10px; }
+        .close-btn { 
+            padding: 6px 10px; 
+            font-size: 9px; 
+            border-color: var(--gray-dark);
+            color: var(--gray-dark);
+        }
+        
+        .close-btn:hover {
+            background: var(--gray-dark);
+            color: var(--bg-color);
+        }
+        
+        .toolbar-btn { 
+            padding: 8px 12px; 
+            font-size: 9px; 
+            margin: 0 2px;
+            box-shadow: var(--shadow);
+        }
+        
+        .action-btn { 
+            padding: 6px 8px; 
+            font-size: 8px; 
+            width: 100%;
+            border-color: var(--gray-darker);
+        }
+        
+        .save-btn { 
+            padding: 10px 16px; 
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            box-shadow: var(--shadow);
+        }
         
         .schedules-toolbar {
             display: flex;
-            gap: 8px;
-            padding: 10px;
+            gap: 10px;
+            padding: 14px 16px;
             background: var(--gray-light);
             border-bottom: 1px solid var(--primary-color);
             justify-content: center;
         }
         
         .schedules-table-container {
-            padding: 8px;
+            padding: 12px;
             overflow-x: auto;
             background: var(--bg-color);
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
         }
         
         .excel-table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 320px;
-            border: 1px solid var(--primary-color);
-            border-radius: 3px;
+            min-width: 340px;
+            border: 1px solid black;
+            border-radius: var(--border-radius-small);
             overflow: hidden;
-            box-shadow: var(--shadow);
+            background: var(--bg-color);
         }
         
         .excel-table th {
             background: var(--primary-color);
             color: var(--bg-color);
-            padding: 6px 4px;
-            font-size: 9px;
+            padding: 10px 6px;
+            font-size: 10px;
             text-align: center;
-            position: sticky;
-            top: 0;
-            border-right: 1px solid var(--gray-dark);
-            font-weight: bold;
+            border-right: 1px solid white;
+            font-weight: 600;
+        }
+        
+        .excel-table th:last-child {
+            border-right: none;
         }
         
         .excel-table td {
-            padding: 4px;
-            font-size: 8px;
-            border-bottom: 1px solid var(--gray-medium);
-            border-right: 1px solid var(--gray-medium);
+            padding: 8px 6px;
+            font-size: 9px;
+            border-bottom: 1px solid var(--primary-color);
+            border-right: 1px solid var(--primary-color);
             text-align: center;
             vertical-align: middle;
-            height: 28px;
+            height: 32px;
+            background: var(--bg-color);
+            position: relative;
+        }
+        
+        .excel-table td:last-child {
+            border-right: none;
+        }
+        
+        .excel-table tr:nth-child(even) td {
+            background: rgba(0,0,0,0.02);
         }
         
         .excel-table tr:hover td {
-            background: var(--gray-light);
-            transition: var(--transition);
+            background: rgba(0,0,0,0.04) !important;
         }
         
         .cell-input, .closure-days-select {
             width: 100%;
-            padding: 4px;
-            border: 1px solid var(--gray-dark);
-            border-radius: 2px;
+            padding: 6px 8px;
+            border: 1px solid black;
+            border-radius: var(--border-radius-small);
             text-align: center;
-            font-size: 8px;
-            transition: var(--transition);
+            font-size: 9px;
             background: var(--bg-color);
+            font-family: inherit;
         }
         
         .cell-input:focus, .closure-days-select:focus {
             border-color: var(--primary-color);
-            border-width: 2px;
+            border-width: 3px;
             outline: none;
-            background: #f9f9f9;
+            background: rgba(0,0,0,0.02);
+            box-shadow: var(--shadow-focus), inset 0 1px 2px rgba(0,0,0,0.05), 0 0 0 1px var(--bg-color);
             transform: scale(1.02);
         }
         
         .cell-input:hover, .closure-days-select:hover {
-            border-color: var(--primary-color);
+            border-color: var(--gray-darker);
+            background: rgba(0,0,0,0.01);
         }
         
-        input[type="text"].cell-input { font-size: 9px; }
-        input[type="checkbox"] { width: 16px; height: 16px; }
+        input[type="text"].cell-input { font-size: 10px; font-weight: 500; }
+        input[type="checkbox"] { 
+            width: 18px; 
+            height: 18px; 
+            margin: 2px;
+            border-radius: var(--border-radius-small);
+            border: 1px solid black;
+        }
         
         /* Column widths using CSS Grid approach */
         .select-col { width: 40px; }
@@ -208,36 +248,22 @@ $sampleSchedules = [
         .closure-days-col { width: 120px; }
         .actions-col { width: 60px; }
         
-        .blocked-row {
-            background: #f0f0f0 !important;
-            opacity: 0.8;
-        }
-        
-        .blocked-row input[disabled], 
-        .blocked-row select[disabled] {
-            background: #e8e8e8 !important;
-            color: #999 !important;
-            cursor: not-allowed;
-            border-color: var(--gray-medium) !important;
-        }
-        
-        .blocked-row .empty-cell {
-            color: #999;
-            font-style: italic;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-        }
+
         
         .schedules-stats {
-            padding: 8px 12px;
-            font-size: 10px;
+            padding: 12px 16px;
+            font-size: 11px;
             display: flex;
-            gap: 12px;
-            background: var(--gray-light);
-            border-top: 1px solid var(--primary-color);
+            gap: 16px;
+            background: var(--bg-color);
+            border-top: 1px solid black;
             color: var(--primary-color);
+            font-weight: 500;
+        }
+        
+        .schedules-stats strong {
+            color: var(--gray-darker);
+            font-weight: 600;
         }
         
         /* Responsive Design */
@@ -261,7 +287,7 @@ $sampleSchedules = [
 
     <div class="popup-window-container">
         <div class="window-header">
-            <h1 class="window-title">🕒 Gestione Orario</h1>
+            <h1 class="window-title">Gestione Orario</h1>
             <button class="close-btn" onclick="window.close()" title="Chiudi finestra">✖</button>
         </div>
 
@@ -289,12 +315,11 @@ $sampleSchedules = [
                         </thead>
                         <tbody id="schedules-list">
                             <?php foreach ($sampleSchedules as $schedule): ?>
-                                <?php $isBlocked = $schedule['id'] === 1 && empty($schedule['startDate']) && empty($schedule['endDate']); ?>
-                                <tr data-schedule-id="<?= $schedule['id'] ?>" class="<?= $isBlocked ? 'blocked-row' : '' ?>">
-                                    <td><input type="checkbox" class="row-select" <?= $isBlocked ? 'disabled' : '' ?>></td>
-                                    <td><input type="text" value="<?= htmlspecialchars($schedule['name']) ?>" placeholder="Nome orario..." class="cell-input" <?= $isBlocked ? 'disabled' : '' ?>></td>
-                                    <td><?php if ($isBlocked): ?><span class="empty-cell">-</span><?php else: ?><input type="date" value="<?= $schedule['startDate'] ?>" class="cell-input"><?php endif; ?></td>
-                                    <td><?php if ($isBlocked): ?><span class="empty-cell">-</span><?php else: ?><input type="date" value="<?= $schedule['endDate'] ?>" class="cell-input"><?php endif; ?></td>
+                                <tr data-schedule-id="<?= $schedule['id'] ?>">
+                                    <td><input type="checkbox" class="row-select"></td>
+                                    <td><input type="text" value="<?= htmlspecialchars($schedule['name']) ?>" placeholder="Nome orario..." class="cell-input"></td>
+                                    <td><input type="date" value="<?= $schedule['startDate'] ?>" class="cell-input"></td>
+                                    <td><input type="date" value="<?= $schedule['endDate'] ?>" class="cell-input"></td>
                                     <td><input type="time" value="<?= $schedule['startTime'] ?>" class="cell-input"></td>
                                     <td><input type="time" value="<?= $schedule['endTime'] ?>" class="cell-input"></td>
                                     <td>
@@ -308,7 +333,7 @@ $sampleSchedules = [
                                             <option value="domenica" <?= in_array('domenica', $schedule['closureDays']) ? 'selected' : '' ?>>Domenica</option>
                                         </select>
                                     </td>
-                                    <td class="actions-cell"><?php if (!$isBlocked): ?><button class="action-btn btn-delete-single" data-schedule-id="<?= $schedule['id'] ?>" title="Elimina">🗑️</button><?php endif; ?></td>
+                                    <td class="actions-cell"><button class="action-btn btn-delete-single" data-schedule-id="<?= $schedule['id'] ?>" title="Elimina">🗑️</button></td>
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>
@@ -339,16 +364,16 @@ $sampleSchedules = [
 
         function escapeHtml(str){ if(str===null||str===undefined) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-        function generateScheduleRow(schedule){ const isBlocked = schedule.id===1 && (!schedule.startDate||!schedule.endDate); const disabled = isBlocked?'disabled':''; const startDateCell = isBlocked?'<td><span class="empty-cell">-</span></td>':`<td><input type="date" value="${escapeHtml(schedule.startDate)}" class="cell-input"></td>`; const endDateCell = isBlocked?'<td><span class="empty-cell">-</span></td>':`<td><input type="date" value="${escapeHtml(schedule.endDate)}" class="cell-input"></td>`; const closureOptions = ['lunedi','martedi','mercoledi','giovedi','venerdi','sabato','domenica'].map(d=>`<option value="${d}" ${Array.isArray(schedule.closureDays)&&schedule.closureDays.includes(d)?'selected':''}>${d.charAt(0).toUpperCase()+d.slice(1)}</option>`).join(''); const deleteBtn = isBlocked?'':`<button class="action-btn btn-delete-single" data-schedule-id="${schedule.id}">🗑️</button>`; return `
-            <tr data-schedule-id="${schedule.id}" class="${isBlocked?'blocked-row':''}">
-                <td><input type="checkbox" class="row-select" ${isBlocked?'disabled':''}></td>
-                <td><input type="text" value="${escapeHtml(schedule.name)}" class="cell-input" ${disabled}></td>
-                ${startDateCell}
-                ${endDateCell}
+        function generateScheduleRow(schedule){ const closureOptions = ['lunedi','martedi','mercoledi','giovedi','venerdi','sabato','domenica'].map(d=>`<option value="${d}" ${Array.isArray(schedule.closureDays)&&schedule.closureDays.includes(d)?'selected':''}>${d.charAt(0).toUpperCase()+d.slice(1)}</option>`).join(''); return `
+            <tr data-schedule-id="${schedule.id}">
+                <td><input type="checkbox" class="row-select"></td>
+                <td><input type="text" value="${escapeHtml(schedule.name)}" class="cell-input"></td>
+                <td><input type="date" value="${escapeHtml(schedule.startDate)}" class="cell-input"></td>
+                <td><input type="date" value="${escapeHtml(schedule.endDate)}" class="cell-input"></td>
                 <td><input type="time" value="${escapeHtml(schedule.startTime)}" class="cell-input"></td>
                 <td><input type="time" value="${escapeHtml(schedule.endTime)}" class="cell-input"></td>
                 <td><select multiple class="cell-select closure-days-select">${closureOptions}</select></td>
-                <td class="actions-cell">${deleteBtn}</td>
+                <td class="actions-cell"><button class="action-btn btn-delete-single" data-schedule-id="${schedule.id}">🗑️</button></td>
             </tr>`; }
 
         function renderSchedulesTable(){ const tbody = document.getElementById('schedules-list'); if(!tbody) return; if(!schedulesList.length){ tbody.innerHTML='<tr><td colspan="8">Nessun orario configurato</td></tr>'; updateSelectionStats(); return; } tbody.innerHTML = schedulesList.map(generateScheduleRow).join(''); updateSelectionStats(); }
@@ -359,9 +384,9 @@ $sampleSchedules = [
 
         function onAddSchedule(){ const newSchedule = { id: scheduleIdCounter++, name: 'Nuovo Orario '+scheduleIdCounter, startDate:'', endDate:'', startTime:'09:00', endTime:'18:00', closureDays:[] }; schedulesList.push(newSchedule); renderSchedulesTable(); saveSchedulesToStorage(); setTimeout(()=>document.querySelector(`tr[data-schedule-id="${newSchedule.id}"] input[type=text]`)?.focus(),0); }
 
-        function onDeleteSingle(id){ const schedule = schedulesList.find(s=>s.id===id); if(!schedule) return; if(schedule.id===1 && (!schedule.startDate||!schedule.endDate)){ alert('Non è possibile eliminare l\'orario bloccato'); return; } if(!confirm('Eliminare questo orario?')) return; schedulesList = schedulesList.filter(s=>s.id!==id); renderSchedulesTable(); saveSchedulesToStorage(); }
+        function onDeleteSingle(id){ const schedule = schedulesList.find(s=>s.id===id); if(!schedule) return; if(!confirm('Eliminare questo orario?')) return; schedulesList = schedulesList.filter(s=>s.id!==id); renderSchedulesTable(); saveSchedulesToStorage(); }
 
-        function onDeleteSelected(){ const ids = Array.from(document.querySelectorAll('.row-select:checked')).map(cb=>parseInt(cb.closest('tr').dataset.scheduleId)); if(ids.length===0){ alert('Nessun orario selezionato'); return; } if(ids.includes(1)){ const first = schedulesList.find(s=>s.id===1); if(first && (!first.startDate||!first.endDate)){ alert('Non è possibile eliminare l\'orario bloccato con date vuote dalla selezione'); return; } } if(!confirm(`Eliminare ${ids.length} orario/i selezionato/i?`)) return; schedulesList = schedulesList.filter(s=>!ids.includes(s.id)); renderSchedulesTable(); saveSchedulesToStorage(); document.getElementById('select-all-schedules').checked=false; }
+        function onDeleteSelected(){ const ids = Array.from(document.querySelectorAll('.row-select:checked')).map(cb=>parseInt(cb.closest('tr').dataset.scheduleId)); if(ids.length===0){ alert('Nessun orario selezionato'); return; } if(!confirm(`Eliminare ${ids.length} orario/i selezionato/i?`)) return; schedulesList = schedulesList.filter(s=>!ids.includes(s.id)); renderSchedulesTable(); saveSchedulesToStorage(); document.getElementById('select-all-schedules').checked=false; }
 
         function onSaveAll(){ document.querySelectorAll('#schedules-list tr[data-schedule-id]').forEach(r=>syncRowToModel(r,parseInt(r.dataset.scheduleId))); saveSchedulesToStorage(); alert('Orari salvati correttamente!'); }
 
@@ -409,10 +434,10 @@ $sampleSchedules = [
         function syncSchedulesFromUI(){ document.querySelectorAll('#schedules-list tr[data-schedule-id]').forEach(row=>syncRowToModel(row,parseInt(row.dataset.scheduleId))); }
 
         function onAddSchedule(){ const newSchedule={ id: scheduleIdCounter++, name: 'Nuovo Orario '+scheduleIdCounter, startDate:'', endDate:'', startTime:'09:00', endTime:'18:00', closureDays:[] }; schedulesList.push(newSchedule); renderSchedulesTable(); saveSchedulesToStorage(); setTimeout(()=>document.querySelector(`tr[data-schedule-id="${newSchedule.id}"] input[type=text]`)?.focus(),0); }
-        function onDeleteSingle(id){ const schedule = schedulesList.find(s=>s.id===id); if(!schedule) return; if(schedule.id===1 && (!schedule.startDate||!schedule.endDate)){ alert('Non è possibile eliminare l\'orario bloccato'); return; } if(!confirm('Eliminare questo orario?')) return; schedulesList = schedulesList.filter(s=>s.id!==id); renderSchedulesTable(); saveSchedulesToStorage(); }
-        function onDeleteSelected(){ const ids = getSelectedScheduleIds(); if(ids.length===0){ alert('Nessun orario selezionato'); return; } if(ids.includes(1)){ const first = schedulesList.find(s=>s.id===1); if(first && (!first.startDate||!first.endDate)){ alert('Non è possibile eliminare l\'orario bloccato con date vuote dalla selezione'); return; } } if(!confirm(`Eliminare ${ids.length} orario/i selezionato/i?`)) return; schedulesList = schedulesList.filter(s=>!ids.includes(s.id)); renderSchedulesTable(); saveSchedulesToStorage(); document.getElementById('select-all-schedules').checked=false; }
+        function onDeleteSingle(id){ const schedule = schedulesList.find(s=>s.id===id); if(!schedule) return; if(!confirm('Eliminare questo orario?')) return; schedulesList = schedulesList.filter(s=>s.id!==id); renderSchedulesTable(); saveSchedulesToStorage(); }
+        function onDeleteSelected(){ const ids = getSelectedScheduleIds(); if(ids.length===0){ alert('Nessun orario selezionato'); return; } if(!confirm(`Eliminare ${ids.length} orario/i selezionato/i?`)) return; schedulesList = schedulesList.filter(s=>!ids.includes(s.id)); renderSchedulesTable(); saveSchedulesToStorage(); document.getElementById('select-all-schedules').checked=false; }
         function onSaveAll(){ syncSchedulesFromUI(); saveSchedulesToStorage(); alert('Orari salvati correttamente!'); }
-        function onToggleSelectAll(e){ const checked = e.target.checked; document.querySelectorAll('.row-select:not([disabled])').forEach(cb=>cb.checked=checked); updateSelectionStats(); }
+        function onToggleSelectAll(e){ const checked = e.target.checked; document.querySelectorAll('.row-select').forEach(cb=>cb.checked=checked); updateSelectionStats(); }
 
         document.addEventListener('click', e=>{ const b = e.target.closest('.btn-delete-single'); if(b) onDeleteSingle(parseInt(b.dataset.scheduleId)); });
         document.addEventListener('input', e=>{ if(e.target.classList.contains('cell-input')){ const row = e.target.closest('tr'); if(!row) return; syncRowToModel(row, parseInt(row.dataset.scheduleId)); } });
