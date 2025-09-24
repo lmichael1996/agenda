@@ -46,70 +46,215 @@ $sampleSchedules = [
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestione Orari - Agenda</title>
+    <link rel="stylesheet" href="../assets/css/scrollbar.css">
     <style>
-        * { font-family:'Courier New'; }
-        body { margin:0; padding:0; background:#f5f5f5; color:#000; display:flex; align-items:center; justify-content:center; min-height:100vh; }
-        .popup-window-container { max-width:800px; width:85vw; margin:auto; background:#fff; border:1px solid #000; border-radius:4px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.15); }
-        .window-header{ background:#000; color:#fff; padding:6px 10px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #000; border-radius:4px 4px 0 0; }
-        .window-title{ margin:0; font-size:14px; font-weight:normal; flex:1; text-align:center; }
-        .close-btn{ background:#fff; color:#000; border:1px solid #000; padding:3px 6px; font-size:8px; cursor:pointer; border-radius:2px; box-shadow:0 1px 2px rgba(0,0,0,0.1); }
-        .close-btn:hover{ background:#000; color:#fff; box-shadow:0 4px 8px rgba(0,0,0,0.2); }
-
-        .schedules-toolbar{ display:flex; gap:12px; padding:8px 15px; background:#f8f9fa; border-bottom:1px solid #000; box-shadow:inset 0 -1px 3px rgba(0,0,0,0.05); justify-content:center; }
-        .toolbar-btn{ padding:3px 6px; font-size:8px; border:1px solid #000; background:#fff; color:#000; cursor:pointer; border-radius:2px; box-shadow:0 1px 2px rgba(0,0,0,0.1); margin:0 4px; }
-        .toolbar-btn:hover{ background:#000; color:#fff; box-shadow:0 4px 8px rgba(0,0,0,0.2); transform:translateY(-1px); }
-
-        .schedules-table-container{ padding:0 8px 8px 8px; overflow-x:auto; background:#fff; border-radius:0 0 4px 4px; }
-        .excel-table{ width:100%; border-collapse:collapse; min-width:320px; border:1px solid #000; border-radius:3px; overflow:hidden; box-shadow:0 2px 4px rgba(0,0,0,0.15); }
-        .excel-table thead th{ background:#000; color:#fff; padding:4px 2px; font-size:9px; text-align:center; position:sticky; top:0; border-bottom:1px solid #000; border-right:1px solid #333; font-weight:bold; }
-        .excel-table td{ padding:2px; font-size:8px; border-bottom:1px solid #ccc; border-right:1px solid #ccc; background:#fff; text-align:center; vertical-align:middle; }
-        .excel-table tr{ height:26px; }
-        .excel-table tr:hover td{ background:#f8f9fa; transition:background-color 0.2s ease; }
-
-        /* Input base styles */
-        .cell-input, .closure-days-select{ border:1px solid #666; padding:2px 3px; margin:1px; background:#fff; width:calc(100% - 2px); box-sizing:border-box; text-align:center; font-size:7px; border-radius:2px; box-shadow:inset 0 1px 1px rgba(0,0,0,0.1); transition:all 0.2s ease; }
-        .cell-input:focus, .closure-days-select:focus{ border:2px solid #000; outline:none; background:#f9f9f9; box-shadow:inset 0 1px 2px rgba(0,0,0,0.1), 0 0 3px rgba(0,0,0,0.2); transform:scale(1.02); }
+        :root {
+            --primary-color: #000;
+            --bg-color: #fff;
+            --gray-light: #f8f9fa;
+            --gray-medium: #ccc;
+            --gray-dark: #666;
+            --shadow: 0 2px 8px rgba(0,0,0,0.1);
+            --shadow-hover: 0 4px 12px rgba(0,0,0,0.2);
+            --border-radius: 4px;
+            --transition: all 0.2s ease;
+        }
         
-        /* Input specifici per tipo */
-        input[type="text"].cell-input{ text-align:center; padding:4px 6px; margin:2px; border-radius:3px; font-size:9px; }
-        input[type="time"].cell-input{ text-align:center; padding:3px 4px; margin:2px; font-size:8px; border-radius:3px; }
-        input[type="date"].cell-input{ text-align:center; padding:3px 4px; margin:2px; font-size:8px; border-radius:3px; }
-        input[type="number"].cell-input{ text-align:center; padding:3px 4px; margin:2px; border-radius:3px; font-size:8px; }
+        * { font-family: 'Courier New', monospace; box-sizing: border-box; }
         
-        /* Select dropdown */
-        select.closure-days-select{ text-align:center; padding:4px 6px; margin:2px; font-size:10px; border-radius:4px; width:calc(100% - 4px); }
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f5f5f5 url('../../assets/images/background.png') center center no-repeat fixed;
+            background-size: auto;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
         
-        /* Action buttons */
-        .actions-cell .action-btn{ border:1px solid #000; padding:3px 6px; cursor:pointer; background:#fff; color:#000; width:100%; box-sizing:border-box; font-size:8px; border-radius:2px; box-shadow:0 1px 2px rgba(0,0,0,0.1); }
-        .actions-cell .action-btn:hover{ background:#000; color:#fff; box-shadow:0 2px 4px rgba(0,0,0,0.15); transform:translateY(-1px); }
-
-        /* Date inputs specifici */
-        .start-date-col input[type="date"], .end-date-col input[type="date"]{ width:calc(100% - 4px); padding:4px 5px; margin:2px; font-size:9px; text-align:center; border-radius:3px; }
-
-        .select-col{ width:12px; text-align:center; padding:2px; }
-        .name-col{ width:80px; text-align:center; padding:1px; }
-        .start-date-col, .end-date-col{ width:8px; text-align:center; padding:1px; }
-        .start-time-col, .end-time-col{ width:10px; text-align:center; padding:1px; }
-        .closure-days-col{ width:100px; text-align:center; padding:2px; }
-        .actions-col{ width:16px; text-align:center; padding:1px; }
+        .popup-window-container {
+            max-width: 800px;
+            width: min(85vw, 100%);
+            background: var(--bg-color);
+            border: 1px solid var(--primary-color);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
         
-        /* Override specifici per colonne */
-        .name-col .cell-input{ text-align:center; padding:3px 6px; margin:1px; font-size:9px; }
-        .select-col input[type="checkbox"]{ width:14px; height:14px; margin:2px; border-radius:2px; }
-        .closure-days-col .closure-days-select{ font-size:8px; padding:2px 4px; }
+        .window-header {
+            background: var(--primary-color);
+            color: var(--bg-color);
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
         
-        /* Hover effects per input */
-        input.cell-input:hover{ border-color:#333; }
-        select.closure-days-select:hover{ border-color:#333; }
-
-        .schedules-stats{ padding:6px 10px; font-size:10px; display:flex; gap:10px; background:#f8f9fa; border-top:1px solid #000; color:#000; border-radius:0 0 4px 4px; box-shadow:inset 0 1px 3px rgba(0,0,0,0.05); }
-        .save-btn{ padding:4px 8px; font-size:10px; border:1px solid #000; background:#fff; color:#000; cursor:pointer; border-radius:2px; box-shadow:0 1px 2px rgba(0,0,0,0.1); }
-        .save-btn:hover{ background:#000; color:#fff; box-shadow:0 4px 8px rgba(0,0,0,0.2); transform:translateY(-1px); }
-
-        @media (max-width:800px){ .popup-window-container{ max-width:700px; width:90vw; } .excel-table{ min-width:350px; } }
-        @media (max-width:700px){ .popup-window-container{ max-width:600px; width:95vw; } .excel-table{ min-width:320px; } }
-        @media (max-width:600px){ .popup-window-container{ max-width:500px; width:98vw; } .excel-table{ min-width:300px; } }
-        @media (max-width:500px){ .popup-window-container{ width:100vw; margin:0; border-radius:0; } .excel-table{ min-width:280px; } }
+        .window-title {
+            flex: 1;
+            text-align: center;
+            margin: 0;
+            font: normal 14px/1 inherit;
+        }
+        
+        button {
+            background: var(--bg-color);
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+            border-radius: 2px;
+            cursor: pointer;
+            transition: var(--transition);
+            font: inherit;
+        }
+        
+        button:hover {
+            background: var(--primary-color);
+            color: var(--bg-color);
+            box-shadow: var(--shadow-hover);
+            transform: translateY(-1px);
+        }
+        
+        .close-btn { padding: 4px 8px; font-size: 8px; }
+        .toolbar-btn { padding: 4px 8px; font-size: 8px; }
+        .action-btn { padding: 4px 8px; font-size: 8px; width: 100%; }
+        .save-btn { padding: 6px 12px; font-size: 10px; }
+        
+        .schedules-toolbar {
+            display: flex;
+            gap: 8px;
+            padding: 10px;
+            background: var(--gray-light);
+            border-bottom: 1px solid var(--primary-color);
+            justify-content: center;
+        }
+        
+        .schedules-table-container {
+            padding: 8px;
+            overflow-x: auto;
+            background: var(--bg-color);
+        }
+        
+        .excel-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 320px;
+            border: 1px solid var(--primary-color);
+            border-radius: 3px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+        
+        .excel-table th {
+            background: var(--primary-color);
+            color: var(--bg-color);
+            padding: 6px 4px;
+            font-size: 9px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            border-right: 1px solid var(--gray-dark);
+            font-weight: bold;
+        }
+        
+        .excel-table td {
+            padding: 4px;
+            font-size: 8px;
+            border-bottom: 1px solid var(--gray-medium);
+            border-right: 1px solid var(--gray-medium);
+            text-align: center;
+            vertical-align: middle;
+            height: 28px;
+        }
+        
+        .excel-table tr:hover td {
+            background: var(--gray-light);
+            transition: var(--transition);
+        }
+        
+        .cell-input, .closure-days-select {
+            width: 100%;
+            padding: 4px;
+            border: 1px solid var(--gray-dark);
+            border-radius: 2px;
+            text-align: center;
+            font-size: 8px;
+            transition: var(--transition);
+            background: var(--bg-color);
+        }
+        
+        .cell-input:focus, .closure-days-select:focus {
+            border-color: var(--primary-color);
+            border-width: 2px;
+            outline: none;
+            background: #f9f9f9;
+            transform: scale(1.02);
+        }
+        
+        .cell-input:hover, .closure-days-select:hover {
+            border-color: var(--primary-color);
+        }
+        
+        input[type="text"].cell-input { font-size: 9px; }
+        input[type="checkbox"] { width: 16px; height: 16px; }
+        
+        /* Column widths using CSS Grid approach */
+        .select-col { width: 40px; }
+        .name-col { width: 120px; }
+        .start-date-col, .end-date-col { width: 100px; }
+        .start-time-col, .end-time-col { width: 80px; }
+        .closure-days-col { width: 120px; }
+        .actions-col { width: 60px; }
+        
+        .blocked-row {
+            background: #f0f0f0 !important;
+            opacity: 0.8;
+        }
+        
+        .blocked-row input[disabled], 
+        .blocked-row select[disabled] {
+            background: #e8e8e8 !important;
+            color: #999 !important;
+            cursor: not-allowed;
+            border-color: var(--gray-medium) !important;
+        }
+        
+        .blocked-row .empty-cell {
+            color: #999;
+            font-style: italic;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
+        
+        .schedules-stats {
+            padding: 8px 12px;
+            font-size: 10px;
+            display: flex;
+            gap: 12px;
+            background: var(--gray-light);
+            border-top: 1px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .popup-window-container { width: 95vw; }
+            .schedules-toolbar { flex-wrap: wrap; gap: 6px; }
+        }
+        
+        @media (max-width: 480px) {
+            .popup-window-container { 
+                width: 100vw; 
+                border-radius: 0; 
+                margin: 0;
+            }
+            .excel-table { min-width: 300px; }
+            .schedules-toolbar { padding: 8px; }
+        }
     </style>
 </head>
 <body>
