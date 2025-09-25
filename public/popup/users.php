@@ -30,7 +30,39 @@ $sampleUsers = [];
     <link rel="stylesheet" href="../../assets/css/popup.css">
     <link rel="stylesheet" href="../../assets/css/scrollbar.css">
     <style>
-
+        .username-col {
+            width: 120px !important;
+            min-width: 120px;
+        }
+        
+        .password-col {
+            width: 200px !important;
+            min-width: 200px;
+        }
+        
+        .username-col input,
+        .password-col input {
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        /* Migliora e ingrandisce il select dello stato */
+        .status-select {
+            width: 100%;
+            padding: 4px 8px;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: white;
+            cursor: pointer;
+            min-height: 28px;
+        }
+        
+        .status-select:focus {
+            border-color: #007bff;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+        }
     </style>
 </head>
 <body>
@@ -44,8 +76,8 @@ $sampleUsers = [];
             <div class="schedules-section">
 
                 <div class="schedules-toolbar">
-                    <button id="add-user-btn" class="toolbar-btn">➕ Nuovo Utente</button>
-                    <button id="delete-selected-btn" class="toolbar-btn">🗑️ Elimina Selezionati</button>
+                    <button id="add-user-btn" class="toolbar-btn">Nuovo Utente</button>
+                    <button id="delete-selected-btn" class="toolbar-btn">Elimina Selezionati</button>
                 </div>
 
                 <div class="schedules-table-container">
@@ -53,8 +85,8 @@ $sampleUsers = [];
                         <thead>
                             <tr>
                                 <th class="select-col"><input type="checkbox" id="select-all-users"></th>
-                                <th class="username-col">Username</th>
-                                <th class="password-col">Password</th>
+                                <th class="username-col" style="width: 120px;">Username</th>
+                                <th class="password-col" style="width: 200px;">Password</th>
                                 <th class="color-col">Colore</th>
                                 <th class="status-col">Stato</th>
                                 <th class="actions-col">Azioni</th>
@@ -68,12 +100,11 @@ $sampleUsers = [];
 
                 <div class="users-stats">
                     <span>Totale utenti: <strong id="total-users"></strong></span>
-                    <span>Attivi: <strong id="active-users"></strong></span>
                     <span>Selezionati: <strong id="selected-users">0</strong></span>
                 </div>
 
                 <div style="margin-top:20px; margin-bottom:20px; text-align:center;">
-                    <button id="save-all-btn" class="save-btn">💾 Salva Tutti gli Utenti</button>
+                    <button id="save-all-btn" class="save-btn">Salva Tutti gli Utenti</button>
                 </div>
 
             </div>
@@ -92,11 +123,14 @@ $sampleUsers = [];
         }
 
         function generateUserRow(user) {
+            const isNewUser = String(user.id).startsWith('temp_');
+            const passwordPlaceholder = isNewUser ? "Inserisci password" : "Vuoto = mantieni";
+            
             return `
                 <tr data-user-id="${user.id}">
                     <td><input type="checkbox" class="row-select"></td>
                     <td><input type="text" value="${escapeHtml(user.username)}" class="cell-input"></td>
-                    <td><input type="password" value="" placeholder="Password" class="cell-input"></td>
+                    <td><input type="password" value="" placeholder="${passwordPlaceholder}" class="cell-input"></td>
                     <td><input type="color" value="${escapeHtml(user.color)}" class="cell-color"></td>
                     <td>
                         <select class="status-select">
@@ -105,7 +139,7 @@ $sampleUsers = [];
                         </select>
                     </td>
                     <td class="actions-cell">
-                        <button class="action-btn btn-delete-single" data-user-id="${user.id}" title="Elimina">🗑️</button>
+                        <button class="action-btn btn-delete-single" data-user-id="${user.id}" title="Elimina">Elimina</button>
                     </td>
                 </tr>
             `;
@@ -127,10 +161,8 @@ $sampleUsers = [];
 
         function updateSelectionStats() {
             const totalUsers = usersList.length;
-            const activeUsers = usersList.filter(u => u.is_active == 1).length;
             const selectedUsers = document.querySelectorAll('.row-select:checked').length;
             document.getElementById('total-users').textContent = totalUsers;
-            document.getElementById('active-users').textContent = activeUsers;
             document.getElementById('selected-users').textContent = selectedUsers;
         }
 
@@ -183,28 +215,38 @@ $sampleUsers = [];
             const rows = document.querySelectorAll('#users-table tbody tr');
             const users = [];
             
-            rows.forEach(row => {
+            rows.forEach((row, index) => {
                 if (row.cells.length < 6) return; // Salta righe vuote
                 
                 const username = row.cells[1].querySelector('input').value.trim();
                 const password = row.cells[2].querySelector('input').value.trim();
                 const color = row.cells[3].querySelector('input').value;
                 const isActive = row.cells[4].querySelector('select').value === 'attivo' ? 1 : 0;
+                const userId = row.dataset.userId;
                 
                 if (username) { // Solo se c'è un username
-                    users.push({
+                    const userData = {
                         username,
-                        password,
                         color,
                         is_active: isActive
-                    });
+                    };
+                    
+                    // Includi password solo se è stata inserita
+                    if (password) {
+                        userData.password = password;
+                    }
+                    
+                    // Se è un utente esistente, includi l'ID
+                    if (userId && !userId.startsWith('temp_')) {
+                        userData.id = userId;
+                    }
+                    
+                    users.push(userData);
                 }
             });
             
             return users;
         }
-
-
 
         function validateUsersData(users) {
             const errors = [];
@@ -215,14 +257,15 @@ $sampleUsers = [];
                 }
                 
                 // Controllo password solo se è stata inserita
-                if (user.password || user.confirmPassword) {
-                    if (user.password !== user.confirmPassword) {
-                        errors.push(`Riga ${index + 1}: Le password non coincidono`);
-                    }
-                    
-                    if (user.password && user.password.length < 4) {
+                if (user.password) {
+                    if (user.password.length < 4) {
                         errors.push(`Riga ${index + 1}: Password troppo corta (minimo 4 caratteri)`);
                     }
+                }
+                
+                // Per nuovi utenti (senza ID), la password è obbligatoria
+                if (!user.id && !user.password) {
+                    errors.push(`Riga ${index + 1}: Password obbligatoria per nuovi utenti`);
                 }
             });
             
@@ -256,17 +299,14 @@ $sampleUsers = [];
             
             const saveBtn = document.getElementById('save-all-btn');
             const originalText = saveBtn.textContent;
-            saveBtn.textContent = '💾 Salvataggio...';
+            saveBtn.textContent = 'Salvataggio...';
             saveBtn.disabled = true;
             
             try {
-                // Rimuovi il campo confirmPassword prima dell'invio
-                const usersToSave = users.map(({confirmPassword, ...user}) => user);
-                
-                const result = await saveAllUsers(usersToSave);
+                const result = await saveAllUsers(users);
                 
                 if (result.success) {
-                    alert('✅ Utenti salvati con successo!');
+                    alert('Utenti salvati con successo!');
                     // Ricarica i dati dal database
                     await loadUsersFromApi();
                     renderUsersTable();
@@ -276,11 +316,11 @@ $sampleUsers = [];
                         window.close();
                     }, 500);
                 } else {
-                    alert('❌ Errore durante il salvataggio:\n' + (result.error || 'Errore sconosciuto'));
+                    alert('Errore durante il salvataggio:\n' + (result.error || 'Errore sconosciuto'));
                 }
             } catch (error) {
                 console.error('Errore salvataggio:', error);
-                alert('❌ Errore di connessione durante il salvataggio');
+                alert('Errore di connessione durante il salvataggio');
             } finally {
                 saveBtn.textContent = originalText;
                 saveBtn.disabled = false;
@@ -309,15 +349,7 @@ $sampleUsers = [];
             }
         });
 
-        // Event listener per controllo password in tempo reale
-        document.addEventListener('input', e => {
-            if (e.target.type === 'password') {
-                const row = e.target.closest('tr');
-                if (row) {
-                    setTimeout(() => checkPasswordMatch(row), 100); // Piccolo delay per UX migliore
-                }
-            }
-        });
+
 
         document.addEventListener('DOMContentLoaded', async () => {
             await loadUsersFromApi();

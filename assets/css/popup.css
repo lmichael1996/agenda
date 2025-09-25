@@ -342,8 +342,8 @@ input[type="checkbox"]:checked {
 .closure-days-col { width: 100px; }
 
 /* Colonne specifiche users */
-.username-col { width: 160px; }
-.password-col, .confirm-password-col { width: 120px; }
+.username-col { width: 120px; }
+.password-col, .confirm-password-col { width: 180px; }
 .color-col { width: 60px; }
 .status-col { width: 100px; }
 
@@ -355,24 +355,24 @@ input[type="checkbox"]:checked {
 
 /* Stili per controlli orario schedule */
 .hour-input {
-    width: 44px;
-    height: 28px;
+    width: 36px;
+    height: 24px;
     display: inline-block;
     text-align: center;
     border: 1px solid #ddd;
     border-radius: 2px;
-    font-size: 13px;
-    padding: 2px;
+    font-size: 11px;
+    padding: 1px;
 }
 
 .minute-select {
-    width: 44px;
-    height: 27px;
+    width: 36px;
+    height: 24px;
     display: inline-block;
     margin-left: 2px;
     border: 1px solid #ddd;
     border-radius: 2px;
-    font-size: 13px;
+    font-size: 11px;
     text-align: center;
     background: white;
 }
@@ -384,6 +384,54 @@ input[type="checkbox"]:checked {
 
 .lunch-time-row.hidden {
     display: none;
+}
+
+/* Stili specifici per schedule popup */
+.schedule-calendar-body {
+    padding: 8px;
+}
+
+.schedule-form {
+    max-width: 600px;
+    margin: auto;
+}
+
+.schedule-table {
+    width: 100%;
+    margin-bottom: 24px;
+}
+
+.schedule-table-th {
+    font-size: 13px;
+    border: 1px solid white;
+}
+
+.schedule-checkbox {
+    height: 28px;
+    width: 28px;
+}
+
+.schedule-closure-select {
+    width: 98%;
+    min-height: 80px;
+    font-size: 13px;
+}
+
+.schedule-table .cell-select {
+    height: 20px;
+    font-size: 11px;
+    padding: 4px 8px;
+}
+
+.schedule-save-container {
+    text-align: center;
+    border-top: 1px solid #ccc;
+    padding-top: 12px;
+}
+
+.schedule-save-btn {
+    font-size: 15px;
+    padding: 16px 32px;
 }
 
 .schedules-stats {

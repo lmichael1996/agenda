@@ -17,17 +17,6 @@ if (!isset($_SESSION['user_id'])) {
 header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: SAMEORIGIN');
 header('Cache-Control: no-cache, no-store, must-revalidate');
-
-// Orario singleton - valori di default
-$defaultSchedule = [
-    'name' => 'Orario Standard',
-    'startTime' => '09:00',
-    'endTime' => '18:00',
-    'lunchBreakEnabled' => false,
-    'lunchStartTime' => '12:00',
-    'lunchEndTime' => '13:00',
-    'closureDays' => ['sabato', 'domenica']
-];
 ?>
 <!DOCTYPE html>
 <html lang="it">
@@ -43,252 +32,249 @@ $defaultSchedule = [
         <div class="window-header">
             <span class="header-title">Gestione Orario</span>
         </div>
-        <div class="calendar-body" style="padding:8px;">
-            <form id="schedule-form" style="max-width:600px; margin:auto;">
-                <table class="excel-table" style="width:100%; margin-bottom:24px;">
+        <div class="calendar-body schedule-calendar-body">
+            <form id="schedule-form" class="schedule-form">
+                <table class="excel-table schedule-table">
                     <tbody>
                         <tr>
-                            <th style="font-size:13px; border: 1px solid white;">Ora Inizio</th>
+                            <th class="schedule-table-th">Ora Inizio</th>
                             <td>
-                                <input type="number" id="schedule-start-hour" class="hour-input" min="0" max="23" value="<?= explode(':', $defaultSchedule['startTime'])[0] ?>"> :
+                                <input type="number" id="schedule-start-hour" class="hour-input" min="0" max="23" value="9"> :
                                 <select id="schedule-start-minute" class="minute-select">
                                     <?php foreach (["00","15","30","45"] as $m): ?>
-                                        <option value="<?= $m ?>" <?= (explode(':', $defaultSchedule['startTime'])[1] == $m ? 'selected' : '') ?>><?= $m ?></option>
+                                        <option value="<?= $m ?>"><?= $m ?></option>
                                     <?php endforeach; ?>
                                 </select>
                             </td>
                         </tr>
                         <tr>
-                            <th style="font-size:13px; border: 1px solid white;">Ora Fine</th>
+                            <th class="schedule-table-th">Ora Fine</th>
                             <td>
-                                <input type="number" id="schedule-end-hour" class="hour-input" min="0" max="23" value="<?= explode(':', $defaultSchedule['endTime'])[0] ?>"> :
+                                <input type="number" id="schedule-end-hour" class="hour-input" min="0" max="23" value="18"> :
                                 <select id="schedule-end-minute" class="minute-select">
                                     <?php foreach (["00","15","30","45"] as $m): ?>
-                                        <option value="<?= $m ?>" <?= (explode(':', $defaultSchedule['endTime'])[1] == $m ? 'selected' : '') ?>><?= $m ?></option>
+                                        <option value="<?= $m ?>"><?= $m ?></option>
                                     <?php endforeach; ?>
                                 </select>
                             </td>
                         </tr>
                         <tr>
-                            <th style="font-size:13px; border: 1px solid white;">Pausa Pranzo</th>
-                            <td><input type="checkbox" id="lunch-break-enabled" class="cell-input" style="height:28px; width:28px;"></td>
+                            <th class="schedule-table-th">Pausa Pranzo</th>
+                            <td><input type="checkbox" id="lunch-break-enabled" class="cell-input schedule-checkbox"></td>
                         </tr>
                         <tr class="lunch-time-row" id="lunch-start-row">
-                            <th style="font-size:13px; border: 1px solid white;">Inizio Pausa</th>
+                            <th class="schedule-table-th">Inizio Pausa</th>
                             <td>
-                                <input type="number" id="lunch-start-hour" class="hour-input" min="0" max="23" value="<?= explode(':', $defaultSchedule['lunchStartTime'])[0] ?>"> :
+                                <input type="number" id="lunch-start-hour" class="hour-input" min="0" max="23" value="12"> :
                                 <select id="lunch-start-minute" class="minute-select">
                                     <?php foreach (["00","15","30","45"] as $m): ?>
-                                        <option value="<?= $m ?>" <?= (explode(':', $defaultSchedule['lunchStartTime'])[1] == $m ? 'selected' : '') ?>><?= $m ?></option>
+                                        <option value="<?= $m ?>"><?= $m ?></option>
                                     <?php endforeach; ?>
                                 </select>
                             </td>
                         </tr>
                         <tr class="lunch-time-row" id="lunch-end-row">
-                            <th style="font-size:13px; border: 1px solid white;">Fine Pausa</th>
+                            <th class="schedule-table-th">Fine Pausa</th>
                             <td>
-                                <input type="number" id="lunch-end-hour" class="hour-input" min="0" max="23" value="<?= explode(':', $defaultSchedule['lunchEndTime'])[0] ?>"> :
+                                <input type="number" id="lunch-end-hour" class="hour-input" min="0" max="23" value="13"> :
                                 <select id="lunch-end-minute" class="minute-select">
                                     <?php foreach (["00","15","30","45"] as $m): ?>
-                                        <option value="<?= $m ?>" <?= (explode(':', $defaultSchedule['lunchEndTime'])[1] == $m ? 'selected' : '') ?>><?= $m ?></option>
+                                        <option value="<?= $m ?>"><?= $m ?></option>
                                     <?php endforeach; ?>
                                 </select>
                             </td>
                         </tr>
                         <tr>
-                            <th style="font-size:13px; border: 1px solid white;">Giorni Chiusura</th>
+                            <th class="schedule-table-th">Fuso Orario</th>
                             <td>
-                                <select multiple id="schedule-closure-days" class="cell-select" style="width:98%; min-height:80px; font-size:13px;">
-                                    <option value="lunedi" <?= in_array('lunedi', $defaultSchedule['closureDays']) ? 'selected' : '' ?>>Lunedì</option>
-                                    <option value="martedi" <?= in_array('martedi', $defaultSchedule['closureDays']) ? 'selected' : '' ?>>Martedì</option>
-                                    <option value="mercoledi" <?= in_array('mercoledi', $defaultSchedule['closureDays']) ? 'selected' : '' ?>>Mercoledì</option>
-                                    <option value="giovedi" <?= in_array('giovedi', $defaultSchedule['closureDays']) ? 'selected' : '' ?>>Giovedì</option>
-                                    <option value="venerdi" <?= in_array('venerdi', $defaultSchedule['closureDays']) ? 'selected' : '' ?>>Venerdì</option>
-                                    <option value="sabato" <?= in_array('sabato', $defaultSchedule['closureDays']) ? 'selected' : '' ?>>Sabato</option>
-                                    <option value="domenica" <?= in_array('domenica', $defaultSchedule['closureDays']) ? 'selected' : '' ?>>Domenica</option>
+                                <select id="schedule-timezone" class="cell-select">
+                                    <option value="UTC">UTC (GMT+0)</option>
+                                    <optgroup label="Europa">
+                                        <option value="Europe/London">Londra (GMT+0/+1)</option>
+                                        <option value="Europe/Paris">Parigi (GMT+1/+2)</option>
+                                        <option value="Europe/Berlin">Berlino (GMT+1/+2)</option>
+                                        <option value="Europe/Rome" selected>Roma (GMT+1/+2)</option>
+                                        <option value="Europe/Madrid">Madrid (GMT+1/+2)</option>
+                                        <option value="Europe/Amsterdam">Amsterdam (GMT+1/+2)</option>
+                                        <option value="Europe/Vienna">Vienna (GMT+1/+2)</option>
+                                        <option value="Europe/Zurich">Zurigo (GMT+1/+2)</option>
+                                        <option value="Europe/Athens">Atene (GMT+2/+3)</option>
+                                        <option value="Europe/Helsinki">Helsinki (GMT+2/+3)</option>
+                                        <option value="Europe/Moscow">Mosca (GMT+3)</option>
+                                    </optgroup>
+                                    <optgroup label="Nord America">
+                                        <option value="America/Los_Angeles">Los Angeles (GMT-8/-7)</option>
+                                        <option value="America/Denver">Denver (GMT-7/-6)</option>
+                                        <option value="America/Chicago">Chicago (GMT-6/-5)</option>
+                                        <option value="America/New_York">New York (GMT-5/-4)</option>
+                                        <option value="America/Toronto">Toronto (GMT-5/-4)</option>
+                                        <option value="America/Vancouver">Vancouver (GMT-8/-7)</option>
+                                    </optgroup>
+                                    <optgroup label="Sud America">
+                                        <option value="America/Sao_Paulo">San Paolo (GMT-3)</option>
+                                        <option value="America/Buenos_Aires">Buenos Aires (GMT-3)</option>
+                                        <option value="America/Lima">Lima (GMT-5)</option>
+                                        <option value="America/Mexico_City">Città del Messico (GMT-6/-5)</option>
+                                    </optgroup>
+                                    <optgroup label="Asia">
+                                        <option value="Asia/Tokyo">Tokyo (GMT+9)</option>
+                                        <option value="Asia/Seoul">Seoul (GMT+9)</option>
+                                        <option value="Asia/Shanghai">Shanghai (GMT+8)</option>
+                                        <option value="Asia/Hong_Kong">Hong Kong (GMT+8)</option>
+                                        <option value="Asia/Singapore">Singapore (GMT+8)</option>
+                                        <option value="Asia/Bangkok">Bangkok (GMT+7)</option>
+                                        <option value="Asia/Mumbai">Mumbai (GMT+5:30)</option>
+                                        <option value="Asia/Dubai">Dubai (GMT+4)</option>
+                                        <option value="Asia/Tehran">Tehran (GMT+3:30/+4:30)</option>
+                                    </optgroup>
+                                    <optgroup label="Africa">
+                                        <option value="Africa/Cairo">Il Cairo (GMT+2)</option>
+                                        <option value="Africa/Johannesburg">Johannesburg (GMT+2)</option>
+                                        <option value="Africa/Lagos">Lagos (GMT+1)</option>
+                                        <option value="Africa/Casablanca">Casablanca (GMT+0/+1)</option>
+                                    </optgroup>
+                                    <optgroup label="Oceania">
+                                        <option value="Australia/Sydney">Sydney (GMT+10/+11)</option>
+                                        <option value="Australia/Melbourne">Melbourne (GMT+10/+11)</option>
+                                        <option value="Australia/Perth">Perth (GMT+8)</option>
+                                        <option value="Pacific/Auckland">Auckland (GMT+12/+13)</option>
+                                        <option value="Pacific/Honolulu">Honolulu (GMT-10)</option>
+                                    </optgroup>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="schedule-table-th">Giorni Chiusura</th>
+                            <td>
+                                <select multiple id="schedule-closure-days" class="cell-select schedule-closure-select">
+                                    <option value="lunedi">Lunedì</option>
+                                    <option value="martedi">Martedì</option>
+                                    <option value="mercoledi">Mercoledì</option>
+                                    <option value="giovedi">Giovedì</option>
+                                    <option value="venerdi">Venerdì</option>
+                                    <option value="sabato">Sabato</option>
+                                    <option value="domenica">Domenica</option>
                                 </select>
                             </td>
                         </tr>
                     </tbody>
                 </table>
-                <div style="text-align:center; border-top: 1px solid #ccc; padding-top: 12px;">
-                    <button class="save-btn" id="save-schedule-btn" style="font-size:15px; padding:16px 32px;">💾 Salva Orario</button>
+                <div class="schedule-save-container">
+                    <button class="save-btn schedule-save-btn" id="save-schedule-btn">Salva Orario</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <script>
-        // Gestione orario singleton - stile note.php
-        const STORAGE_KEY = 'calendar_schedule_singleton';
+    <script type="module">
+        import { fetchSchedule, saveSchedule, convertFromApiFormat } from '../../api/frontend/schedule-api.js';
         
-        // Dati di default dal server
-        let currentSchedule = <?= json_encode($defaultSchedule) ?>;
-        
-        // Carica dati dal localStorage
-        function loadScheduleFromStorage() {
+        let schedule = {};
+        const closePopup = (msg) => { 
+            if(msg) alert(msg); 
+            setTimeout(() => window.close(), 200); 
+        };
+
+        // API functions
+        const loadData = async () => {
             try {
-                const raw = localStorage.getItem(STORAGE_KEY);
-                if (raw) {
-                    const parsed = JSON.parse(raw);
-                    if (parsed && typeof parsed === 'object') {
-                        currentSchedule = { ...currentSchedule, ...parsed };
-                    }
-                }
-            } catch (e) {
-                console.warn('Impossibile leggere storage orario:', e);
-            }
-        }
-        
-        // Salva dati nel localStorage
-        function saveScheduleToStorage() {
-            try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(currentSchedule));
-            } catch (e) {
-                console.error('Errore salvataggio storage orario:', e);
-            }
-        }
-        
-        // Gestisci visibilità campi pausa pranzo
-        function toggleLunchBreakFields() {
-            const isEnabled = document.getElementById('lunch-break-enabled').checked;
-            const lunchRows = document.querySelectorAll('.lunch-time-row');
-            
-            lunchRows.forEach(row => {
-                if (isEnabled) {
-                    row.classList.remove('hidden');
+                const res = await fetchSchedule();
+                if (res.success && res.data) {
+                    schedule = convertFromApiFormat(res.data);
                 } else {
-                    row.classList.add('hidden');
+                    // Se non ci sono dati nel database, chiudi finestra
+                    closePopup('Nessun orario configurato');
+                    return;
                 }
-            });
-        }
+            } catch (e) { 
+                closePopup('Errore caricamento: ' + e.message); 
+            }
+        };
         
-        // Carica i dati dai campi del form
-        function loadFormData() {
-            // Gestisci ora inizio
-            const [startHour, startMinute] = (currentSchedule.startTime || '09:00').split(':');
-            document.getElementById('schedule-start-hour').value = parseInt(startHour);
-            document.getElementById('schedule-start-minute').value = startMinute;
-            
-            // Gestisci ora fine
-            const [endHour, endMinute] = (currentSchedule.endTime || '18:00').split(':');
-            document.getElementById('schedule-end-hour').value = parseInt(endHour);
-            document.getElementById('schedule-end-minute').value = endMinute;
-            
-            // Gestisci pausa pranzo
-            document.getElementById('lunch-break-enabled').checked = currentSchedule.lunchBreakEnabled || false;
-            
-            const [lunchStartHour, lunchStartMinute] = (currentSchedule.lunchStartTime || '12:00').split(':');
-            document.getElementById('lunch-start-hour').value = parseInt(lunchStartHour);
-            document.getElementById('lunch-start-minute').value = lunchStartMinute;
-            
-            const [lunchEndHour, lunchEndMinute] = (currentSchedule.lunchEndTime || '13:00').split(':');
-            document.getElementById('lunch-end-hour').value = parseInt(lunchEndHour);
-            document.getElementById('lunch-end-minute').value = lunchEndMinute;
-            
-            // Giorni di chiusura
-            const closureSelect = document.getElementById('schedule-closure-days');
-            Array.from(closureSelect.options).forEach(option => {
-                option.selected = currentSchedule.closureDays && currentSchedule.closureDays.includes(option.value);
-            });
-            
-            // Aggiorna visibilità campi pausa pranzo
-            toggleLunchBreakFields();
-        }
-        
-        // Salva i dati dai campi del form
-        function saveFormData() {
-            // Costruisci orari
-            const startHour = document.getElementById('schedule-start-hour').value.padStart(2, '0');
-            const startMinute = document.getElementById('schedule-start-minute').value;
-            currentSchedule.startTime = `${startHour}:${startMinute}`;
-            
-            const endHour = document.getElementById('schedule-end-hour').value.padStart(2, '0');
-            const endMinute = document.getElementById('schedule-end-minute').value;
-            currentSchedule.endTime = `${endHour}:${endMinute}`;
-            
-            // Salva pausa pranzo
-            currentSchedule.lunchBreakEnabled = document.getElementById('lunch-break-enabled').checked;
-            
-            const lunchStartHour = document.getElementById('lunch-start-hour').value.padStart(2, '0');
-            const lunchStartMinute = document.getElementById('lunch-start-minute').value;
-            currentSchedule.lunchStartTime = `${lunchStartHour}:${lunchStartMinute}`;
-            
-            const lunchEndHour = document.getElementById('lunch-end-hour').value.padStart(2, '0');
-            const lunchEndMinute = document.getElementById('lunch-end-minute').value;
-            currentSchedule.lunchEndTime = `${lunchEndHour}:${lunchEndMinute}`;
-            
-            // Giorni di chiusura
-            const closureSelect = document.getElementById('schedule-closure-days');
-            currentSchedule.closureDays = Array.from(closureSelect.selectedOptions).map(opt => opt.value);
-            
-            saveScheduleToStorage();
-        }
-        
-        // Validazione base
-        function validateForm() {
-            // Valida orario di lavoro
-            const startTime = `${document.getElementById('schedule-start-hour').value.padStart(2, '0')}:${document.getElementById('schedule-start-minute').value}`;
-            const endTime = `${document.getElementById('schedule-end-hour').value.padStart(2, '0')}:${document.getElementById('schedule-end-minute').value}`;
-            
-            if (startTime >= endTime) {
-                alert('L\'ora di inizio deve essere precedente all\'ora di fine');
-                document.getElementById('schedule-start-hour').focus();
+        const saveData = async () => {
+            try {
+                return (await saveSchedule(schedule)).success;
+            } catch (e) {
+                const msg = e.message.includes('401') ? 'Sessione scaduta' : e.message.includes('400') ? 'Dati non validi' : 'Errore connessione';
+                closePopup(msg);
                 return false;
             }
-            
-            // Valida pausa pranzo se abilitata
-            const lunchEnabled = document.getElementById('lunch-break-enabled').checked;
-            if (lunchEnabled) {
-                const lunchStartTime = `${document.getElementById('lunch-start-hour').value.padStart(2, '0')}:${document.getElementById('lunch-start-minute').value}`;
-                const lunchEndTime = `${document.getElementById('lunch-end-hour').value.padStart(2, '0')}:${document.getElementById('lunch-end-minute').value}`;
-                
-                if (lunchStartTime >= lunchEndTime) {
-                    alert('L\'inizio pausa deve essere precedente alla fine pausa');
-                    document.getElementById('lunch-start-hour').focus();
-                    return false;
-                }
-                
-                if (lunchStartTime <= startTime || lunchEndTime >= endTime) {
-                    alert('La pausa pranzo deve essere compresa nell\'orario di lavoro');
-                    document.getElementById('lunch-start-hour').focus();
-                    return false;
-                }
-            }
-            
-            return true;
-        }
+        };
         
-        // Event listeners
-        document.addEventListener('DOMContentLoaded', () => {
-            loadScheduleFromStorage();
-            loadFormData();
+        // UI functions
+        const toggleLunch = () => document.querySelectorAll('.lunch-time-row').forEach(
+            row => row.classList.toggle('hidden', !document.getElementById('lunch-break-enabled').checked)
+        );
+        
+        const setTime = (id, time) => {
+            const [h, m] = time.split(':');
+            document.getElementById(id + '-hour').value = parseInt(h);
+            document.getElementById(id + '-minute').value = m;
+        };
+        
+        const getTime = (id) => `${document.getElementById(id + '-hour').value.padStart(2, '0')}:${document.getElementById(id + '-minute').value}`;
+        
+        const loadForm = () => {
+            setTime('schedule-start', schedule.startTime || '08:00');
+            setTime('schedule-end', schedule.endTime || '18:00');
+            setTime('lunch-start', schedule.lunchStartTime || '12:30');
+            setTime('lunch-end', schedule.lunchEndTime || '13:30');
+            document.getElementById('lunch-break-enabled').checked = schedule.lunchBreakEnabled || false;
+            document.getElementById('schedule-timezone').value = schedule.timezone || 'Europe/Rome';
+            Array.from(document.getElementById('schedule-closure-days').options).forEach(opt => opt.selected = schedule.closureDays?.includes(opt.value));
+            toggleLunch();
+        };
+        
+        const saveForm = () => {
+            schedule = {
+                startTime: getTime('schedule-start'),
+                endTime: getTime('schedule-end'),
+                lunchBreakEnabled: document.getElementById('lunch-break-enabled').checked,
+                lunchStartTime: getTime('lunch-start'),
+                lunchEndTime: getTime('lunch-end'),
+                timezone: document.getElementById('schedule-timezone').value,
+                closureDays: Array.from(document.getElementById('schedule-closure-days').selectedOptions).map(opt => opt.value)
+            };
+        };
+        
+        const validate = () => {
+            const start = getTime('schedule-start'), end = getTime('schedule-end');
+            if (start >= end) return closePopup('Ora inizio deve essere precedente a fine'), false;
             
-            // Auto-save su modifica campi
-            document.querySelectorAll('#schedule-form input, #schedule-form select').forEach(field => {
-                field.addEventListener('input', saveFormData);
-                field.addEventListener('change', saveFormData);
-            });
+            if (document.getElementById('lunch-break-enabled').checked) {
+                const lStart = getTime('lunch-start'), lEnd = getTime('lunch-end');
+                if (lStart >= lEnd) return closePopup('Inizio pausa deve essere precedente a fine pausa'), false;
+                if (lStart <= start || lEnd >= end) return closePopup('Pausa pranzo deve essere compresa nell\'orario'), false;
+            }
+            return true;
+        };
+        
+        // Init
+        document.addEventListener('DOMContentLoaded', async () => {
+            const btn = document.getElementById('save-schedule-btn');
+            btn.disabled = true;
+            btn.textContent = 'Caricamento...';
             
-            // Gestione visibilità campi pausa pranzo
-            document.getElementById('lunch-break-enabled').addEventListener('change', function() {
-                toggleLunchBreakFields();
-                saveFormData();
-            });
+            await loadData();
+            loadForm();
             
-            // Gestione salvataggio
-            document.getElementById('save-schedule-btn').addEventListener('click', function(e) {
+            btn.disabled = false;
+            btn.textContent = 'Salva Orario';
+            
+            document.getElementById('lunch-break-enabled').addEventListener('change', toggleLunch);
+            btn.addEventListener('click', async (e) => {
                 e.preventDefault();
+                if (!validate()) return;
                 
-                if (!validateForm()) return;
+                saveForm();
+                btn.disabled = true;
+                btn.textContent = 'Salvando...';
                 
-                saveFormData();
-                alert('✅ Orario salvato correttamente!');
-                
-                // Chiudi la finestra popup dopo il salvataggio
-                setTimeout(() => {
-                    window.close();
-                }, 500);
+                if (await saveData()) closePopup('Salvato!');
+                else { 
+                    btn.disabled = false; 
+                    btn.textContent = 'Salva Orario'; 
+                }
             });
         });
     </script>

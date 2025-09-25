@@ -37,8 +37,8 @@ header('X-XSS-Protection: 1; mode=block');
             <div class="schedules-section">
 
                 <div class="schedules-toolbar">
-                    <button id="add-service-btn" class="toolbar-btn">➕ Nuovo Servizio</button>
-                    <button id="delete-selected-btn" class="toolbar-btn">🗑️ Elimina Selezionati</button>
+                    <button id="add-service-btn" class="toolbar-btn">Nuovo Servizio</button>
+                    <button id="delete-selected-btn" class="toolbar-btn">Elimina Selezionati</button>
                 </div>
 
                 <div class="schedules-table-container">
@@ -65,7 +65,7 @@ header('X-XSS-Protection: 1; mode=block');
                 </div>
 
                 <div class="save-btn-container">
-                    <button id="save-all-btn" class="save-btn">💾 Salva Tutti i Servizi</button>
+                    <button id="save-all-btn" class="save-btn">Salva Tutti i Servizi</button>
                 </div>
 
             </div>
@@ -106,7 +106,7 @@ header('X-XSS-Protection: 1; mode=block');
                 <td><input type="number" value="${Number(service.price).toFixed(2)}" step="1" min="0" max="9999.99" class="cell-input price-input"></td>
                 <td><input type="number" value="${service.durationMinutes}" step="15" min="15" max="480" class="cell-input duration-input"></td>
                 <td><textarea class="cell-textarea" rows="2" placeholder="Descrizione dettagliata...">${escapeHtml(service.description)}</textarea></td>
-                <td class="actions-cell"><button class="action-btn btn-delete-single" data-service-id="${service.id}" title="Elimina">🗑️</button></td>
+                <td class="actions-cell"><button class="action-btn btn-delete-single" data-service-id="${service.id}" title="Elimina">Elimina</button></td>
             </tr>
         `;
     }
@@ -215,7 +215,7 @@ header('X-XSS-Protection: 1; mode=block');
         });
         
         if (!allValid) {
-            alert('⚠️ Correggi gli errori evidenziati prima di salvare');
+            alert('Correggi gli errori evidenziati prima di salvare');
             return;
         }
         
@@ -230,14 +230,14 @@ header('X-XSS-Protection: 1; mode=block');
         
         const saveBtn = document.getElementById('save-all-btn');
         const originalText = saveBtn.textContent;
-        saveBtn.textContent = '💾 Salvataggio...';
+        saveBtn.textContent = 'Salvataggio...';
         saveBtn.disabled = true;
         
         try {
             const result = await saveAllServices(servicesList);
             
             if (result.success) {
-                alert('✅ Servizi salvati con successo!');
+                alert('Servizi salvati con successo!');
                 // Ricarica i dati dal database
                 await loadServicesFromApi();
                 renderServicesTable();
@@ -247,11 +247,11 @@ header('X-XSS-Protection: 1; mode=block');
                     window.close();
                 }, 500);
             } else {
-                alert('❌ Errore durante il salvataggio:\n' + (result.error || 'Errore sconosciuto'));
+                alert('Errore durante il salvataggio:\n' + (result.error || 'Errore sconosciuto'));
             }
         } catch (error) {
             console.error('Errore salvataggio:', error);
-            alert('❌ Errore di connessione durante il salvataggio');
+            alert('Errore di connessione durante il salvataggio');
         } finally {
             saveBtn.textContent = originalText;
             saveBtn.disabled = false;
