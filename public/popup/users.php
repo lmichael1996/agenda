@@ -18,27 +18,8 @@ header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: SAMEORIGIN');
 header('Cache-Control: no-cache, no-store, must-revalidate');
 
-// Dati di esempio per gli utenti
-$sampleUsers = [
-    [
-        'id' => 1,
-        'username' => 'mario.rossi',
-        'color' => '#3498db',
-        'status' => 'attivo'
-    ],
-    [
-        'id' => 2,
-        'username' => 'laura.bianchi',
-        'color' => '#e74c3c',
-        'status' => 'attivo'
-    ],
-    [
-        'id' => 3,
-        'username' => 'giuseppe.verdi',
-        'color' => '#2ecc71',
-        'status' => 'attivo'
-    ]
-];
+// Sostituito: i dati utenti ora vengono caricati dalle API
+$sampleUsers = [];
 ?>
 <!DOCTYPE html>
 <html lang="it">
@@ -48,13 +29,15 @@ $sampleUsers = [
     <title>Gestione Utenti - Agenda</title>
     <link rel="stylesheet" href="../../assets/css/popup.css">
     <link rel="stylesheet" href="../../assets/css/scrollbar.css">
+    <style>
+
+    </style>
 </head>
 <body>
 
     <div class="popup-window-container">
         <div class="window-header">
             <span class="header-title">Gestione Utenti</span>
-            <!-- Pulsante chiusura rimosso -->
         </div>
 
         <div class="calendar-body" style="padding:4px;">
@@ -72,37 +55,20 @@ $sampleUsers = [
                                 <th class="select-col"><input type="checkbox" id="select-all-users"></th>
                                 <th class="username-col">Username</th>
                                 <th class="password-col">Password</th>
-                                <th class="confirm-password-col">Conferma Password</th>
                                 <th class="color-col">Colore</th>
                                 <th class="status-col">Stato</th>
                                 <th class="actions-col">Azioni</th>
                             </tr>
                         </thead>
                         <tbody id="users-list">
-                            <?php foreach ($sampleUsers as $user): ?>
-                                <tr data-user-id="<?= $user['id'] ?>">
-                                    <td><input type="checkbox" class="row-select"></td>
-                                    <td><input type="text" value="<?= htmlspecialchars($user['username']) ?>" placeholder="Username..." class="cell-input"></td>
-                                    <td><input type="password" value="" placeholder="Password" class="cell-input"></td>
-                                    <td><input type="password" value="" placeholder="Conferma Password" class="cell-input"></td>
-                                    <td><input type="color" value="<?= $user['color'] ?>" class="cell-color"></td>
-                                    <td>
-                                        <select class="status-select">
-                                            <option value="attivo" <?= $user['status'] === 'attivo' ? 'selected' : '' ?>>Attivo</option>
-                                            <option value="inattivo" <?= $user['status'] === 'inattivo' ? 'selected' : '' ?>>Inattivo</option>
-                                            <option value="sospeso" <?= $user['status'] === 'sospeso' ? 'selected' : '' ?>>Sospeso</option>
-                                        </select>
-                                    </td>
-                                    <td class="actions-cell"><button class="action-btn btn-delete-single" data-user-id="<?= $user['id'] ?>" title="Elimina">🗑️</button></td>
-                                </tr>
-                            <?php endforeach; ?>
+                            <!-- I dati vengono caricati via JS -->
                         </tbody>
                     </table>
                 </div>
 
                 <div class="users-stats">
-                    <span>Totale utenti: <strong id="total-users"><?= count($sampleUsers) ?></strong></span>
-                    <span>Attivi: <strong id="active-users"><?= count(array_filter($sampleUsers, fn($u) => $u['status'] === 'attivo')) ?></strong></span>
+                    <span>Totale utenti: <strong id="total-users"></strong></span>
+                    <span>Attivi: <strong id="active-users"></strong></span>
                     <span>Selezionati: <strong id="selected-users">0</strong></span>
                 </div>
 
@@ -114,37 +80,11 @@ $sampleUsers = [
         </div>
     </div>
 
-    <script>
-        // ========== GESTIONE UTENTI ==========
-        let usersList = <?= json_encode($sampleUsers) ?>;
-        const STORAGE_KEY = 'users_data';
-        let userIdCounter = Math.max(...usersList.map(u => u.id)) + 1;
+    <script type="module">
+        import { fetchUsers, saveAllUsers } from '../../api/frontend/user-api.js';
 
-        // Funzioni di utilità
-        function loadUsersFromStorage() {
-            try {
-                const raw = localStorage.getItem(STORAGE_KEY);
-                if (!raw) return;
-                const parsed = JSON.parse(raw);
-                if (Array.isArray(parsed.users)) {
-                    usersList = parsed.users;
-                    userIdCounter = parsed.counter || (Math.max(...usersList.map(u => u.id)) + 1);
-                }
-            } catch (e) {
-                console.warn('Impossibile leggere storage utenti:', e);
-            }
-        }
-
-        function saveUsersToStorage() {
-            try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify({
-                    users: usersList,
-                    counter: userIdCounter
-                }));
-            } catch (e) {
-                console.error('Errore salvataggio storage utenti:', e);
-            }
-        }
+        let usersList = [];
+        let userIdCounter = 1;
 
         function escapeHtml(str) {
             if (str === null || str === undefined) return '';
@@ -157,16 +97,16 @@ $sampleUsers = [
                     <td><input type="checkbox" class="row-select"></td>
                     <td><input type="text" value="${escapeHtml(user.username)}" class="cell-input"></td>
                     <td><input type="password" value="" placeholder="Password" class="cell-input"></td>
-                    <td><input type="password" value="" placeholder="Conferma Password" class="cell-input"></td>
                     <td><input type="color" value="${escapeHtml(user.color)}" class="cell-color"></td>
                     <td>
                         <select class="status-select">
-                            <option value="attivo" ${user.status === 'attivo' ? 'selected' : ''}>Attivo</option>
-                            <option value="inattivo" ${user.status === 'inattivo' ? 'selected' : ''}>Inattivo</option>
-                            <option value="sospeso" ${user.status === 'sospeso' ? 'selected' : ''}>Sospeso</option>
+                            <option value="attivo" ${user.is_active == 1 ? 'selected' : ''}>Attivo</option>
+                            <option value="inattivo" ${user.is_active == 0 ? 'selected' : ''}>Inattivo</option>
                         </select>
                     </td>
-                    <td class="actions-cell"><button class="action-btn btn-delete-single" data-user-id="${user.id}" title="Elimina">🗑️</button></td>
+                    <td class="actions-cell">
+                        <button class="action-btn btn-delete-single" data-user-id="${user.id}" title="Elimina">🗑️</button>
+                    </td>
                 </tr>
             `;
         }
@@ -174,121 +114,185 @@ $sampleUsers = [
         function renderUsersTable() {
             const tbody = document.getElementById('users-list');
             if (!tbody) return;
-            
             if (!usersList.length) {
-                tbody.innerHTML = '<tr><td colspan="7">Nessun utente configurato</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6">Nessun utente configurato</td></tr>';
                 updateSelectionStats();
                 return;
             }
-            
             tbody.innerHTML = usersList.map(generateUserRow).join('');
             updateSelectionStats();
+            
+
         }
 
         function updateSelectionStats() {
             const totalUsers = usersList.length;
-            const activeUsers = usersList.filter(u => u.status === 'attivo').length;
+            const activeUsers = usersList.filter(u => u.is_active == 1).length;
             const selectedUsers = document.querySelectorAll('.row-select:checked').length;
-            
             document.getElementById('total-users').textContent = totalUsers;
             document.getElementById('active-users').textContent = activeUsers;
             document.getElementById('selected-users').textContent = selectedUsers;
         }
 
-        function syncRowToModel(row, id) {
-            const user = usersList.find(u => u.id === id);
-            if (!user) return;
-            
-            const inputs = row.querySelectorAll('.cell-input, .cell-color, .status-select');
-            user.username = inputs[0]?.value || '';
-            user.color = inputs[3]?.value || '#3498db';
-            user.status = inputs[4]?.value || 'attivo';
-            
-            // Validazione password
-            const password = inputs[1]?.value || '';
-            const confirmPassword = inputs[2]?.value || '';
-            if (password && password !== confirmPassword) {
-                alert(`⚠️ Le password per ${user.username} non corrispondono!`);
-                return false;
+        async function loadUsersFromApi() {
+            try {
+                const data = await fetchUsers();
+                if (data.success && Array.isArray(data.users)) {
+                    usersList = data.users;
+                    userIdCounter = usersList.length ? Math.max(...usersList.map(u => u.id)) + 1 : 1;
+                }
+            } catch (e) {
+                console.error('Errore caricamento utenti:', e);
             }
-            
-            saveUsersToStorage();
-            return true;
         }
 
-        // Gestori eventi principali
-        function onAddUser() {
+        function addNewRow() {
             const newUser = {
-                id: userIdCounter++,
-                username: 'Nuovo Utente ' + userIdCounter,
+                id: 'temp_' + Date.now(),
+                username: 'Nuovo Utente ' + (usersList.length + 1),
                 color: '#3498db',
-                status: 'attivo'
+                is_active: 1,
+                isPending: true
             };
-            
             usersList.push(newUser);
             renderUsersTable();
-            saveUsersToStorage();
-            
-            setTimeout(() => {
-                const newRow = document.querySelector(`tr[data-user-id="${newUser.id}"] input[type="text"]`);
-                if (newRow) newRow.focus();
-            }, 0);
         }
 
-        function onDeleteSingle(id) {
-            const user = usersList.find(u => u.id === id);
-            if (!user) return;
-            
-            if (!confirm('Eliminare questo utente?')) return;
-            
-            usersList = usersList.filter(u => u.id !== id);
+        function deleteRowOnly(userId) {
+            usersList = usersList.filter(u => u.id != userId);
             renderUsersTable();
-            saveUsersToStorage();
         }
 
-        function onDeleteSelected() {
-            const ids = Array.from(document.querySelectorAll('.row-select:checked'))
-                .map(cb => parseInt(cb.closest('tr').dataset.userId));
-            
-            if (ids.length === 0) {
-                alert('Nessun utente selezionato');
+        function deleteSelectedRows() {
+            const selectedCheckboxes = document.querySelectorAll('.row-select:checked');
+            if (selectedCheckboxes.length === 0) {
+                alert('Nessuna riga selezionata');
                 return;
             }
             
-            if (!confirm(`Eliminare ${ids.length} utente/i selezionato/i?`)) return;
-            
-            usersList = usersList.filter(u => !ids.includes(u.id));
-            renderUsersTable();
-            saveUsersToStorage();
-            document.getElementById('select-all-users').checked = false;
+            if (confirm(`Eliminare ${selectedCheckboxes.length} righe selezionate dalla tabella?`)) {
+                const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.closest('tr').dataset.userId);
+                usersList = usersList.filter(u => !selectedIds.includes(String(u.id)));
+                renderUsersTable();
+                // Deseleziona il checkbox "seleziona tutto"
+                document.getElementById('select-all-users').checked = false;
+            }
         }
 
-        function onSaveAll() {
-            // Sincronizza tutti i dati dalla UI
-            document.querySelectorAll('#users-list tr[data-user-id]').forEach(row => {
-                syncRowToModel(row, parseInt(row.dataset.userId));
+        function collectTableData() {
+            const rows = document.querySelectorAll('#users-table tbody tr');
+            const users = [];
+            
+            rows.forEach(row => {
+                if (row.cells.length < 6) return; // Salta righe vuote
+                
+                const username = row.cells[1].querySelector('input').value.trim();
+                const password = row.cells[2].querySelector('input').value.trim();
+                const color = row.cells[3].querySelector('input').value;
+                const isActive = row.cells[4].querySelector('select').value === 'attivo' ? 1 : 0;
+                
+                if (username) { // Solo se c'è un username
+                    users.push({
+                        username,
+                        password,
+                        color,
+                        is_active: isActive
+                    });
+                }
             });
             
-            saveUsersToStorage();
-            alert('Utenti salvati correttamente!');
+            return users;
         }
 
-        // Event listeners
+
+
+        function validateUsersData(users) {
+            const errors = [];
+            
+            users.forEach((user, index) => {
+                if (!user.username) {
+                    errors.push(`Riga ${index + 1}: Username obbligatorio`);
+                }
+                
+                // Controllo password solo se è stata inserita
+                if (user.password || user.confirmPassword) {
+                    if (user.password !== user.confirmPassword) {
+                        errors.push(`Riga ${index + 1}: Le password non coincidono`);
+                    }
+                    
+                    if (user.password && user.password.length < 4) {
+                        errors.push(`Riga ${index + 1}: Password troppo corta (minimo 4 caratteri)`);
+                    }
+                }
+            });
+            
+            // Controlla username duplicati
+            const usernames = users.map(u => u.username.toLowerCase());
+            const duplicates = usernames.filter((name, index) => usernames.indexOf(name) !== index);
+            if (duplicates.length > 0) {
+                errors.push(`Username duplicati: ${[...new Set(duplicates)].join(', ')}`);
+            }
+            
+            return errors;
+        }
+
+        async function saveAllUsersToDatabase() {
+            const users = collectTableData();
+            
+            if (users.length === 0) {
+                alert('Nessun utente da salvare');
+                return;
+            }
+            
+            const validationErrors = validateUsersData(users);
+            if (validationErrors.length > 0) {
+                alert('Errori di validazione:\n' + validationErrors.join('\n'));
+                return;
+            }
+            
+            if (!confirm(`Salvare ${users.length} utenti nel database?\n\nATTENZIONE: Questa operazione sostituirà tutti gli utenti esistenti.`)) {
+                return;
+            }
+            
+            const saveBtn = document.getElementById('save-all-btn');
+            const originalText = saveBtn.textContent;
+            saveBtn.textContent = '💾 Salvataggio...';
+            saveBtn.disabled = true;
+            
+            try {
+                // Rimuovi il campo confirmPassword prima dell'invio
+                const usersToSave = users.map(({confirmPassword, ...user}) => user);
+                
+                const result = await saveAllUsers(usersToSave);
+                
+                if (result.success) {
+                    alert('✅ Utenti salvati con successo!');
+                    // Ricarica i dati dal database
+                    await loadUsersFromApi();
+                    renderUsersTable();
+                    
+                    // Chiudi la finestra popup dopo il salvataggio
+                    setTimeout(() => {
+                        window.close();
+                    }, 500);
+                } else {
+                    alert('❌ Errore durante il salvataggio:\n' + (result.error || 'Errore sconosciuto'));
+                }
+            } catch (error) {
+                console.error('Errore salvataggio:', error);
+                alert('❌ Errore di connessione durante il salvataggio');
+            } finally {
+                saveBtn.textContent = originalText;
+                saveBtn.disabled = false;
+            }
+        }
+
         document.addEventListener('click', e => {
             const deleteBtn = e.target.closest('.btn-delete-single');
             if (deleteBtn) {
-                const id = parseInt(deleteBtn.dataset.userId);
-                onDeleteSingle(id);
-            }
-        });
-
-        document.addEventListener('input', e => {
-            if (e.target.classList.contains('cell-input') || 
-                e.target.classList.contains('cell-color') || 
-                e.target.classList.contains('status-select')) {
-                const row = e.target.closest('tr');
-                if (row) {
-                    syncRowToModel(row, parseInt(row.dataset.userId));
+                const userId = deleteBtn.dataset.userId;
+                if (confirm('Eliminare questa riga dalla tabella?')) {
+                    deleteRowOnly(userId);
                 }
             }
         });
@@ -305,19 +309,22 @@ $sampleUsers = [
             }
         });
 
-        document.addEventListener('DOMContentLoaded', () => {
-            loadUsersFromStorage();
+        // Event listener per controllo password in tempo reale
+        document.addEventListener('input', e => {
+            if (e.target.type === 'password') {
+                const row = e.target.closest('tr');
+                if (row) {
+                    setTimeout(() => checkPasswordMatch(row), 100); // Piccolo delay per UX migliore
+                }
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadUsersFromApi();
             renderUsersTable();
-            
-            document.getElementById('add-user-btn')?.addEventListener('click', onAddUser);
-            document.getElementById('delete-selected-btn')?.addEventListener('click', onDeleteSelected);
-            document.getElementById('save-all-btn')?.addEventListener('click', onSaveAll);
-            
-            document.getElementById('select-all-users')?.addEventListener('change', e => {
-                const checked = e.target.checked;
-                document.querySelectorAll('.row-select').forEach(cb => cb.checked = checked);
-                updateSelectionStats();
-            });
+            document.getElementById('add-user-btn')?.addEventListener('click', addNewRow);
+            document.getElementById('delete-selected-btn')?.addEventListener('click', deleteSelectedRows);
+            document.getElementById('save-all-btn')?.addEventListener('click', saveAllUsersToDatabase);
         });
     </script>
 

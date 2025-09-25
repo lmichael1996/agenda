@@ -12,6 +12,10 @@ body {
     min-height: 100vh;
 }
 
+.calendar-body {
+    padding: 4px;
+}
+
 .popup-window-container {
     max-width: 1000px;
     width: min(95vw, 100%);
@@ -96,6 +100,12 @@ button:hover {
     font-weight: 700;
     border-radius: 6px;
     text-transform: uppercase;
+}
+
+.save-btn-container {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    text-align: center;
 }
 
 .schedules-toolbar {
@@ -343,6 +353,39 @@ input[type="checkbox"]:checked {
 .duration-col { width: 90px; }
 .description-col { width: 250px; }
 
+/* Stili per controlli orario schedule */
+.hour-input {
+    width: 44px;
+    height: 28px;
+    display: inline-block;
+    text-align: center;
+    border: 1px solid #ddd;
+    border-radius: 2px;
+    font-size: 13px;
+    padding: 2px;
+}
+
+.minute-select {
+    width: 44px;
+    height: 27px;
+    display: inline-block;
+    margin-left: 2px;
+    border: 1px solid #ddd;
+    border-radius: 2px;
+    font-size: 13px;
+    text-align: center;
+    background: white;
+}
+
+/* Nasconde elementi quando la pausa pranzo è disabilitata */
+.lunch-time-row {
+    transition: opacity 0.3s ease;
+}
+
+.lunch-time-row.hidden {
+    display: none;
+}
+
 .schedules-stats {
     padding: 12px 20px;
     font-size: 11px;
@@ -376,3 +419,11 @@ input[type="checkbox"]:checked {
     .excel-table { min-width: 300px; }
     .schedules-toolbar { padding: 8px; }
 }
+
+
+.password-match { border: 2px solid #27ae60 !important; background-color: #d5f4e6 !important; }
+.password-mismatch { border: 2px solid #e74c3c !important; background-color: #fdf2f2 !important; }
+.password-empty { border: 1px solid #ddd; }
+.password-feedback { font-size: 12px; margin-top: 2px; }
+.feedback-match { color: #27ae60; }
+.feedback-mismatch { color: #e74c3c; }
