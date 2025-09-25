@@ -45,14 +45,16 @@ body {
     margin: 0;
 }
 
+/* === STILI BASE PULSANTI === */
 button {
     background: #fff;
     color: #000;
     border: 1px solid #000;
-    border-radius: 3px;
+    border-radius: 4px;
     cursor: pointer;
     font: inherit;
     font-weight: 500;
+    transition: all 0.2s ease;
 }
 
 button:hover {
@@ -60,21 +62,19 @@ button:hover {
     color: #fff;
 }
 
+/* Varianti pulsanti */
 .close-btn { 
     padding: 4px 8px; 
     font-size: 10px; 
     border: 1px solid rgba(255,255,255,0.3);
     background: rgba(255,255,255,0.1);
     color: #fff;
-    border-radius: 4px;
-    transition: all 0.2s ease;
     font-weight: bold;
 }
 
 .close-btn:hover {
     background: rgba(255,255,255,0.2);
     border-color: rgba(255,255,255,0.5);
-    color: #fff;
     transform: scale(1.05);
 }
 
@@ -83,7 +83,6 @@ button:hover {
     font-size: 10px; 
     margin: 0 3px;
     font-weight: 600;
-    border-radius: 4px;
     text-transform: uppercase;
 }
 
@@ -102,13 +101,19 @@ button:hover {
     text-transform: uppercase;
 }
 
-.save-btn-container {
-    margin-top: 20px;
-    margin-bottom: 20px;
+/* === LAYOUT CONTAINER === */
+.save-btn-container,
+.schedule-save-container,
+.note-save-container {
+    margin: 20px 0;
     text-align: center;
+    border-top: 1px solid #ccc;
+    padding-top: 12px;
 }
 
-.schedules-toolbar {
+.schedules-toolbar,
+.users-toolbar,
+.services-toolbar {
     display: flex;
     gap: 12px;
     padding: 8px 16px;
@@ -117,7 +122,8 @@ button:hover {
     border-bottom: 1px solid #ddd;
 }
 
-.schedules-table-container {
+.schedules-table-container,
+.table-container {
     padding: 8px;
     overflow-x: auto;
     background: #fff;
@@ -173,38 +179,60 @@ button:hover {
     background: rgba(0,0,0,0.06) !important;
 }
 
-.cell-input, .cell-textarea, .closure-days-select {
+/* === STILI BASE INPUT === */
+.cell-input, 
+.cell-textarea, 
+.cell-select,
+.closure-days-select,
+.hour-input,
+.minute-select,
+.status-select {
     width: 100%;
-    padding: 3px 5px;
-    border: 1px solid rgba(0,0,0,0.2);
-    border-radius: 3px;
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
     text-align: center;
-    font-size: 9px;
+    font-size: 12px;
     background: #fff;
     font-family: inherit;
     transition: all 0.2s ease;
-    resize: vertical;
+    box-sizing: border-box;
 }
 
 .cell-textarea {
     min-height: 40px;
     resize: vertical;
     vertical-align: top;
+    padding: 8px 10px;
 }
 
-.cell-input:focus, .cell-textarea:focus, .closure-days-select:focus {
-    border-color: black;
-    border-width: 2px;
+/* Stati focus comuni */
+.cell-input:focus, 
+.cell-textarea:focus, 
+.cell-select:focus,
+.closure-days-select:focus,
+.hour-input:focus,
+.minute-select:focus,
+.status-select:focus {
+    border-color: #007bff;
     outline: none;
-    background: rgba(0,0,0,0.03);
-    box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
+    background: #fdfdfd;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }
 
-.cell-input:hover, .cell-textarea:hover, .closure-days-select:hover {
+/* Stati hover comuni */
+.cell-input:hover, 
+.cell-textarea:hover, 
+.cell-select:hover,
+.closure-days-select:hover,
+.hour-input:hover,
+.minute-select:hover,
+.status-select:hover {
     border-color: #333;
     background: rgba(0,0,0,0.01);
 }
 
+/* Varianti input specifiche */
 input[type="text"].cell-input { 
     font-size: 9px; 
     font-weight: 500; 
@@ -222,66 +250,71 @@ input[type="number"].cell-input {
     height: 24px;
 }
 
-/* Centratura specifica per campi servizi */
 .service-name-col input[type="text"],
-.description-col input[type="text"] {
-    text-align: center;
-}
-
-.price-input {
+.description-col input[type="text"],
+.price-input,
+.duration-input {
     text-align: center !important;
 }
 
 .duration-input {
-    text-align: center !important;
     font-weight: bold;
 }
 
-/* Centratura per tutti i select */
+/* Varianti select specifiche */
 select.cell-select,
 select.status-select,
 select.closure-days-select,
-.select-field {
+.select-field,
+.status-col select,
+.closure-days-col select {
     text-align: center;
     text-align-last: center;
     font-size: 9px;
 }
 
-/* Centratura specifica per select nei popup servizi e utenti */
-.status-col select,
-.closure-days-col select {
-    text-align: center;
-    text-align-last: center;
-}
+/* === DIMENSIONI COLONNE TABELLE === */
+/* Colonne comuni */
+.select-col { width: 30px; }
+.name-col { width: 180px; }
+.actions-col { width: 45px; }
+.color-col { width: 60px; }
+.status-col { width: 100px; }
 
-/* Stili specifici per gestione servizi */
+/* Colonne schedule */
+.start-date-col, .end-date-col { width: 85px; }
+.start-time-col, .end-time-col { width: 65px; }
+.closure-days-col { width: 100px; }
+
+/* Colonne servizi */
 .service-name-col { width: 180px; }
 .price-col { width: 100px; }
 .duration-col { width: 90px; }
 .description-col { width: 250px; }
 
-/* Stili specifici per gestione utenti */
-.username-col { width: 160px; }
-.password-col, .confirm-password-col { width: 120px; }
-.color-col { width: 60px; }
+/* Colonne utenti */
+.username-col { width: 120px; min-width: 120px; }
+.password-col, .confirm-password-col { width: 180px; min-width: 180px; }
 
+/* Input color picker */
 .cell-color {
-    width: 40px;
-    height: 24px;
+    width: 50px !important;
+    height: 36px !important;
+    padding: 4px !important;
     border: 1px solid rgba(0,0,0,0.2);
     border-radius: 3px;
-    cursor: pointer;
-    padding: 0;
+    cursor: pointer !important;
 }
 
 .cell-color:hover {
     border-color: #333;
 }
 
-/* Stili uniformi per le statistiche di tutti i popup */
+/* === STILI STATISTICHE E FOOTER === */
 .users-stats,
 .services-stats,
-.schedules-stats {
+.schedules-stats,
+.client-stats {
     padding: 12px 20px;
     font-size: 11px;
     display: flex;
@@ -294,23 +327,24 @@ select.closure-days-select,
     text-transform: uppercase;
 }
 
+.users-stats strong,
+.services-stats strong,
+.schedules-stats strong,
+.client-stats strong {
+    color: #000;
+    font-weight: 700;
+}
+
+/* === ELEMENTI SPECIALI === */
+/* Input numerici - spinner visibili */
 .duration-input::-webkit-outer-spin-button,
-.duration-input::-webkit-inner-spin-button {
+.duration-input::-webkit-inner-spin-button,
+.hour-input::-webkit-outer-spin-button,
+.hour-input::-webkit-inner-spin-button {
     opacity: 1;
 }
 
-.error-highlight {
-    border-color: #e74c3c !important;
-    background-color: rgba(231, 76, 60, 0.1) !important;
-}
-
-.validation-message {
-    color: #e74c3c;
-    font-size: 10px;
-    margin-top: 2px;
-    display: none;
-}
-
+/* Checkbox e radio buttons */
 input[type="checkbox"] { 
     width: 16px; 
     height: 16px; 
@@ -331,62 +365,31 @@ input[type="checkbox"]:checked {
     border-color: black;
 }
 
-/* Column widths uniformi per tutti i popup */
-.select-col { width: 30px; }
-.name-col { width: 180px; }
-.actions-col { width: 45px; }
-
-/* Colonne specifiche schedule */
-.start-date-col, .end-date-col { width: 85px; }
-.start-time-col, .end-time-col { width: 65px; }
-.closure-days-col { width: 100px; }
-
-/* Colonne specifiche users */
-.username-col { width: 120px; }
-.password-col, .confirm-password-col { width: 180px; }
-.color-col { width: 60px; }
-.status-col { width: 100px; }
-
-/* Colonne specifiche services */
-.service-name-col { width: 180px; }
-.price-col { width: 100px; }
-.duration-col { width: 90px; }
-.description-col { width: 250px; }
-
-/* Stili per controlli orario schedule */
-.hour-input {
-    width: 36px;
-    height: 24px;
-    display: inline-block;
-    text-align: center;
-    border: 1px solid #ddd;
-    border-radius: 2px;
-    font-size: 11px;
-    padding: 1px;
+.row-select,
+.note-checkbox,
+.schedule-checkbox {
+    width: 18px !important;
+    height: 18px !important;
+    cursor: pointer !important;
+    accent-color: #007bff !important;
 }
 
-.minute-select {
-    width: 36px;
-    height: 24px;
-    display: inline-block;
-    margin-left: 2px;
-    border: 1px solid #ddd;
-    border-radius: 2px;
-    font-size: 11px;
-    text-align: center;
-    background: white;
+/* === STATI DI VALIDAZIONE === */
+.error-highlight {
+    border-color: #e74c3c !important;
+    background-color: rgba(231, 76, 60, 0.1) !important;
 }
 
-/* Nasconde elementi quando la pausa pranzo è disabilitata */
-.lunch-time-row {
-    transition: opacity 0.3s ease;
-}
-
-.lunch-time-row.hidden {
+.validation-message {
+    color: #e74c3c;
+    font-size: 10px;
+    margin-top: 2px;
     display: none;
 }
 
-/* Stili specifici per schedule popup */
+
+
+/* === STILI SPECIFICI SCHEDULE === */
 .schedule-calendar-body {
     padding: 8px;
 }
@@ -423,33 +426,43 @@ input[type="checkbox"]:checked {
     padding: 4px 8px;
 }
 
-.schedule-save-container {
-    text-align: center;
-    border-top: 1px solid #ccc;
-    padding-top: 12px;
-}
-
-.schedule-save-btn {
+.schedule-save-btn,
+.note-save-btn {
     font-size: 15px;
     padding: 16px 32px;
 }
 
-.schedules-stats {
-    padding: 12px 20px;
+/* Controlli orario specifici */
+.hour-input {
+    width: 36px;
+    height: 24px;
+    display: inline-block;
+    text-align: center;
+    border: 1px solid #ddd;
+    border-radius: 2px;
     font-size: 11px;
-    display: flex;
-    gap: 20px;
-    background: #f5f5f5;
-    border-top: 1px solid #000;
-    color: #333;
-    font-weight: 600;
-    justify-content: center;
-    text-transform: uppercase;
+    padding: 1px;
 }
 
-.schedules-stats strong {
-    color: #333;
-    font-weight: 600;
+.minute-select {
+    width: 36px;
+    height: 24px;
+    display: inline-block;
+    margin-left: 2px;
+    border: 1px solid #ddd;
+    border-radius: 2px;
+    font-size: 11px;
+    text-align: center;
+    background: white;
+}
+
+/* Gestione pausa pranzo */
+.lunch-time-row {
+    transition: opacity 0.3s ease;
+}
+
+.lunch-time-row.hidden {
+    display: none;
 }
 
 /* Responsive Design */
@@ -469,9 +482,37 @@ input[type="checkbox"]:checked {
 }
 
 
-.password-match { border: 2px solid #27ae60 !important; background-color: #d5f4e6 !important; }
-.password-mismatch { border: 2px solid #e74c3c !important; background-color: #fdf2f2 !important; }
-.password-empty { border: 1px solid #ddd; }
-.password-feedback { font-size: 12px; margin-top: 2px; }
-.feedback-match { color: #27ae60; }
-.feedback-mismatch { color: #e74c3c; }
+/* === STILI SPECIFICI USERS === */
+.username-col input,
+.password-col input {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Validazione password */
+.password-match { 
+    border: 2px solid #27ae60 !important; 
+    background-color: #d5f4e6 !important; 
+}
+
+.password-mismatch { 
+    border: 2px solid #e74c3c !important; 
+    background-color: #fdf2f2 !important; 
+}
+
+.password-empty { 
+    border: 1px solid #ddd; 
+}
+
+.password-feedback { 
+    font-size: 12px; 
+    margin-top: 2px; 
+}
+
+.feedback-match { 
+    color: #27ae60; 
+}
+
+.feedback-mismatch { 
+    color: #e74c3c; 
+}
