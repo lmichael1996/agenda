@@ -7,17 +7,7 @@
 // Carica configurazione e controlli di sicurezza
 require_once '../../config/config.php';
 
-// Verifica autenticazione
-if (!isset($_SESSION['user_id'])) {
-    header('Location: ../login.php');
-    exit;
-}
-
-// Headers di sicurezza per popup
-header('X-Content-Type-Options: nosniff');
-header('X-Frame-Options: SAMEORIGIN');
-header('Cache-Control: no-cache, no-store, must-revalidate');
-
+// Il config.php gestisce automaticamente tutti i controlli per i popup
 // Sostituito: i dati utenti ora vengono caricati dalle API
 $sampleUsers = [];
 ?>
@@ -29,41 +19,6 @@ $sampleUsers = [];
     <title>Gestione Utenti - Agenda</title>
     <link rel="stylesheet" href="../../assets/css/popup.css">
     <link rel="stylesheet" href="../../assets/css/scrollbar.css">
-    <style>
-        .username-col {
-            width: 120px !important;
-            min-width: 120px;
-        }
-        
-        .password-col {
-            width: 200px !important;
-            min-width: 200px;
-        }
-        
-        .username-col input,
-        .password-col input {
-            width: 100%;
-            box-sizing: border-box;
-        }
-        
-        /* Migliora e ingrandisce il select dello stato */
-        .status-select {
-            width: 100%;
-            padding: 4px 8px;
-            font-size: 14px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            background-color: white;
-            cursor: pointer;
-            min-height: 28px;
-        }
-        
-        .status-select:focus {
-            border-color: #007bff;
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
-        }
-    </style>
 </head>
 <body>
 

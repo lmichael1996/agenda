@@ -405,8 +405,16 @@ input[type="checkbox"]:checked {
 }
 
 .schedule-table-th {
-    font-size: 13px;
+    font-size: 14px;
+    font-weight: bold;
     border: 1px solid white;
+    padding: 12px 8px;
+}
+
+.schedule-table td {
+    padding: 12px 8px;
+    font-size: 14px;
+    vertical-align: middle;
 }
 
 .schedule-checkbox {
@@ -434,26 +442,42 @@ input[type="checkbox"]:checked {
 
 /* Controlli orario specifici */
 .hour-input {
-    width: 36px;
-    height: 24px;
+    width: 40px;
+    height: 25px;
     display: inline-block;
     text-align: center;
-    border: 1px solid #ddd;
-    border-radius: 2px;
-    font-size: 11px;
-    padding: 1px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    padding: 4px;
+    background: #fff;
 }
 
 .minute-select {
-    width: 36px;
-    height: 24px;
+    width: 50px;
+    height: 25px;
     display: inline-block;
-    margin-left: 2px;
-    border: 1px solid #ddd;
-    border-radius: 2px;
-    font-size: 11px;
+    margin-left: 4px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
     text-align: center;
     background: white;
+    padding: 4px;
+}
+
+.hour-input:hover,
+.minute-select:hover {
+    border-color: #999;
+    background: #f8f9fa;
+}
+
+.hour-input:focus,
+.minute-select:focus {
+    border-color: #007bff;
+    background: #fff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+    outline: none;
 }
 
 /* Gestione pausa pranzo */

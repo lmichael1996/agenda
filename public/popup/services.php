@@ -7,16 +7,7 @@
 // Carica configurazione e controlli di sicurezza
 require_once '../../config/config.php';
 
-// Verifica autenticazione
-if (!isset($_SESSION['user_id'])) {
-    header('Location: ../login.php');
-    exit;
-}
-
-// Headers di sicurezza per popup
-header('X-Content-Type-Options: nosniff');
-header('X-Frame-Options: DENY');
-header('X-XSS-Protection: 1; mode=block');
+// Il config.php gestisce automaticamente tutti i controlli per i popup
 ?>
 <!DOCTYPE html>
 <html lang="it">

@@ -4,13 +4,12 @@
  * Tabella verticale con tutti i dati: nome, cognome, telefono, nota, certificato
  */
 require_once '../../config/config.php';
-if (!isset($_SESSION['user_id'])) {
-    header('Location: ../login.php');
-    exit;
-}
-header('X-Content-Type-Options: nosniff');
-header('X-Frame-Options: SAMEORIGIN');
-header('Cache-Control: no-cache, no-store, must-revalidate');
+
+// Il config.php gestisce automaticamente tutti i controlli per i popup:
+// - Autenticazione utente obbligatoria  
+// - Headers di sicurezza
+// - Controlli anti-hijacking
+// - Gestione sessioni
 ?>
 <!DOCTYPE html>
 <html lang="it">
@@ -20,35 +19,135 @@ header('Cache-Control: no-cache, no-store, must-revalidate');
     <title>Gestione Cliente - Agenda</title>
     <link rel="stylesheet" href="../../assets/css/popup.css">
     <link rel="stylesheet" href="../../assets/css/scrollbar.css">
+    <style>
+        /* Stili uniformi con gli altri popup */
+        .client-calendar-body {
+            padding: 8px;
+        }
+        
+        .client-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            position: relative;
+        }
+        
+        .client-search-group {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .client-search-input {
+            width: 180px;
+            font-size: 12px;
+            border-radius: 4px;
+            border: 1px solid #000;
+            background: #fff;
+        }
+        
+        .client-btn {
+            font-size: 12px;
+            padding: 6px 12px;
+            border-radius: 5px;
+            background: #fff;
+            color: #000;
+        }
+        
+        .client-total-label {
+            position: absolute;
+            right: 0;
+            font-size: 11px;
+            color: #222;
+            font-family: 'Courier New', monospace;
+            background: #fff;
+            border-radius: 4px;
+            padding: 3px 10px;
+            border: 1px solid #eee;
+            font-weight: 600;
+        }
+        
+        .client-pagination {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .client-range-label {
+            font-size: 11px;
+            color: #222;
+            font-family: 'Courier New', monospace;
+            background: #fff;
+            border-radius: 4px;
+            padding: 3px 10px;
+            border: 1px solid #eee;
+            font-weight: 600;
+        }
+        
+        .client-nav-btn {
+            font-size: 12px;
+            padding: 6px 10px;
+            border-radius: 5px;
+            background: #fff;
+            color: #000;
+        }
+        
+        .client-table {
+            width: 100%;
+            margin-bottom: 24px;
+        }
+        
+        .client-name-col, .client-surname-col {
+            width: 20%;
+        }
+        
+        .client-phone-col {
+            width: 25%;
+        }
+        
+        .client-note-col {
+            width: 25%;
+        }
+        
+        .client-cert-col {
+            width: 10%;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
     <div class="popup-window-container">
         <div class="window-header">
             <span class="header-title">Lista Clienti</span>
         </div>
-        <div class="calendar-body" style="padding:8px;">
-            <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:8px; position:relative;">
-                <div style="display:flex; align-items:center; justify-content:center; gap:10px;">
-                    <input type="search" id="client-search" class="cell-input" style="width:180px; font-size:12px; border-radius:4px; border:1px solid #000; background:#fff;" placeholder="Cerca...">
-                    <button id="search-btn" class="save-btn" style="font-size:12px; padding:6px 12px; border-radius:5px; background:#fff; color:#000;">🔍</button>
-                    <button id="group-btn" class="save-btn" style="font-size:12px; padding:6px 12px; border-radius:5px; background:#fff; color:#000;">👨‍👨‍👦</button>
+        <div class="calendar-body client-calendar-body">
+            <div class="client-controls">
+                <div class="client-search-group">
+                    <input type="search" id="client-search" class="cell-input client-search-input" placeholder="Cerca...">
+                    <button id="search-btn" class="save-btn client-btn">Cerca</button>
+                    <button id="group-btn" class="save-btn client-btn">Gruppo</button>
                 </div>
-                <span id="client-total-label" style="position:absolute; right:0; font-size:11px; color:#222; font-family:'Courier New', monospace; background:#fff; border-radius:4px; padding:3px 10px; border:1px solid #eee; font-weight:600;">Totale: 100</span>
+                <span id="client-total-label" class="client-total-label">Totale: 100</span>
             </div>
-            <div style="display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:8px;">
-                <button id="prev-btn" class="save-btn" style="font-size:12px; padding:6px 10px; border-radius:5px; background:#fff; color:#000;">◀</button>
-                <span id="client-range-label" style="font-size:11px; color:#222; font-family:'Courier New', monospace; background:#fff; border-radius:4px; padding:3px 10px; border:1px solid #eee; font-weight:600;">da 1 a 50</span>
-                <button id="next-btn" class="save-btn" style="font-size:12px; padding:6px 10px; border-radius:5px; background:#fff; color:#000;">▶</button>
+            <div class="client-pagination">
+                <button id="prev-btn" class="save-btn client-nav-btn">◀</button>
+                <span id="client-range-label" class="client-range-label">da 1 a 50</span>
+                <button id="next-btn" class="save-btn client-nav-btn">▶</button>
             </div>
             <div class="schedules-table-container">
-                <table class="excel-table" style="width:100%; margin-bottom:24px;">
+                <table class="excel-table client-table">
                     <thead>
                         <tr>
-                            <th>Nome</th>
-                            <th>Cognome</th>
-                            <th>Telefono</th>
-                            <th>Nota</th>
-                            <th>Certificato</th>
+                            <th class="client-name-col">Nome</th>
+                            <th class="client-surname-col">Cognome</th>
+                            <th class="client-phone-col">Telefono</th>
+                            <th class="client-note-col">Nota</th>
+                            <th class="client-cert-col">Certificato</th>
                         </tr>
                     </thead>
                     <tbody id="client-table-body">

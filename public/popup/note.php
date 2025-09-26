@@ -4,13 +4,8 @@
  * Struttura orizzontale, stile uniforme con popup.css
  */
 require_once '../../config/config.php';
-if (!isset($_SESSION['user_id'])) {
-    header('Location: ../login.php');
-    exit;
-}
-header('X-Content-Type-Options: nosniff');
-header('X-Frame-Options: SAMEORIGIN');
-header('Cache-Control: no-cache, no-store, must-revalidate');
+
+// Il config.php gestisce automaticamente tutti i controlli per i popup
 ?>
 <!DOCTYPE html>
 <html lang="it">

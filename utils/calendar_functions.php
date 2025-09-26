@@ -3,6 +3,17 @@
  * Funzioni utility per il calendario
  */
 
+// Definizione costanti calendario
+if (!defined('CALENDAR_START_HOUR')) {
+    define('CALENDAR_START_HOUR', 8);
+}
+if (!defined('CALENDAR_END_HOUR')) {
+    define('CALENDAR_END_HOUR', 22);
+}
+if (!defined('CALENDAR_INTERVAL_MINUTES')) {
+    define('CALENDAR_INTERVAL_MINUTES', 15);
+}
+
 function getCurrentWeekDays($baseDate = null) {
     $today = $baseDate ? new DateTime($baseDate) : new DateTime();
     $weekDay = (int)$today->format('N');

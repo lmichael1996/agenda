@@ -1,8 +1,25 @@
+<?php
+/**
+ * Pagina di accesso negato con controlli di sicurezza
+ */
+
+// Headers di sicurezza
+header('X-Frame-Options: DENY');
+header('X-Content-Type-Options: nosniff');
+header('Cache-Control: no-cache, no-store, must-revalidate');
+
+// Log del tentativo di accesso bloccato
+$ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+$userAgent = $_SERVER['HTTP_USER_AGENT'] ?? 'unknown';
+$referer = $_SERVER['HTTP_REFERER'] ?? 'none';
+error_log("Access denied page viewed - IP: $ip, UA: $userAgent, Referer: $referer");
+?>
 <!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
     <title>Accesso Vietato - Agenda</title>
     <link rel="stylesheet" href="../assets/css/login.css">
 </head>
