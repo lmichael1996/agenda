@@ -16,6 +16,56 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/captcha.php';
+require_once __DIR__ . '/db.php';
+
+/**
+ * Autentica un utente verificando username e password nel database
+ * @param string $username
+ * @param string $password
+ * @return bool
+ */
+function authenticateUser($username, $password) {
+    global $conn;
+    
+    // Controllo connessione database
+    if (!isset($conn) || $conn->connect_errno) {
+        error_log('Errore connessione DB in authenticateUser: ' . ($conn ? $conn->connect_error : 'connessione non inizializzata'));
+        return false;
+    }
+    
+    // Prepared statement per sicurezza
+    $stmt = $conn->prepare('SELECT password_hash, is_active FROM users WHERE username = ? LIMIT 1');
+    if (!$stmt) {
+        error_log('Errore preparazione query: ' . $conn->error);
+        return false;
+    }
+    
+    $stmt->bind_param('s', $username);
+    if (!$stmt->execute()) {
+        error_log('Errore esecuzione query: ' . $stmt->error);
+        $stmt->close();
+        return false;
+    }
+    
+    $result = $stmt->get_result();
+    $user = $result->fetch_assoc();
+    $stmt->close();
+    
+    // Verifica se utente esiste
+    if (!$user) {
+        error_log("Login failed: User '$username' not found");
+        return false;
+    }
+    
+    // Verifica se utente è attivo
+    if (!$user['is_active']) {
+        error_log("Login failed: User '$username' is not active");
+        return false;
+    }
+    
+    // Verifica password
+    return password_verify($password, $user['password_hash']);
+}
 
 // Sistema di sicurezza equilibrato
 if (!isset($_SESSION['login_attempts'])) {
@@ -66,13 +116,8 @@ try {
         throw new Exception('Verifica anti-bot fallita');
     }
     
-    // Credenziali con hash sicuri
-    $validUsers = [
-        'admin' => password_hash('admin123', PASSWORD_ARGON2ID),
-        'user' => password_hash('password', PASSWORD_ARGON2ID)
-    ];
-    
-    if (!isset($validUsers[$username]) || !password_verify($password, $validUsers[$username])) {
+    // Verifica credenziali tramite database usando user-api.php
+    if (!authenticateUser($username, $password)) {
         $_SESSION['login_attempts']++;
         $_SESSION['last_attempt'] = time();
         throw new Exception('Credenziali non valide');

@@ -49,7 +49,6 @@ $currentDate = $today->format('Y-m-d');
     <link rel="stylesheet" href="../assets/css/lateral-menu.css">
 </head>
 <body>
-    
     <!-- Sidebar con icona integrata -->
     <div id="sidebar" class="sidebar sidebar-hover">
         <div class="sidebar-toggle">
@@ -90,7 +89,6 @@ $currentDate = $today->format('Y-m-d');
         <!-- Calendar Header -->
         <div class="calendar-header-row">
             <div class="hour-label-empty">Orario:</div>
-            
             <?php foreach ($days as $idx => $day): ?>
                 <?php 
                 $dayName = htmlspecialchars($dayNames[$idx]);

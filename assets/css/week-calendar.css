@@ -3,12 +3,19 @@
  * @author Michael Leanza
  */
 
-/* Stili base */
+/* === STILI BASE UNIFICATI === */
+* { 
+    font-family: 'Courier New'; 
+    box-sizing: border-box;
+}
+
 body {
     margin: 0;
     padding: 0;
-    font-family: 'Courier New', monospace;
-    background: url('../images/background.png') center fixed no-repeat;
+    background: #f8f9fa;
+    color: #000;
+    font-size: 14px;
+    line-height: 1.4;
 }
 
 /* Riduzione spazio header superiore */
@@ -22,105 +29,143 @@ html, body {
     width: 100vw;
     min-height: 100vh;
     margin-top: -2px;
+    background: #fff;
 }
 
-/* Layout calendario */
+/* === LAYOUT CALENDARIO MODERNO === */
 .calendar-header-row {
     display: grid;
-    grid-template-columns: 48px repeat(7, 1fr);
+    grid-template-columns: 60px repeat(7, 1fr);
     min-width: 1100px;
     position: sticky;
     top: 0;
     z-index: 2;
-    border-radius: 6px 6px 0 0;
+    border: 2px solid #000;
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    overflow: hidden;
+}
+
+.hour-label-container {
+    position: relative;
+    height: 100%;
+    isolation: isolate;
 }
 
 .hour-label-empty {
-    font-size: 0.7em;
-    background: #222;
+    font-size: 0.8em;
+    background: #000;
     color: #fff;
     display: flex;
+    height: 60%;
     align-items: center;
     justify-content: center;
-    height: 80%;
+    border-right: 1px solid #fff;
+    position: relative;
+    z-index: 100;
+}
+
+.hour-label-bottom {
+    font-size: 0.8em;
+    background: #000;
+    color: #fff;
+    display: flex;
+    height: 40%;
+    align-items: center;
+    justify-content: center;
+    border-right: 1px solid #fff;
+    position: relative;
+    z-index: 1;
 }
 
 .header-day {
     text-align: center;
-    font-weight: 500;
+    font-weight: 600;
     font-size: 1em;
-    background: #222;
+    background: #000;
     color: #fff;
-    border: 1px solid #fff;
-    padding: 4px 2px 2px;
-    line-height: 1.2;
+    border-right: 1px solid #fff;
+    padding: 8px 4px;
+    line-height: 1.1;
 }
 
 .header-day.today {
     background: #fff;
     color: #000;
-    border-color: #000;
 }
 
 .header-date {
-    font-size: 0.95em;
-    color: #888;
+    font-size: 0.9em;
+    color: #ccc;
+    font-weight: 400;
 }
 
 .header-day.today .header-date {
-    color: #222;
+    color: #666;
 }
 
-/* Calendar grid */
+/* === GRIGLIA CALENDARIO MODERNA === */
 .calendar-grid {
     display: grid;
-    grid-template-columns: 48px repeat(7, 1fr);
+    grid-template-columns: 60px repeat(7, 1fr);
     min-width: 1100px;
-    border-radius: 0 0 6px 6px;
-    box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+    border: 2px solid #000;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    background: #fff;
+    overflow: hidden;
 }
 
 .hour-label {
     display: flex;
     align-items: flex-start;
     justify-content: flex-end;
-    background: #222;
+    background: #000;
+    border-right: 1px solid #fff;
     color: #fff;
     font-size: 0.75em;
+    font-weight: 500;
     height: 40px;
-    padding: 2px 2px 0 0;
-    margin-top: -9px;
+    padding: 2px 4px 0 0;
+    margin-top: -10px;
+    position: relative;
 }
 
 .hour-label-time {
     width: 100%;
-    text-align: center;
+    text-align: right;
+    padding: 2px 4px;
+    border-radius: 3px;
+    position: relative;
 }
 
-.hour-label-past { color: #bbb; }
+.hour-label-past { 
+    color: #ffffff;
+    background: #333;
+}
 
 .day {
-    background: transparent;
-    border: 1px solid #000;
-    transition: background 0.2s;
+    background: #fff;
+    border: 1px solid #000000;
+    transition: background 0.2s ease;
+    min-height: 40px;
 }
 
 .day.today {
-    background: #c9c9c9;
-    border-left: 2px solid #222;
-    border-right: 2px solid #222;
+    background: #e9ecef;
+    border: 1px solid #000000;
+    border-right: 2px solid #000000;
+    border-left: 2px solid #000000;
 }
 
-/* Stili per sistema unificato */
+/* === STILI INTERATTIVI UNIFICATI === */
 .day:hover {
-    background-color: #e9ecef;
-    border-color: #000000;
+    background: #e9ecef !important;
     cursor: pointer;
 }
 
 .day.selected {
-    background-color: #007bff;
-    border-color: #0056b3;
+    background: #6c757d !important;
     color: white;
 }
 
@@ -141,7 +186,9 @@ html, body {
     width: 280px;
     height: calc(100vh - 60px);
     background: #fff;
-    border-left: 1px solid #ddd;
+    border-left: 2px solid #000;
+    border-radius: 8px 0 0 0;
+    box-shadow: -4px 0 8px rgba(0,0,0,0.1);
     transition: right 0.3s ease;
     z-index: 1000;
 }
@@ -150,30 +197,153 @@ html, body {
     right: 0;
 }
 
-/* Layout responsive per sistema unificato */
-@media (max-width: 768px) {
-    .mobile-layout .dashboard-controls {
-        flex-direction: column;
-        gap: 10px;
+/* === DESIGN RESPONSIVO UNIFICATO === */
+
+/* Tablet (1024px e meno) */
+@media (max-width: 1024px) {
+    .calendar-header-row,
+    .calendar-grid {
+        grid-template-columns: 50px repeat(7, 1fr);
+        min-width: 900px;
     }
     
-    .mobile-layout .calendar-grid {
-        font-size: 0.8em;
+    .header-day {
+        font-size: 0.9em;
+        padding: 6px 2px;
     }
     
-    .mobile-layout .notes-panel {
-        width: 100%;
-        right: -100%;
+    .hour-label {
+        height: 36px;
+        font-size: 0.7em;
+        margin-top: -8px;
+        padding: 2px 3px 0 0;
+    }
+    
+    .day {
+        min-height: 36px;
     }
 }
 
-@media (max-width: 1024px) {
-    .tablet-layout .dashboard-controls {
-        font-size: 0.9em;
+/* Mobile Large (768px e meno) */
+@media (max-width: 768px) {
+    .calendar-header-row,
+    .calendar-grid {
+        grid-template-columns: 40px repeat(7, 1fr);
+        min-width: 100%;
+        border: 1px solid #000;
     }
     
-    .tablet-layout .calendar-grid {
-        min-width: 800px;
+    .calendar-header-row {
+        border-radius: 6px 6px 0 0;
+    }
+    
+    .calendar-grid {
+        border-radius: 0 0 6px 6px;
+    }
+    
+    .hour-label {
+        height: 32px;
+        font-size: 0.65em;
+        margin-top: -6px;
+        padding: 1px 3px 0 0;
+    }
+    
+    .header-day {
+        font-size: 0.8em;
+        padding: 5px 2px;
+    }
+    
+    .header-date {
+        font-size: 0.75em;
+    }
+    
+    .day {
+        min-height: 32px;
+    }
+    
+    .notes-panel {
+        width: 100%;
+        right: -100%;
+        top: 0;
+        height: 100vh;
+        border-left: none;
+        border-top: 2px solid #000;
+        border-radius: 0;
+    }
+}
+
+/* Mobile Small (480px e meno) */
+@media (max-width: 480px) {
+    .calendar-header-row,
+    .calendar-grid {
+        grid-template-columns: 35px repeat(7, 1fr);
+        font-size: 0.75em;
+    }
+    
+    .calendar-header-row {
+        border-radius: 4px 4px 0 0;
+    }
+    
+    .calendar-grid {
+        border-radius: 0 0 4px 4px;
+    }
+    
+    .hour-label-empty,
+    .hour-label {
+        font-size: 0.6em;
+    }
+    
+    .hour-label {
+        height: 28px;
+        margin-top: -5px;
+        padding: 1px 2px 0 0;
+    }
+    
+    .header-day {
+        font-size: 0.75em;
+        padding: 6px 0 2px;
+    }
+    
+    .header-date {
+        font-size: 0.7em;
+    }
+    
+    .day {
+        min-height: 28px;
+        font-size: 0.7em;
+    }
+    
+    .mobile-layout .dashboard-controls {
+        padding: 8px;
+        gap: 6px;
+    }
+}
+
+/* Mobile Extra Small (375px e meno) */
+@media (max-width: 375px) {
+    .calendar-header-row,
+    .calendar-grid {
+        grid-template-columns: 30px repeat(7, 1fr);
+    }
+    
+    .hour-label-empty,
+    .hour-label {
+        font-size: 0.55em;
+    }
+    
+    .hour-label {
+        height: 24px;
+        margin-top: -4px;
+        padding: 1px 2px 0 0;
+    }
+    
+    .header-day {
+        font-size: 0.65em;
+        padding: 4px 0 2px;
+    }
+    
+    .day {
+        min-height: 24px;
     }
 }
 

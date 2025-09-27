@@ -15,52 +15,6 @@ require_once '../../config/config.php';
     <title>Gestione Note - Agenda</title>
     <link rel="stylesheet" href="../../assets/css/popup.css">
     <link rel="stylesheet" href="../../assets/css/scrollbar.css">
-    <style>
-        /* Stili uniformi con schedule.php */
-        .note-calendar-body {
-            padding: 4px;
-        }
-        
-        .note-form {
-            max-width: 450px;
-            margin: auto;
-        }
-        
-        .note-table {
-            width: 100%;
-            margin-bottom: 24px;
-        }
-        
-        .note-table-th {
-            width: 140px;
-            font-size: 13px;
-            background-color: #f8f9fa;
-            border: 1px solid #dee2e6;
-            padding: 8px;
-            text-align: left;
-        }
-        
-        .date-input {
-            width: 48%;
-            display: inline-block;
-        }
-        
-        .note-checkbox {
-            height: 28px;
-            width: 28px;
-        }
-        
-        .note-save-container {
-            text-align: center;
-            border-top: 1px solid #ccc;
-            padding-top: 12px;
-        }
-        
-        .note-save-btn {
-            font-size: 15px;
-            padding: 16px 32px;
-        }
-    </style>
 </head>
 <body>
     <div class="popup-window-container">

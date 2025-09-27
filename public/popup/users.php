@@ -27,7 +27,7 @@ $sampleUsers = [];
             <span class="header-title">Gestione Utenti</span>
         </div>
 
-        <div class="calendar-body" style="padding:4px;">
+        <div class="calendar-body">
             <div class="schedules-section">
 
                 <div class="schedules-toolbar">
@@ -40,8 +40,8 @@ $sampleUsers = [];
                         <thead>
                             <tr>
                                 <th class="select-col"><input type="checkbox" id="select-all-users"></th>
-                                <th class="username-col" style="width: 120px;">Username</th>
-                                <th class="password-col" style="width: 200px;">Password</th>
+                                <th class="username-col">Username</th>
+                                <th class="password-col">Password</th>
                                 <th class="color-col">Colore</th>
                                 <th class="status-col">Stato</th>
                                 <th class="actions-col">Azioni</th>
@@ -58,7 +58,7 @@ $sampleUsers = [];
                     <span>Selezionati: <strong id="selected-users">0</strong></span>
                 </div>
 
-                <div style="margin-top:20px; margin-bottom:20px; text-align:center;">
+                <div class="save-btn-container">
                     <button id="save-all-btn" class="save-btn">Salva Tutti gli Utenti</button>
                 </div>
 
