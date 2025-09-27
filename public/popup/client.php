@@ -44,6 +44,121 @@ require_once '../../config/config.php';
             border: 1px solid #ffcdd2;
             margin: 10px 0;
         }
+        
+        .sort-select, .search-field-select {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: white;
+            font-size: 14px;
+            margin-right: 8px;
+            cursor: pointer;
+        }
+        
+        .sort-select {
+            min-width: 150px;
+        }
+        
+        .search-field-select {
+            min-width: 130px;
+        }
+        
+        .sort-select:focus, .search-field-select:focus {
+            outline: none;
+            border-color: #000;
+            box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
+        }
+
+        .unified-controls {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .controls-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .controls-row:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Prima riga - Ricerca e Filtri */
+        .search-row {
+            justify-content: center;
+            gap: 30px;
+        }
+
+        .search-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sort-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Seconda riga - Azioni e Navigazione */
+        .action-row {
+            justify-content: space-between;
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .info-section {
+            display: flex;
+            align-items: center;
+        }
+
+        .pagination-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .add-client-btn {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .add-client-btn:hover {
+            background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .add-client-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 6px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn-icon {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .btn-text {
+            font-size: 14px;
+        }
     </style>
 
 </head>
@@ -56,24 +171,45 @@ require_once '../../config/config.php';
         <div class="calendar-body">
             <!-- Unified Controls Section -->
             <div class="unified-controls">
-                <div class="controls-row top-row">
-                    <div class="search-section">
+                <!-- Prima riga: Ricerca e Filtri -->
+                <div class="controls-row search-row">
+                    <div class="search-group">
                         <input type="search" id="client-search" placeholder="Cerca cliente..." class="search-input">
+                        <select id="search-field-select" class="search-field-select">
+                            <option value="name">Nome e Cognome</option>
+                            <option value="first_name">Solo Nome</option>
+                            <option value="last_name">Solo Cognome</option>
+                            <option value="phone">Telefono</option>
+                            <option value="notes">Note</option>
+                        </select>
+                        <select id="sort-select" class="sort-select">
+                            <option value="first_name_asc">Nome A-Z</option>
+                            <option value="first_name_desc">Nome Z-A</option>
+                            <option value="last_name_asc">Cognome A-Z</option>
+                            <option value="last_name_desc">Cognome Z-A</option>
+                        </select>
                         <button id="search-btn" class="control-btn search-btn">🔍</button>
                         <button id="group-btn" class="control-btn group-btn">👥</button>
                     </div>
-                    <button id="add-client-btn" class="add-client-btn">✚ Aggiungi Cliente</button>
                 </div>
                 
-                <div class="controls-row bottom-row">
+                <!-- Seconda riga: Azioni e Navigazione -->
+                <div class="controls-row action-row">
                     <div class="pagination-section">
                         <button id="prev-btn" class="nav-btn" disabled>‹</button>
                         <span id="client-range-label" class="range-info">0-0</span>
                         <button id="next-btn" class="nav-btn" disabled>›</button>
                     </div>
-                    <div class="total-section">
+                    
+                    <div class="info-section">
                         <span id="client-total-label" class="total-info">Totale: 0</span>
                     </div>
+                    
+                    <button id="add-client-btn" class="add-client-btn">
+                        <span class="btn-icon">➕</span>
+                        <span class="btn-text">Aggiungi Cliente</span>
+                    </button>
+
                 </div>
             </div>
 
@@ -110,8 +246,40 @@ require_once '../../config/config.php';
         // Importa l'API dei clienti
         import { ClientsUI } from '../../api/frontend/clients-api.js';
         
+        // Leggi parametri URL per ricerca automatica
+        const urlParams = new URLSearchParams(window.location.search);
+        const searchText = urlParams.get('search') || '';
+        const searchField = urlParams.get('searchField') || 'name';
+        
+        // Aspetta che il DOM sia caricato
+        document.addEventListener('DOMContentLoaded', function() {
+            // Se ci sono parametri di ricerca, imposta i valori e esegui la ricerca
+            if (searchText || searchField !== 'name') {
+                const searchInput = document.getElementById('client-search');
+                const searchFieldSelect = document.getElementById('search-field-select');
+                
+                if (searchInput && searchText) {
+                    searchInput.value = searchText;
+                }
+                
+                if (searchFieldSelect && searchField) {
+                    // Mappa i valori dal dashboard al popup
+                    const fieldMapping = {
+                        'name': 'name',
+                        'first_name': 'first_name', 
+                        'last_name': 'last_name',
+                        'phone': 'phone',
+                        'notes': 'notes'
+                    };
+                    
+                    const mappedField = fieldMapping[searchField] || 'name';
+                    searchFieldSelect.value = mappedField;
+                }
+            }
+        });
+        
         // L'inizializzazione avviene automaticamente nell'API
-        console.log('Client API caricata');
+        console.log('Client API caricata con parametri:', { searchText, searchField });
     </script>
 </body>
 </html>

@@ -6,14 +6,16 @@
 const PATH = '../../api/backend/clients-api.php';
 
 /**
- * Recupera la lista dei clienti con paginazione e ricerca
+ * Recupera la lista dei clienti con paginazione, ricerca e ordinamento
  */
-export async function fetchClients(page = 1, limit = 50, search = '') {
+export async function fetchClients(page = 1, limit = 50, search = '', searchField = 'all', sort = 'last_name_asc') {
     try {
         const params = new URLSearchParams();
         if (page > 1) params.set('page', page);
         if (limit !== 50) params.set('limit', limit);
         if (search.trim()) params.set('search', search.trim());
+        if (searchField !== 'all') params.set('search_field', searchField);
+        if (sort !== 'last_name_asc') params.set('sort', sort);
         
         const url = PATH + (params.toString() ? '?' + params.toString() : '');
         
@@ -151,6 +153,8 @@ export class ClientsUI {
         this.currentPage = 1;
         this.currentLimit = 50;
         this.currentSearch = '';
+        this.currentSearchField = 'all';
+        this.currentSort = 'last_name_asc';
         this.clients = [];
         this.pagination = {};
         
@@ -161,7 +165,9 @@ export class ClientsUI {
     initializeElements() {
         this.tableBody = document.getElementById('client-table-body');
         this.searchInput = document.getElementById('client-search');
+        this.searchFieldSelect = document.getElementById('search-field-select');
         this.searchBtn = document.getElementById('search-btn');
+        this.sortSelect = document.getElementById('sort-select');
         this.prevBtn = document.getElementById('prev-btn');
         this.nextBtn = document.getElementById('next-btn');
         this.rangeLabel = document.getElementById('client-range-label');
@@ -201,20 +207,23 @@ export class ClientsUI {
         if (this.groupBtn) {
             this.groupBtn.addEventListener('click', () => this.toggleCertificateFilter());
         }
+        
+        if (this.sortSelect) {
+            this.sortSelect.addEventListener('change', () => this.performSort());
+        }
+        
+        if (this.searchFieldSelect) {
+            this.searchFieldSelect.addEventListener('change', () => this.performSearch());
+        }
     }
     
     async loadClients() {
         try {
-            this.showLoading();
-            this.hideError();
-            
-            const response = await fetchClients(this.currentPage, this.currentLimit, this.currentSearch);
+            const response = await fetchClients(this.currentPage, this.currentLimit, this.currentSearch, this.currentSearchField, this.currentSort);
             
             if (response.success) {
                 this.clients = response.data;
                 this.pagination = response.pagination;
-                this.hideLoading();
-                this.showTable();
                 this.renderTable();
                 this.updatePaginationControls();
             } else {
@@ -222,8 +231,6 @@ export class ClientsUI {
             }
         } catch (error) {
             console.error('Errore caricamento clienti:', error);
-            this.hideLoading();
-            this.hideTable();
             this.showError('Errore nel caricamento dei clienti: ' + error.message);
         }
     }
@@ -345,6 +352,13 @@ export class ClientsUI {
     
     performSearch() {
         this.currentSearch = this.searchInput ? this.searchInput.value.trim() : '';
+        this.currentSearchField = this.searchFieldSelect ? this.searchFieldSelect.value : 'all';
+        this.currentPage = 1;
+        this.loadClients();
+    }
+    
+    performSort() {
+        this.currentSort = this.sortSelect ? this.sortSelect.value : 'last_name_asc';
         this.currentPage = 1;
         this.loadClients();
     }
@@ -432,7 +446,33 @@ export class ClientsUI {
 document.addEventListener('DOMContentLoaded', function() {
     if (document.getElementById('client-table-body')) {
         const clientsUI = new ClientsUI();
-        clientsUI.loadClients();
+        
+        // Controlla parametri URL per ricerca automatica
+        const urlParams = new URLSearchParams(window.location.search);
+        const searchText = urlParams.get('search') || '';
+        const searchField = urlParams.get('searchField') || 'name';
+        
+        // Se ci sono parametri di ricerca, impostali e esegui la ricerca
+        if (searchText || searchField !== 'name') {
+            // Imposta i valori nei controlli
+            setTimeout(() => {
+                if (clientsUI.searchInput && searchText) {
+                    clientsUI.searchInput.value = searchText;
+                    clientsUI.currentSearch = searchText;
+                }
+                
+                if (clientsUI.searchFieldSelect && searchField) {
+                    clientsUI.searchFieldSelect.value = searchField;
+                    clientsUI.currentSearchField = searchField;
+                }
+                
+                // Esegui la ricerca
+                clientsUI.loadClients();
+            }, 100);
+        } else {
+            // Caricamento normale
+            clientsUI.loadClients();
+        }
         
         // Rendi disponibile globalmente per debug
         window.clientsUI = clientsUI;

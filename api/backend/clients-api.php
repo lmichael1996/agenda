@@ -99,21 +99,59 @@ try {
             $limit = isset($_GET['limit']) ? max(1, min(100, intval($_GET['limit']))) : 50;
             $offset = ($page - 1) * $limit;
             $search = isset($_GET['search']) ? trim($_GET['search']) : '';
+            $searchField = isset($_GET['search_field']) ? trim($_GET['search_field']) : 'all';
+            $sort = isset($_GET['sort']) ? trim($_GET['sort']) : 'last_name_asc';
             
             // Costruzione query con ricerca
             $searchCondition = '';
             $params = [];
             
             if (!empty($search)) {
-                $searchCondition = "WHERE first_name LIKE :search OR last_name LIKE :search OR phone LIKE :search";
+                switch ($searchField) {
+                    case 'name':
+                        $searchCondition = "WHERE (first_name LIKE :search OR last_name LIKE :search OR CONCAT(first_name, ' ', last_name) LIKE :search)";
+                        break;
+                    case 'first_name':
+                        $searchCondition = "WHERE first_name LIKE :search";
+                        break;
+                    case 'last_name':
+                        $searchCondition = "WHERE last_name LIKE :search";
+                        break;
+                    case 'phone':
+                        $searchCondition = "WHERE phone LIKE :search";
+                        break;
+                    case 'notes':
+                        $searchCondition = "WHERE notes LIKE :search";
+                        break;
+                    case 'all':
+                    default:
+                        $searchCondition = "WHERE first_name LIKE :search OR last_name LIKE :search OR phone LIKE :search OR notes LIKE :search";
+                        break;
+                }
                 $params['search'] = "%$search%";
+            }
+            
+            // Costruzione ORDER BY
+            $orderBy = 'ORDER BY first_name, last_name'; // default
+            switch ($sort) {
+                case 'first_name_desc':
+                    $orderBy = 'ORDER BY first_name DESC, last_name DESC';
+                    break;
+                case 'last_name_asc':
+                    $orderBy = 'ORDER BY last_name ASC, first_name ASC';
+                    break;
+                case 'last_name_desc':
+                    $orderBy = 'ORDER BY last_name DESC, first_name DESC';
+                    break;
+                default:
+                    $orderBy = 'ORDER BY last_name ASC, first_name ASC';
             }
             
             // Query per recuperare clienti
             $sql = "SELECT id, first_name, last_name, phone, notes, has_certificate 
                     FROM clients 
                     $searchCondition 
-                    ORDER BY last_name, first_name 
+                    $orderBy 
                     LIMIT :limit OFFSET :offset";
             
             $stmt = $pdo->prepare($sql);

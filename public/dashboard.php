@@ -54,10 +54,18 @@ $currentDate = $today->format('Y-m-d');
         <div class="sidebar-toggle">
             <img src="../assets/images/menu-icon.png" alt="Menu" class="menu-icon">
         </div>
-        <a href="#" data-popup-window="services">Servizi</a>
-        <a href="#" data-popup-window="users">Utenti</a>
-        <a href="#" data-popup-window="schedule">Orario</a>
-        <a href="../utils/logout.php" class="logout" onclick="return confirm('Sei sicuro di voler uscire?')">Logout</a>
+        <a href="#" data-popup-window="services" class="sidebar-link">
+            <span class="sidebar-text">Servizi</span>
+        </a>
+        <a href="#" data-popup-window="users" class="sidebar-link">
+            <span class="sidebar-text">Utenti</span>
+        </a>
+        <a href="#" data-popup-window="schedule" class="sidebar-link">
+            <span class="sidebar-text">Orario</span>
+        </a>
+        <a href="../utils/logout.php" class="logout sidebar-link" onclick="return confirm('Sei sicuro di voler uscire?')">
+            <span class="sidebar-text">Logout</span>
+        </a>
     </div>
 
     <!-- Top Menu Controls -->
@@ -74,6 +82,13 @@ $currentDate = $today->format('Y-m-d');
         <div class="controls-center">
             <label for="cerca" class="control-label">Cliente:</label>
             <input type="search" autocomplete="on" id="cerca" placeholder="Cerca cliente...">
+            <select id="search-field-select" class="search-field-select">
+                <option value="name">Nome e Cognome</option>
+                <option value="first_name">Solo Nome</option>
+                <option value="last_name">Solo Cognome</option>
+                <option value="phone">Telefono</option>
+                <option value="notes">Note</option>
+            </select>
             <input type="submit" id="client-search" onmouseover="this.style.cursor='pointer'" value="Cerca">
             <button type="button" id="note-btn" title="Note" onmouseover="this.style.cursor='pointer'">📝</button>
         </div>
