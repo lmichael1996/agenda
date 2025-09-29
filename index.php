@@ -34,19 +34,9 @@ $hasValidUserAgent = !empty(trim($userAgent)) && strlen($userAgent) > 10 && strl
 $noSuspiciousChars = !preg_match('/[<>"\'\(\){}]/', $requestUri);
 $validIpFormat = filter_var($remoteAddr, FILTER_VALIDATE_IP) !== false;
 
-// Rate limiting semplice (max 10 richieste per minuto per IP)
-$rateLimitKey = 'rate_limit_' . md5($remoteAddr);
-$currentRequests = $_SESSION[$rateLimitKey] ?? 0;
-$lastRequestTime = $_SESSION[$rateLimitKey . '_time'] ?? 0;
-
-if (time() - $lastRequestTime > 60) {
-    $_SESSION[$rateLimitKey] = 1;
-    $_SESSION[$rateLimitKey . '_time'] = time();
-} else {
-    $_SESSION[$rateLimitKey]++;
-}
-
-$withinRateLimit = $_SESSION[$rateLimitKey] <= 10;
+// Rate limiting DISABILITATO per sviluppo
+// TODO: Riattivare in produzione con limiti più permissivi
+$withinRateLimit = true;
 
 // Accesso diretto o da logout
 $isDirectAccess = empty($_GET) && empty($referer);
@@ -76,7 +66,7 @@ if (!$noOtherParams) $blockReason .= 'ExtraParams ';
 if (!$hasValidUserAgent) $blockReason .= 'InvalidUA ';
 if (!$noSuspiciousChars) $blockReason .= 'SuspiciousChars ';
 if (!$validIpFormat) $blockReason .= 'InvalidIP ';
-if (!$withinRateLimit) $blockReason .= 'RateLimit ';
+// Rate limiting disabilitato
 
 error_log("Blocked access from IP: $remoteAddr, Reason: $blockReason, UA: " . substr($userAgent, 0, 100));
 

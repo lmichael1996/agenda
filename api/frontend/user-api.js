@@ -17,6 +17,19 @@ export async function fetchUsers() {
     }
 }
 
+export async function fetchUserDetails(userId) {
+    const response = await fetch(`${PATH}?id=${userId}`);
+    const text = await response.text();
+    console.log('User details response:', text);
+    try {
+        return JSON.parse(text);
+    } catch (e) {
+        alert('Errore caricamento dettagli utente: ' + text);
+        console.error('Errore parsing JSON user details:', text, e);
+        return { success: false, user: null, error: 'Invalid JSON' };
+    }
+}
+
 export async function saveAllUsers(usersData) {
     const response = await fetch(PATH, {
         method: 'PUT',

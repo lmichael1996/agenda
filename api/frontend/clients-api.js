@@ -113,6 +113,38 @@ export async function updateClient(clientData) {
 }
 
 /**
+ * Recupera i dettagli di un cliente specifico
+ */
+export async function fetchClientDetails(clientId) {
+    try {
+        const response = await fetch(`${PATH}?id=${clientId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const text = await response.text();
+        console.log('Client details response:', text);
+        
+        // Controlla se la risposta HTTP è ok
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${text}`);
+        }
+        
+        try {
+            return JSON.parse(text);
+        } catch (e) {
+            console.error('Errore parsing JSON fetchClientDetails:', text, e);
+            throw new Error('Risposta non valida dal server: ' + text);
+        }
+    } catch (error) {
+        console.error('Errore caricamento dettagli cliente:', error);
+        throw error;
+    }
+}
+
+/**
  * Elimina un cliente
  */
 export async function deleteClient(clientId) {
@@ -242,7 +274,7 @@ export class ClientsUI {
         this.tableBody.innerHTML = '';
         
         if (this.clients.length === 0) {
-            const emptyRow = this.createTableRow(['Nessun cliente trovato'], 5, 'empty-row');
+            const emptyRow = this.createTableRow(['Nessun cliente trovato'], 6, 'empty-row');
             this.tableBody.appendChild(emptyRow);
             return;
         }
@@ -258,6 +290,8 @@ export class ClientsUI {
         const row = document.createElement('tr');
         row.className = 'client-row';
         row.style.cursor = 'pointer';
+        row.dataset.clientId = client.id;
+        row.title = 'Clicca per vedere i dettagli del cliente';
         
         const q = (this.currentSearch || '').trim();
         const field = this.currentSearchField || 'all';
@@ -303,23 +337,58 @@ export class ClientsUI {
         certCell.className = 'client-cert-cell';
         certCell.style.textAlign = 'center';
         
+        // Colonna Azioni
+        const actionsCell = document.createElement('td');
+        actionsCell.className = 'actions-cell';
+        
+        const editBtn = document.createElement('button');
+        editBtn.className = 'action-btn btn-add-appointment';
+        editBtn.textContent = 'Appuntamento';
+        editBtn.title = 'Aggiungi appuntamento';
+        editBtn.dataset.clientId = client.id;
+        
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'action-btn btn-delete-client';
+        deleteBtn.textContent = 'Elimina';
+        deleteBtn.title = 'Elimina cliente';
+        deleteBtn.dataset.clientId = client.id;
+        
+        actionsCell.appendChild(editBtn);
+        actionsCell.appendChild(deleteBtn);
+        
+        // Event handlers for action buttons (prevent row click)
+        editBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.addAppointment(client.id);
+        });
+        
+        deleteBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.deleteClient(client.id);
+        });
+        
         // Assembla la riga
         row.appendChild(nameCell);
         row.appendChild(surnameCell);
         row.appendChild(phoneCell);
         row.appendChild(notesCell);
         row.appendChild(certCell);
+        row.appendChild(actionsCell);
         
-        // Event listener per selezione
-        row.addEventListener('click', () => this.selectClient(client));
+        // Event listener per aprire dettagli cliente
+        row.addEventListener('click', () => this.showClientDetails(client.id));
         
         // Hover effect
         row.addEventListener('mouseenter', () => {
-            row.style.backgroundColor = '#f5f5f5';
+            row.style.backgroundColor = '#e8f4f8';
+            row.style.transform = 'translateX(2px)';
+            row.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
         });
         
         row.addEventListener('mouseleave', () => {
             row.style.backgroundColor = '';
+            row.style.transform = '';
+            row.style.boxShadow = '';
         });
         
         return row;
@@ -398,14 +467,149 @@ export class ClientsUI {
         // Implementa logica per selezione cliente
     }
     
+    showClientDetails(clientId) {
+        console.log('Opening client details for ID:', clientId);
+        
+        if (!clientId) {
+            alert('ID cliente non valido');
+            return;
+        }
+
+        // Open new popup window with client details
+        const windowFeatures = [
+            'width=650',
+            'height=550',
+            'left=' + (screen.width - 650) / 2,
+            'top=' + (screen.height - 550) / 2,
+            'scrollbars=yes',
+            'resizable=yes',
+            'menubar=no',
+            'toolbar=no',
+            'location=no',
+            'status=no'
+        ].join(',');
+        
+        const popupUrl = `client-detail.php?clientId=${clientId}`;
+        console.log('Opening popup URL:', popupUrl);
+        
+        const popupWindow = window.open(popupUrl, 'ClientDetail_' + clientId, windowFeatures);
+        
+        if (popupWindow) {
+            popupWindow.focus();
+            console.log('Client detail popup opened successfully');
+        } else {
+            console.error('Failed to open popup window');
+            alert('Impossibile aprire la finestra popup. Controlla le impostazioni del browser.');
+        }
+    }
+    
+    addAppointment(clientId) {
+        console.log('Opening add appointment for client ID:', clientId);
+        
+        if (!clientId) {
+            alert('ID cliente non valido');
+            return;
+        }
+
+        // Find client data for appointment context
+        const client = this.clients.find(c => c.id == clientId);
+        const clientName = client ? 
+            [client.first_name, client.last_name].filter(Boolean).join(' ') : 
+            `Cliente ID ${clientId}`;
+
+        // Open appointment popup window with client pre-selected
+        const windowFeatures = [
+            'width=800',
+            'height=700',
+            'left=' + (screen.width - 800) / 2,
+            'top=' + (screen.height - 700) / 2,
+            'scrollbars=yes',
+            'resizable=yes',
+            'menubar=no',
+            'toolbar=no',
+            'location=no',
+            'status=no'
+        ].join(',');
+        
+        const popupUrl = `schedule.php?clientId=${clientId}&clientName=${encodeURIComponent(clientName)}`;
+        console.log('Opening appointment popup URL:', popupUrl);
+        
+        const popupWindow = window.open(popupUrl, 'AddAppointment_' + clientId, windowFeatures);
+        
+        if (popupWindow) {
+            popupWindow.focus();
+            console.log(`Appointment popup opened for client: ${clientName}`);
+        } else {
+            console.error('Failed to open appointment popup window');
+            alert('Impossibile aprire la finestra appuntamenti. Controlla le impostazioni del browser.');
+        }
+    }
+    
+    async deleteClient(clientId) {
+        console.log('Deleting client with ID:', clientId);
+        
+        if (!clientId) {
+            alert('ID cliente non valido');
+            return;
+        }
+
+        // Find client data for confirmation message
+        const client = this.clients.find(c => c.id == clientId);
+        const clientName = client ? 
+            [client.first_name, client.last_name].filter(Boolean).join(' ') : 
+            `Cliente ID ${clientId}`;
+        
+        const confirmMessage = `Sei sicuro di voler eliminare il cliente "${clientName}"?\n\nQuesta operazione non può essere annullata.`;
+        
+        if (!confirm(confirmMessage)) {
+            return;
+        }
+        
+        try {
+            const result = await deleteClient(clientId);
+            
+            if (result.success) {
+                alert('Cliente eliminato con successo!');
+                // Refresh client list
+                this.loadClients();
+            } else {
+                alert('Errore durante l\'eliminazione: ' + (result.error || 'Errore sconosciuto'));
+            }
+        } catch (error) {
+            console.error('Errore eliminazione cliente:', error);
+            alert('Errore di connessione durante l\'eliminazione');
+        }
+    }
+    
     showAddClientDialog() {
         console.log('Apri dialog aggiungi cliente');
         // Implementa dialog per aggiungere cliente
     }
     
     toggleCertificateFilter() {
-        console.log('Toggle filtro certificato');
-        // Implementa filtro per certificato
+        console.log('Reset filtri - mostra tutti i clienti');
+        
+        // Reset tutti i campi di ricerca e filtri
+        if (this.searchInput) {
+            this.searchInput.value = '';
+        }
+        
+        if (this.searchFieldSelect) {
+            this.searchFieldSelect.value = 'name';
+        }
+        
+        if (this.sortSelect) {
+            this.sortSelect.value = 'first_name_asc';
+        }
+        
+        // Reset variabili di stato
+        this.currentSearch = '';
+        this.currentSearchField = 'name';
+        this.currentSort = 'first_name_asc';
+        this.currentPage = 1;
+        
+        // Ricarica tutti i clienti senza filtri
+        this.loadClients();
     }
     
     showLoading() {

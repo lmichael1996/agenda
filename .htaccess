@@ -11,17 +11,8 @@
 </FilesMatch>
 
 # Blocca accesso a directory di configurazione
-<Directory "config">
-    Require all denied
-</Directory>
-
-<Directory "includes">
-    Require all denied
-</Directory>
-
-<Directory "views">
-    Require all denied
-</Directory>
+# Nota: Le direttive Directory non sono permesse in .htaccess
+# Queste protezioni sono gestite nel virtual host Apache
 
 # Headers di sicurezza
 <IfModule mod_headers.c>

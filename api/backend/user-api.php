@@ -19,19 +19,36 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 switch ($method) {
     case 'GET':
-        // Lista utenti con prepared statement
-        $stmt = $conn->prepare('SELECT id, username, color, is_active FROM users');
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $users = [];
-        while ($row = $result->fetch_assoc()) {
-            $users[] = $row;
+        // Check if requesting a specific user by ID
+        if (isset($_GET['id']) && !empty($_GET['id'])) {
+            // Get single user details
+            $userId = (int)$_GET['id'];
+            $stmt = $conn->prepare('SELECT id, username, color, is_active FROM users WHERE id = ?');
+            $stmt->bind_param('i', $userId);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            
+            if ($user = $result->fetch_assoc()) {
+                echo json_encode(['success' => true, 'user' => $user]);
+            } else {
+                echo json_encode(['success' => false, 'error' => 'Utente non trovato']);
+            }
+            $stmt->close();
+        } else {
+            // Lista utenti con prepared statement
+            $stmt = $conn->prepare('SELECT id, username, color, is_active FROM users');
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $users = [];
+            while ($row = $result->fetch_assoc()) {
+                $users[] = $row;
+            }
+            // Stampa la query e il risultato su console (solo per debug)
+            error_log('QUERY: SELECT id, username, color, is_active FROM users');
+            error_log('RISULTATO: ' . print_r($users, true));
+            echo json_encode(['success' => true, 'users' => $users]);
+            $stmt->close();
         }
-        // Stampa la query e il risultato su console (solo per debug)
-        error_log('QUERY: SELECT id, username, color, is_active FROM users');
-        error_log('RISULTATO: ' . print_r($users, true));
-        echo json_encode(['success' => true, 'users' => $users]);
-        $stmt->close();
         break;
     case 'PUT':
         // Salvataggio batch di tutti gli utenti

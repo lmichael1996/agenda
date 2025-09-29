@@ -82,6 +82,21 @@ try {
     
     switch ($method) {
         case 'GET':
+            // Check if requesting a specific client by ID
+            if (isset($_GET['id']) && !empty($_GET['id'])) {
+                // Get single client details
+                $clientId = (int)$_GET['id'];
+                $stmt = $pdo->prepare('SELECT id, first_name, last_name, phone, notes, has_certificate FROM clients WHERE id = ?');
+                $stmt->execute([$clientId]);
+                
+                if ($client = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                    echo json_encode(['success' => true, 'data' => $client]);
+                } else {
+                    echo json_encode(['success' => false, 'error' => 'Cliente non trovato']);
+                }
+                break;
+            }
+            
             // Verifica esistenza tabella clients
             try {
                 $stmt = $pdo->query("SHOW TABLES LIKE 'clients'");

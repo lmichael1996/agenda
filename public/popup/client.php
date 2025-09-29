@@ -159,6 +159,93 @@ require_once '../../config/config.php';
         .btn-text {
             font-size: 14px;
         }
+        
+        /* Action buttons styling */
+        .client-actions-col {
+            width: 140px;
+            text-align: center;
+        }
+        
+        .actions-cell {
+            text-align: center;
+            white-space: nowrap;
+            padding: 4px;
+        }
+        
+        .action-btn {
+            padding: 6px 12px;
+            margin: 2px;
+            font-size: 11px;
+            background: #000;
+            color: #fff;
+            border: 1.5px solid #000;
+            cursor: pointer;
+            font-family: 'Segoe UI', 'Arial', sans-serif;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .action-btn:hover {
+            background: #fff;
+            color: #000;
+            border-color: #000;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
+        
+        /* Stile specifico per il button Appuntamento */
+        .btn-add-appointment {
+            background: #000;
+            color: #fff;
+            border: 1.5px solid #000;
+            font-weight: 600;
+            font-family: 'Courier New', monospace;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-add-appointment:hover {
+            background: #fff;
+            color: #000;
+            border-color: #000;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-add-appointment:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Effetto icona per il button appuntamento */
+        .btn-add-appointment::before {
+            content: '📅';
+            margin-right: 4px;
+            font-size: 10px;
+        }
+        
+        /* Responsive styling for smaller screens */
+        @media (max-width: 768px) {
+            .client-actions-col {
+                width: 140px;
+            }
+            
+            .actions-cell {
+                padding: 2px;
+            }
+            
+            .action-btn {
+                padding: 5px 10px;
+                font-size: 10px;
+                margin: 1px;
+            }
+            
+            .btn-add-appointment::before {
+                font-size: 9px;
+                margin-right: 2px;
+            }
+        }
     </style>
 
 </head>
@@ -189,7 +276,7 @@ require_once '../../config/config.php';
                             <option value="last_name_desc">Cognome Z-A</option>
                         </select>
                         <button id="search-btn" class="control-btn search-btn">🔍</button>
-                        <button id="group-btn" class="control-btn group-btn">👥</button>
+                        <button id="group-btn" class="control-btn group-btn" title="Mostra tutti i clienti">👥</button>
                     </div>
                 </div>
                 
@@ -228,6 +315,7 @@ require_once '../../config/config.php';
                             <th class="client-phone-col">Telefono</th>
                             <th class="client-note-col">Nota</th>
                             <th class="client-cert-col">Certificato</th>
+                            <th class="client-actions-col">Azioni</th>
                         </tr>
                     </thead>
                     <tbody id="client-table-body">
