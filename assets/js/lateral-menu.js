@@ -1,17 +1,37 @@
 /**
- * Gestione menu laterale semplificata
+ * Gestione menu laterale - Desktop & Mobile
  */
 const sidebar = document.getElementById("sidebar");
+const sidebarToggle = document.querySelector(".sidebar-toggle");
 
 // Stato
 let isOpen = false;
 let hoverTimeout = null;
+let isMobile = window.innerWidth <= 768;
+
+// Aggiorna stato mobile su resize
+window.addEventListener('resize', () => {
+    const wasMobile = isMobile;
+    isMobile = window.innerWidth <= 768;
+    
+    // Se cambia da mobile a desktop o viceversa, reset del menu
+    if (wasMobile !== isMobile) {
+        closeSidebar();
+    }
+});
 
 function openSidebar() {
     if (isOpen) return;
     
     clearTimeout(hoverTimeout);
-    sidebar.style.width = "224px";
+    
+    if (isMobile) {
+        sidebar.classList.add('sidebar-open');
+        createBackdrop();
+    } else {
+        sidebar.style.width = "240px";
+    }
+    
     isOpen = true;
 }
 
@@ -19,24 +39,76 @@ function closeSidebar() {
     if (!isOpen) return;
     
     clearTimeout(hoverTimeout);
-    sidebar.style.width = "0px";
+    
+    if (isMobile) {
+        sidebar.classList.remove('sidebar-open');
+        removeBackdrop();
+    } else {
+        sidebar.style.width = "0px";
+    }
+    
     isOpen = false;
 }
 
-// Eventi con debounce sulla sidebar
+function toggleSidebar() {
+    if (isOpen) {
+        closeSidebar();
+    } else {
+        openSidebar();
+    }
+}
+
+// Crea backdrop per mobile
+function createBackdrop() {
+    let backdrop = document.querySelector('.sidebar-backdrop');
+    if (!backdrop) {
+        backdrop = document.createElement('div');
+        backdrop.className = 'sidebar-backdrop';
+        document.body.appendChild(backdrop);
+    }
+    backdrop.classList.add('active');
+    backdrop.addEventListener('click', closeSidebar);
+}
+
+// Rimuovi backdrop
+function removeBackdrop() {
+    const backdrop = document.querySelector('.sidebar-backdrop');
+    if (backdrop) {
+        backdrop.classList.remove('active');
+        backdrop.removeEventListener('click', closeSidebar);
+    }
+}
+
+// Eventi sidebar
 if (sidebar) {
-    // Imposta subito la transizione per evitare lentezza iniziale
-    sidebar.style.transition = 'width 0.4s cubic-bezier(0.77,0,0.18,1)';
+    // Imposta transizione CSS
+    sidebar.style.transition = 'width 0.3s ease';
     
-    sidebar.addEventListener('mouseenter', () => {
-        clearTimeout(hoverTimeout);
-        hoverTimeout = setTimeout(openSidebar, 100);
-    });
+    // Desktop: hover behavior
+    if (!isMobile) {
+        sidebar.addEventListener('mouseenter', () => {
+            if (!isMobile) {
+                clearTimeout(hoverTimeout);
+                hoverTimeout = setTimeout(openSidebar, 100);
+            }
+        });
+        
+        sidebar.addEventListener('mouseleave', () => {
+            if (!isMobile) {
+                clearTimeout(hoverTimeout);
+                hoverTimeout = setTimeout(closeSidebar, 50);
+            }
+        });
+    }
     
-    sidebar.addEventListener('mouseleave', () => {
-        clearTimeout(hoverTimeout);
-        hoverTimeout = setTimeout(closeSidebar, 50);
-    });
+    // Mobile: click toggle button
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleSidebar();
+        });
+    }
     
     // Stato iniziale chiuso
     closeSidebar();
@@ -50,6 +122,11 @@ if (sidebar) {
         
         const popupType = target.getAttribute('data-popup-window');
         openPopupWindow(popupType);
+        
+        // Chiudi menu su mobile dopo click
+        if (isMobile) {
+            setTimeout(closeSidebar, 300);
+        }
     });
 }
 

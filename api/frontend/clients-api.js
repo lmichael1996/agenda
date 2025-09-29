@@ -259,25 +259,41 @@ export class ClientsUI {
         row.className = 'client-row';
         row.style.cursor = 'pointer';
         
+        const q = (this.currentSearch || '').trim();
+        const field = this.currentSearchField || 'all';
+        const highlightFirst = q && (field === 'first_name' || field === 'name' || field === 'all');
+        const highlightLast = q && (field === 'last_name' || field === 'name' || field === 'all');
+        const highlightPhone = q && (field === 'phone' || field === 'all');
+        const highlightNotes = q && (field === 'notes' || field === 'all');
+
         // Colonna Nome
         const nameCell = document.createElement('td');
-        nameCell.textContent = client.first_name || '';
+        nameCell.innerHTML = highlightFirst
+            ? this.getHighlightedHTML(client.first_name || '', q)
+            : this.escapeHtml(client.first_name || '');
         nameCell.className = 'client-name-cell';
         
         // Colonna Cognome
         const surnameCell = document.createElement('td');
-        surnameCell.textContent = client.last_name || '';
+        surnameCell.innerHTML = highlightLast
+            ? this.getHighlightedHTML(client.last_name || '', q)
+            : this.escapeHtml(client.last_name || '');
         surnameCell.className = 'client-surname-cell';
         
         // Colonna Telefono
         const phoneCell = document.createElement('td');
-        phoneCell.textContent = client.phone || '';
+        phoneCell.innerHTML = highlightPhone
+            ? this.getHighlightedHTML(client.phone || '', q)
+            : this.escapeHtml(client.phone || '');
         phoneCell.className = 'client-phone-cell';
         
         // Colonna Note
         const notesCell = document.createElement('td');
         const notes = client.notes || 'Nessuna nota';
-        notesCell.textContent = this.truncateText(notes, 50);
+        const notesDisplay = this.truncateText(notes, 50);
+        notesCell.innerHTML = highlightNotes
+            ? this.getHighlightedHTML(notesDisplay, q)
+            : this.escapeHtml(notesDisplay);
         notesCell.title = notes;
         notesCell.className = 'client-notes-cell';
         
@@ -434,6 +450,35 @@ export class ClientsUI {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+    
+    escapeRegExp(text) {
+        return (text || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+    
+    getHighlightedHTML(text, query) {
+        const source = String(text || '');
+        const q = String(query || '').trim();
+        if (!q) return this.escapeHtml(source);
+        try {
+            const regex = new RegExp(this.escapeRegExp(q), 'gi');
+            let lastIndex = 0;
+            let match;
+            const parts = [];
+            while ((match = regex.exec(source)) !== null) {
+                const start = match.index;
+                const end = start + match[0].length;
+                parts.push(this.escapeHtml(source.slice(lastIndex, start)));
+                parts.push('<span class="search-highlight">', this.escapeHtml(source.slice(start, end)), '</span>');
+                lastIndex = end;
+                if (regex.lastIndex === start) regex.lastIndex++; // avoid zero-length loops
+            }
+            parts.push(this.escapeHtml(source.slice(lastIndex)));
+            return parts.join('');
+        } catch (e) {
+            // Fallback safe
+            return this.escapeHtml(source);
+        }
     }
     
     truncateText(text, maxLength) {

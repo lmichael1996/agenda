@@ -84,12 +84,12 @@ $currentDate = $today->format('Y-m-d');
             <input type="search" autocomplete="on" id="cerca" placeholder="Cerca cliente...">
             <select id="search-field-select" class="search-field-select">
                 <option value="name">Nome e Cognome</option>
-                <option value="first_name">Solo Nome</option>
-                <option value="last_name">Solo Cognome</option>
+                <option value="first_name">Nome</option>
+                <option value="last_name">Cognome</option>
                 <option value="phone">Telefono</option>
                 <option value="notes">Note</option>
             </select>
-            <input type="submit" id="client-search" onmouseover="this.style.cursor='pointer'" value="Cerca">
+            <input type="submit" id="client-search" onmouseover="this.style.cursor='pointer'" value="🔍">
             <button type="button" id="note-btn" title="Note" onmouseover="this.style.cursor='pointer'">📝</button>
         </div>
         
