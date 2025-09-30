@@ -148,7 +148,7 @@ function openPopupWindow(type) {
         schedule: {
             url: 'popup/schedule.php',
             title: 'Gestione Orari',
-            width: 1600,
+            width: 1200,
             height: 1000
         }
     };

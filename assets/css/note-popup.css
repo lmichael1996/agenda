@@ -1,0 +1,311 @@
+/* === RESET E BASE === */
+* { 
+    font-family: 'Courier New', monospace; 
+    box-sizing: border-box; 
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background: #f5f5f5 url('../images/background.png') center center no-repeat fixed;
+    background-size: auto;
+    color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+/* === CONTENITORE PRINCIPALE === */
+.popup-window-container {
+    max-width: 500px;
+    width: min(95vw, 100%);
+    background: #fff;
+    border: 3px solid #000;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.25);
+    position: relative;
+}
+
+.window-header {
+    background: #000;
+    color: #fff;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.header-title {
+    flex: 1;
+    text-align: center;
+    margin: 0;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+/* === LAYOUT CONTENUTO === */
+.calendar-body,
+.note-calendar-body {
+    padding: 4px;
+    min-height: 300px;
+}
+
+.note-form {
+    max-width: 400px;
+    margin: auto;
+    padding: 8px;
+}
+
+/* === TABELLE === */
+.excel-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    min-width: 280px;
+    border: 2px solid #000;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    margin: 8px 0;
+}
+
+.excel-table th {
+    background: #000;
+    color: #fff;
+    padding: 10px 6px;
+    font-size: 11px;
+    text-align: center;
+    border-right: 1px solid rgba(255,255,255,0.3);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.excel-table th:last-child {
+    border-right: none;
+}
+
+.excel-table td {
+    padding: 6px 4px;
+    font-size: 11px;
+    border-right: 1px solid rgba(0,0,0,0.1);
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    text-align: center;
+    vertical-align: middle;
+    min-height: 32px;
+    background: #fff;
+    transition: all 0.2s ease;
+}
+
+.excel-table td:last-child {
+    border-right: none;
+}
+
+.excel-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* === STILI SPECIFICI NOTE === */
+.note-table-th {
+    width: 140px;
+    font-size: 13px;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    padding: 12px 10px;
+    text-align: left;
+    font-weight: 600;
+    color: #495057;
+    vertical-align: top;
+}
+
+.note-table td {
+    padding: 12px 10px;
+    border: 1px solid #dee2e6;
+    vertical-align: top;
+}
+
+/* === INPUT E CONTROLLI === */
+.cell-input, 
+.cell-textarea, 
+.cell-select,
+.hour-input,
+.minute-select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    text-align: center;
+    font-size: 12px;
+    background: #fff;
+    font-family: inherit;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+    line-height: 1.2;
+}
+
+.cell-input:focus, 
+.cell-textarea:focus, 
+.cell-select:focus,
+.hour-input:focus,
+.minute-select:focus {
+    border-color: #007bff;
+    outline: none;
+    background: #fdfdfd;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+    transform: translateY(-1px);
+}
+
+.cell-input:hover, 
+.cell-textarea:hover, 
+.cell-select:hover,
+.hour-input:hover,
+.minute-select:hover {
+    border-color: #333;
+    background: rgba(0,0,0,0.02);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.cell-textarea {
+    resize: vertical;
+    min-height: 60px;
+    text-align: left;
+    vertical-align: top;
+    padding: 8px 10px;
+}
+
+.note-checkbox {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+}
+
+input[type="checkbox"] { 
+    width: 18px; 
+    height: 18px; 
+    margin: 2px;
+    border-radius: 3px;
+    border: 2px solid rgba(0,0,0,0.3);
+    transition: all 0.25s ease;
+    cursor: pointer;
+    appearance: none;
+    background: #fff;
+    position: relative;
+}
+
+input[type="checkbox"]:hover {
+    border-color: #000;
+    transform: scale(1.1);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+input[type="checkbox"]:checked {
+    background: #000;
+    border-color: #000;
+}
+
+input[type="checkbox"]:checked::after {
+    content: '✓';
+    position: absolute;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* === CONTROLLI TEMPORALI === */
+.date-time-container {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.date-input {
+    flex: 2;
+}
+
+.hour-input {
+    width: 60px;
+    text-align: center;
+}
+
+.minute-select {
+    width: 70px;
+    text-align: center;
+    text-align-last: center;
+}
+
+/* === PULSANTI === */
+button {
+    background: #fff;
+    color: #000;
+    border: 1px solid #000;
+    border-radius: 4px;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 500;
+    font-size: 12px;
+    padding: 8px 12px;
+    transition: all 0.2s ease;
+    text-transform: none;
+    min-height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+button:hover {
+    background: #000;
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.save-btn { 
+    padding: 12px 24px; 
+    font-size: 12px;
+    font-weight: 700;
+    border-radius: 6px;
+    text-transform: uppercase;
+}
+
+.note-save-container {
+    margin: 20px 0;
+    text-align: center;
+    border-top: 1px solid #ccc;
+    padding-top: 12px;
+}
+
+/* === SCROLLBAR === */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #999;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #666;
+}

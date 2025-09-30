@@ -39,7 +39,7 @@ $currentDate = $today->format('Y-m-d');
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agenda Settimanale</title>
+    <title>Agenda</title>
     
     <!-- CSS -->
     <link rel="stylesheet" href="../assets/css/top-header.css">

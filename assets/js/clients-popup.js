@@ -7,9 +7,6 @@
 // Importa le funzioni per i dati dal backend
 import { 
     fetchClients, 
-    createClient, 
-    updateClient, 
-    fetchClientDetails, 
     deleteClient 
 } from '../../api/frontend/clients-api.js';
 
@@ -24,42 +21,21 @@ let clients = [];
 let pagination = {};
 
 // Elementi DOM
-let tableBody;
-let searchInput;
-let searchFieldSelect;
-let searchTypeSelect;
-let searchBtn;
-let sortSelect;
-let prevBtn;
-let nextBtn;
-let rangeLabel;
-let totalLabel;
-let addClientBtn;
-let groupBtn;
-let loadingIndicator;
-let clientsTable;
-let errorMessage;
-
-/**
- * Inizializza gli elementi DOM
- */
-function initializeElements() {
-    tableBody = document.getElementById('client-table-body');
-    searchInput = document.getElementById('client-search');
-    searchFieldSelect = document.getElementById('search-field-select');
-    searchTypeSelect = document.getElementById('search-type-select');
-    searchBtn = document.getElementById('search-btn');
-    sortSelect = document.getElementById('sort-select');
-    prevBtn = document.getElementById('prev-btn');
-    nextBtn = document.getElementById('next-btn');
-    rangeLabel = document.getElementById('client-range-label');
-    totalLabel = document.getElementById('client-total-label');
-    addClientBtn = document.getElementById('add-client-btn');
-    groupBtn = document.getElementById('group-btn');
-    loadingIndicator = document.getElementById('loading-indicator');
-    clientsTable = document.getElementById('clients-table');
-    errorMessage = document.getElementById('error-message');
-}
+const tableBody = document.getElementById('client-table-body');
+const searchInput = document.getElementById('client-search');
+const searchFieldSelect = document.getElementById('search-field-select');
+const searchTypeSelect = document.getElementById('search-type-select');
+const searchBtn = document.getElementById('search-btn');
+const sortSelect = document.getElementById('sort-select');
+const prevBtn = document.getElementById('prev-btn');
+const nextBtn = document.getElementById('next-btn');
+const rangeLabel = document.getElementById('client-range-label');
+const totalLabel = document.getElementById('client-total-label');
+const addClientBtn = document.getElementById('add-client-btn');
+const groupBtn = document.getElementById('group-btn');
+const loadingIndicator = document.getElementById('loading-indicator');
+const clientsTable = document.getElementById('clients-table');
+const errorMessage = document.getElementById('error-message');
 
 /**
  * Attacca gli event listeners
@@ -647,8 +623,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Debug: mostra i parametri caricati
     console.log('Client popup caricato con parametri:', { searchText, searchField, searchType });
 
-    // Inizializza elementi e event listeners
-    initializeElements();
+    // Inizializza event listeners
     attachEventListeners();
 
     // Se ci sono parametri di ricerca, impostali

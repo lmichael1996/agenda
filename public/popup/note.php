@@ -13,8 +13,7 @@ require_once '../../config/config.php';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestione Note - Agenda</title>
-    <link rel="stylesheet" href="../../assets/css/popup.css">
-    <link rel="stylesheet" href="../../assets/css/scrollbar.css">
+    <link rel="stylesheet" href="../../assets/css/note-popup.css">
 </head>
 <body>
     <div class="popup-window-container">
@@ -35,7 +34,11 @@ require_once '../../config/config.php';
                         </tr>
                         <tr>
                             <th class="note-table-th">Utente</th>
-                            <td><input type="text" id="note-user" class="cell-input" placeholder="Utente" maxlength="50"></td>
+                            <td>
+                                <select id="note-user" class="cell-input">
+                                    <option value="">Caricamento utenti...</option>
+                                </select>
+                            </td>
                         </tr>
                         <tr>
                             <th class="note-table-th">Tutti</th>
@@ -44,13 +47,15 @@ require_once '../../config/config.php';
                         <tr>
                             <th class="note-table-th">Data e ora</th>
                             <td>
-                                <input type="date" id="note-date" class="cell-input date-input" value="<?= date('Y-m-d') ?>">
-                                <input type="number" id="note-hour" class="hour-input" min="0" max="23" value="12"> :
-                                <select id="note-minute" class="minute-select">
-                                    <?php foreach (["00","15","30","45"] as $m): ?>
-                                        <option value="<?= $m ?>"><?= $m ?></option>
-                                    <?php endforeach; ?>
-                                </select>
+                                <div class="date-time-container">
+                                    <input type="date" id="note-date" class="cell-input date-input" value="<?= date('Y-m-d') ?>">
+                                    <input type="number" id="note-hour" class="cell-input hour-input" min="0" max="23" value="12">
+                                    <select id="note-minute" class="cell-input minute-select">
+                                        <?php foreach (["00","15","30","45"] as $m): ?>
+                                            <option value="<?= $m ?>"><?= $m ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
                             </td>
                         </tr>
                         <tr>
@@ -66,10 +71,55 @@ require_once '../../config/config.php';
         </div>
     </div>
     <script>
-        // Qui puoi aggiungere la logica JS per salvataggio, validazione, ecc.
+        // Carica utenti tramite API
+        async function loadUsers() {
+            try {
+                const response = await fetch('../../api/backend/user-api.php');
+                const userSelect = document.getElementById('note-user');
+                const data = await response.json();
+                
+                if (data.success && data.users) {
+                    userSelect.innerHTML = '<option value="">Seleziona utente...</option>';
+                    data.users.forEach(user => {
+                        if (user.is_active == 1) { // Solo utenti attivi
+                            const option = document.createElement('option');
+                            option.value = user.id;
+                            option.textContent = user.username;
+                            userSelect.appendChild(option);
+                        }
+                    });
+                } else {
+                    userSelect.innerHTML = '<option value="">Errore caricamento utenti</option>';
+                }
+            } catch (error) {
+                console.error('Errore caricamento utenti:', error);
+                document.getElementById('note-user').innerHTML = '<option value="">Errore caricamento utenti</option>';
+            }
+        }
+
+        // Inizializza al caricamento della pagina
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUsers();
+        });
+
+        // Gestione salvataggio nota
         document.getElementById('save-note-btn').addEventListener('click', function(e) {
             e.preventDefault();
-            // ...salva nota...
+            
+            // Raccolta dati form
+            const noteData = {
+                title: document.getElementById('note-title').value,
+                content: document.getElementById('note-content').value,
+                user_id: document.getElementById('note-user').value,
+                all_users: document.getElementById('note-all').checked,
+                date: document.getElementById('note-date').value,
+                hour: document.getElementById('note-hour').value,
+                minute: document.getElementById('note-minute').value,
+                duration: document.getElementById('note-time').value
+            };
+            
+            console.log('Dati nota:', noteData);
+            // TODO: Implementare salvataggio tramite API
             alert('Nota salvata!');
         });
     </script>

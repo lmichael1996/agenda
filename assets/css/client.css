@@ -51,7 +51,7 @@
 }
 
 .search-input::placeholder {
-    color: #666666;
+    color: #666;
     font-style: italic;
     font-weight: 400;
 }
@@ -287,15 +287,15 @@
 }
 
 .sort-select {
-    min-width: 150px;
+    min-width: 180px;
 }
 
 .search-field-select {
-    min-width: 130px;
+    min-width: 160px;
 }
 
 .search-type-select {
-    min-width: 120px;
+    min-width: 150px;
 }
 
 .sort-select:focus, .search-field-select:focus, .search-type-select:focus {
