@@ -166,7 +166,9 @@ if (isset($_SESSION['user_id'])) {
     }
 }
 
-// Rate limiting globale per IP
+// Rate limiting globale per IP - DISABILITATO PER SVILUPPO
+// TODO: Riattivare in produzione con limiti più permissivi
+/*
 $globalRateKey = 'global_rate_' . hash('sha256', $_SERVER['REMOTE_ADDR'] ?? '');
 $globalRequests = $_SESSION[$globalRateKey] ?? 0;
 $globalRateTime = $_SESSION[$globalRateKey . '_time'] ?? 0;
@@ -185,4 +187,5 @@ if ($_SESSION[$globalRateKey] > 100) {
     echo '<h1>429 - Too Many Requests</h1><p>Limite di richieste superato. Riprova più tardi.</p>';
     exit;
 }
+*/
 ?>

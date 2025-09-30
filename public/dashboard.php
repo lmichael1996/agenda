@@ -89,6 +89,12 @@ $currentDate = $today->format('Y-m-d');
                 <option value="phone">Telefono</option>
                 <option value="notes">Note</option>
             </select>
+            <select id="search-type-select" class="search-type-select">
+                <option value="starts">Inizia con</option>
+                <option value="contains">Contiene</option>
+                <option value="ends">Finisce con</option>
+                <option value="exact">Esatto</option>
+            </select>
             <input type="submit" id="client-search" onmouseover="this.style.cursor='pointer'" value="🔍">
             <button type="button" id="note-btn" title="Note" onmouseover="this.style.cursor='pointer'">📝</button>
         </div>

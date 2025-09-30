@@ -1,19 +1,30 @@
 /**
  * API Frontend per la gestione dei clienti
- * Wrapper JavaScript per le chiamate REST all'API clients
+ * Fornisce solo le funzioni per recuperare dati dal backend
+ * La parte grafica è gestita da clients-popup.js
  */
 
 const PATH = '../../api/backend/clients-api.php';
 
 /**
  * Recupera la lista dei clienti con paginazione, ricerca e ordinamento
+ * @param {number} page - Numero di pagina (default: 1)
+ * @param {number} limit - Numero di elementi per pagina (default: 50)
+ * @param {string} search - Testo di ricerca (default: '')
+ * @param {string} searchField - Campo di ricerca (default: 'all')
+ * @param {string} searchType - Tipo di ricerca: starts, contains, ends, exact (default: 'contains')
+ * @param {string} sort - Ordinamento (default: 'last_name_asc')
+ * @returns {Promise<Object>} Risposta con success, data, pagination
  */
-export async function fetchClients(page = 1, limit = 50, search = '', searchField = 'all', sort = 'last_name_asc') {
+export async function fetchClients(page = 1, limit = 50, search = '', searchField = 'all', searchType = 'contains', sort = 'last_name_asc') {
     try {
         const params = new URLSearchParams();
         if (page > 1) params.set('page', page);
         if (limit !== 50) params.set('limit', limit);
-        if (search.trim()) params.set('search', search.trim());
+        if (search.trim()) {
+            params.set('search', search.trim());
+            params.set('search_type', searchType);
+        }
         if (searchField !== 'all') params.set('search_field', searchField);
         if (sort !== 'last_name_asc') params.set('sort', sort);
         
@@ -29,7 +40,6 @@ export async function fetchClients(page = 1, limit = 50, search = '', searchFiel
         const text = await response.text();
         console.log('Clients response text:', text);
         
-        // Controlla se la risposta HTTP è ok
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${text}`);
         }
@@ -48,6 +58,8 @@ export async function fetchClients(page = 1, limit = 50, search = '', searchFiel
 
 /**
  * Crea un nuovo cliente
+ * @param {Object} clientData - Dati del cliente da creare
+ * @returns {Promise<Object>} Risposta con success e eventuale ID del cliente creato
  */
 export async function createClient(clientData) {
     try {
@@ -62,7 +74,6 @@ export async function createClient(clientData) {
         const text = await response.text();
         console.log('Create client response:', text);
         
-        // Controlla se la risposta HTTP è ok
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${text}`);
         }
@@ -81,6 +92,8 @@ export async function createClient(clientData) {
 
 /**
  * Aggiorna un cliente esistente
+ * @param {Object} clientData - Dati del cliente da aggiornare (deve includere id)
+ * @returns {Promise<Object>} Risposta con success
  */
 export async function updateClient(clientData) {
     try {
@@ -95,7 +108,6 @@ export async function updateClient(clientData) {
         const text = await response.text();
         console.log('Update client response:', text);
         
-        // Controlla se la risposta HTTP è ok
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${text}`);
         }
@@ -114,6 +126,8 @@ export async function updateClient(clientData) {
 
 /**
  * Recupera i dettagli di un cliente specifico
+ * @param {number|string} clientId - ID del cliente
+ * @returns {Promise<Object>} Risposta con success e data del cliente
  */
 export async function fetchClientDetails(clientId) {
     try {
@@ -127,7 +141,6 @@ export async function fetchClientDetails(clientId) {
         const text = await response.text();
         console.log('Client details response:', text);
         
-        // Controlla se la risposta HTTP è ok
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${text}`);
         }
@@ -146,6 +159,8 @@ export async function fetchClientDetails(clientId) {
 
 /**
  * Elimina un cliente
+ * @param {number|string} clientId - ID del cliente da eliminare
+ * @returns {Promise<Object>} Risposta con success
  */
 export async function deleteClient(clientId) {
     try {
@@ -160,7 +175,6 @@ export async function deleteClient(clientId) {
         const text = await response.text();
         console.log('Delete client response:', text);
         
-        // Controlla se la risposta HTTP è ok
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${text}`);
         }
@@ -177,553 +191,4 @@ export async function deleteClient(clientId) {
     }
 }
 
-/**
- * Classe per gestire l'interfaccia utente dei clienti
- */
-export class ClientsUI {
-    constructor() {
-        this.currentPage = 1;
-        this.currentLimit = 50;
-        this.currentSearch = '';
-        this.currentSearchField = 'all';
-        this.currentSort = 'last_name_asc';
-        this.clients = [];
-        this.pagination = {};
-        
-        this.initializeElements();
-        this.attachEventListeners();
-    }
-    
-    initializeElements() {
-        this.tableBody = document.getElementById('client-table-body');
-        this.searchInput = document.getElementById('client-search');
-        this.searchFieldSelect = document.getElementById('search-field-select');
-        this.searchBtn = document.getElementById('search-btn');
-        this.sortSelect = document.getElementById('sort-select');
-        this.prevBtn = document.getElementById('prev-btn');
-        this.nextBtn = document.getElementById('next-btn');
-        this.rangeLabel = document.getElementById('client-range-label');
-        this.totalLabel = document.getElementById('client-total-label');
-        this.addClientBtn = document.getElementById('add-client-btn');
-        this.groupBtn = document.getElementById('group-btn');
-        this.loadingIndicator = document.getElementById('loading-indicator');
-        this.clientsTable = document.getElementById('clients-table');
-        this.errorMessage = document.getElementById('error-message');
-    }
-    
-    attachEventListeners() {
-        if (this.searchBtn) {
-            this.searchBtn.addEventListener('click', () => this.performSearch());
-        }
-        
-        if (this.searchInput) {
-            this.searchInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    this.performSearch();
-                }
-            });
-        }
-        
-        if (this.prevBtn) {
-            this.prevBtn.addEventListener('click', () => this.goToPreviousPage());
-        }
-        
-        if (this.nextBtn) {
-            this.nextBtn.addEventListener('click', () => this.goToNextPage());
-        }
-        
-        if (this.addClientBtn) {
-            this.addClientBtn.addEventListener('click', () => this.showAddClientDialog());
-        }
-        
-        if (this.groupBtn) {
-            this.groupBtn.addEventListener('click', () => this.toggleCertificateFilter());
-        }
-        
-        if (this.sortSelect) {
-            this.sortSelect.addEventListener('change', () => this.performSort());
-        }
-        
-        if (this.searchFieldSelect) {
-            this.searchFieldSelect.addEventListener('change', () => this.performSearch());
-        }
-    }
-    
-    async loadClients() {
-        try {
-            const response = await fetchClients(this.currentPage, this.currentLimit, this.currentSearch, this.currentSearchField, this.currentSort);
-            
-            if (response.success) {
-                this.clients = response.data;
-                this.pagination = response.pagination;
-                this.renderTable();
-                this.updatePaginationControls();
-            } else {
-                throw new Error(response.error || 'Errore sconosciuto');
-            }
-        } catch (error) {
-            console.error('Errore caricamento clienti:', error);
-            this.showError('Errore nel caricamento dei clienti: ' + error.message);
-        }
-    }
-    
-    renderTable() {
-        if (!this.tableBody) return;
-        
-        // Pulisci la tabella
-        this.tableBody.innerHTML = '';
-        
-        if (this.clients.length === 0) {
-            const emptyRow = this.createTableRow(['Nessun cliente trovato'], 6, 'empty-row');
-            this.tableBody.appendChild(emptyRow);
-            return;
-        }
-        
-        // Genera le righe con i dati dei clienti
-        this.clients.forEach(client => {
-            const row = this.createClientRow(client);
-            this.tableBody.appendChild(row);
-        });
-    }
-    
-    createClientRow(client) {
-        const row = document.createElement('tr');
-        row.className = 'client-row';
-        row.style.cursor = 'pointer';
-        row.dataset.clientId = client.id;
-        row.title = 'Clicca per vedere i dettagli del cliente';
-        
-        const q = (this.currentSearch || '').trim();
-        const field = this.currentSearchField || 'all';
-        const highlightFirst = q && (field === 'first_name' || field === 'name' || field === 'all');
-        const highlightLast = q && (field === 'last_name' || field === 'name' || field === 'all');
-        const highlightPhone = q && (field === 'phone' || field === 'all');
-        const highlightNotes = q && (field === 'notes' || field === 'all');
 
-        // Colonna Nome
-        const nameCell = document.createElement('td');
-        nameCell.innerHTML = highlightFirst
-            ? this.getHighlightedHTML(client.first_name || '', q)
-            : this.escapeHtml(client.first_name || '');
-        nameCell.className = 'client-name-cell';
-        
-        // Colonna Cognome
-        const surnameCell = document.createElement('td');
-        surnameCell.innerHTML = highlightLast
-            ? this.getHighlightedHTML(client.last_name || '', q)
-            : this.escapeHtml(client.last_name || '');
-        surnameCell.className = 'client-surname-cell';
-        
-        // Colonna Telefono
-        const phoneCell = document.createElement('td');
-        phoneCell.innerHTML = highlightPhone
-            ? this.getHighlightedHTML(client.phone || '', q)
-            : this.escapeHtml(client.phone || '');
-        phoneCell.className = 'client-phone-cell';
-        
-        // Colonna Note
-        const notesCell = document.createElement('td');
-        const notes = client.notes || 'Nessuna nota';
-        const notesDisplay = this.truncateText(notes, 50);
-        notesCell.innerHTML = highlightNotes
-            ? this.getHighlightedHTML(notesDisplay, q)
-            : this.escapeHtml(notesDisplay);
-        notesCell.title = notes;
-        notesCell.className = 'client-notes-cell';
-        
-        // Colonna Certificato
-        const certCell = document.createElement('td');
-        certCell.textContent = client.has_certificate ? '✓' : '✗';
-        certCell.className = 'client-cert-cell';
-        certCell.style.textAlign = 'center';
-        
-        // Colonna Azioni
-        const actionsCell = document.createElement('td');
-        actionsCell.className = 'actions-cell';
-        
-        const editBtn = document.createElement('button');
-        editBtn.className = 'action-btn btn-add-appointment';
-        editBtn.textContent = 'Appuntamento';
-        editBtn.title = 'Aggiungi appuntamento';
-        editBtn.dataset.clientId = client.id;
-        
-        const deleteBtn = document.createElement('button');
-        deleteBtn.className = 'action-btn btn-delete-client';
-        deleteBtn.textContent = 'Elimina';
-        deleteBtn.title = 'Elimina cliente';
-        deleteBtn.dataset.clientId = client.id;
-        
-        actionsCell.appendChild(editBtn);
-        actionsCell.appendChild(deleteBtn);
-        
-        // Event handlers for action buttons (prevent row click)
-        editBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.addAppointment(client.id);
-        });
-        
-        deleteBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.deleteClient(client.id);
-        });
-        
-        // Assembla la riga
-        row.appendChild(nameCell);
-        row.appendChild(surnameCell);
-        row.appendChild(phoneCell);
-        row.appendChild(notesCell);
-        row.appendChild(certCell);
-        row.appendChild(actionsCell);
-        
-        // Event listener per aprire dettagli cliente
-        row.addEventListener('click', () => this.showClientDetails(client.id));
-        
-        // Hover effect
-        row.addEventListener('mouseenter', () => {
-            row.style.backgroundColor = '#e8f4f8';
-            row.style.transform = 'translateX(2px)';
-            row.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-        });
-        
-        row.addEventListener('mouseleave', () => {
-            row.style.backgroundColor = '';
-            row.style.transform = '';
-            row.style.boxShadow = '';
-        });
-        
-        return row;
-    }
-    
-    createTableRow(data, colspan = null, className = '') {
-        const row = document.createElement('tr');
-        if (className) row.className = className;
-        
-        if (colspan) {
-            const cell = document.createElement('td');
-            cell.colSpan = colspan;
-            cell.textContent = data[0] || '';
-            cell.style.textAlign = 'center';
-            cell.style.fontStyle = 'italic';
-            cell.style.color = '#666';
-            row.appendChild(cell);
-        } else {
-            data.forEach(cellData => {
-                const cell = document.createElement('td');
-                cell.textContent = cellData || '';
-                row.appendChild(cell);
-            });
-        }
-        
-        return row;
-    }
-    
-    updatePaginationControls() {
-        if (this.prevBtn) {
-            this.prevBtn.disabled = this.pagination.page <= 1;
-        }
-        
-        if (this.nextBtn) {
-            this.nextBtn.disabled = this.pagination.page >= this.pagination.totalPages;
-        }
-        
-        if (this.rangeLabel) {
-            this.rangeLabel.textContent = `${this.pagination.start}-${this.pagination.end}`;
-        }
-        
-        if (this.totalLabel) {
-            this.totalLabel.textContent = `Totale: ${this.pagination.total}`;
-        }
-    }
-    
-    performSearch() {
-        this.currentSearch = this.searchInput ? this.searchInput.value.trim() : '';
-        this.currentSearchField = this.searchFieldSelect ? this.searchFieldSelect.value : 'all';
-        this.currentPage = 1;
-        this.loadClients();
-    }
-    
-    performSort() {
-        this.currentSort = this.sortSelect ? this.sortSelect.value : 'last_name_asc';
-        this.currentPage = 1;
-        this.loadClients();
-    }
-    
-    goToPreviousPage() {
-        if (this.currentPage > 1) {
-            this.currentPage--;
-            this.loadClients();
-        }
-    }
-    
-    goToNextPage() {
-        if (this.currentPage < this.pagination.totalPages) {
-            this.currentPage++;
-            this.loadClients();
-        }
-    }
-    
-    selectClient(client) {
-        console.log('Cliente selezionato:', client);
-        // Implementa logica per selezione cliente
-    }
-    
-    showClientDetails(clientId) {
-        console.log('Opening client details for ID:', clientId);
-        
-        if (!clientId) {
-            alert('ID cliente non valido');
-            return;
-        }
-
-        // Open new popup window with client details
-        const windowFeatures = [
-            'width=650',
-            'height=550',
-            'left=' + (screen.width - 650) / 2,
-            'top=' + (screen.height - 550) / 2,
-            'scrollbars=yes',
-            'resizable=yes',
-            'menubar=no',
-            'toolbar=no',
-            'location=no',
-            'status=no'
-        ].join(',');
-        
-        const popupUrl = `client-detail.php?clientId=${clientId}`;
-        console.log('Opening popup URL:', popupUrl);
-        
-        const popupWindow = window.open(popupUrl, 'ClientDetail_' + clientId, windowFeatures);
-        
-        if (popupWindow) {
-            popupWindow.focus();
-            console.log('Client detail popup opened successfully');
-        } else {
-            console.error('Failed to open popup window');
-            alert('Impossibile aprire la finestra popup. Controlla le impostazioni del browser.');
-        }
-    }
-    
-    addAppointment(clientId) {
-        console.log('Opening add appointment for client ID:', clientId);
-        
-        if (!clientId) {
-            alert('ID cliente non valido');
-            return;
-        }
-
-        // Find client data for appointment context
-        const client = this.clients.find(c => c.id == clientId);
-        const clientName = client ? 
-            [client.first_name, client.last_name].filter(Boolean).join(' ') : 
-            `Cliente ID ${clientId}`;
-
-        // Open appointment popup window with client pre-selected
-        const windowFeatures = [
-            'width=800',
-            'height=700',
-            'left=' + (screen.width - 800) / 2,
-            'top=' + (screen.height - 700) / 2,
-            'scrollbars=yes',
-            'resizable=yes',
-            'menubar=no',
-            'toolbar=no',
-            'location=no',
-            'status=no'
-        ].join(',');
-        
-        const popupUrl = `schedule.php?clientId=${clientId}&clientName=${encodeURIComponent(clientName)}`;
-        console.log('Opening appointment popup URL:', popupUrl);
-        
-        const popupWindow = window.open(popupUrl, 'AddAppointment_' + clientId, windowFeatures);
-        
-        if (popupWindow) {
-            popupWindow.focus();
-            console.log(`Appointment popup opened for client: ${clientName}`);
-        } else {
-            console.error('Failed to open appointment popup window');
-            alert('Impossibile aprire la finestra appuntamenti. Controlla le impostazioni del browser.');
-        }
-    }
-    
-    async deleteClient(clientId) {
-        console.log('Deleting client with ID:', clientId);
-        
-        if (!clientId) {
-            alert('ID cliente non valido');
-            return;
-        }
-
-        // Find client data for confirmation message
-        const client = this.clients.find(c => c.id == clientId);
-        const clientName = client ? 
-            [client.first_name, client.last_name].filter(Boolean).join(' ') : 
-            `Cliente ID ${clientId}`;
-        
-        const confirmMessage = `Sei sicuro di voler eliminare il cliente "${clientName}"?\n\nQuesta operazione non può essere annullata.`;
-        
-        if (!confirm(confirmMessage)) {
-            return;
-        }
-        
-        try {
-            const result = await deleteClient(clientId);
-            
-            if (result.success) {
-                alert('Cliente eliminato con successo!');
-                // Refresh client list
-                this.loadClients();
-            } else {
-                alert('Errore durante l\'eliminazione: ' + (result.error || 'Errore sconosciuto'));
-            }
-        } catch (error) {
-            console.error('Errore eliminazione cliente:', error);
-            alert('Errore di connessione durante l\'eliminazione');
-        }
-    }
-    
-    showAddClientDialog() {
-        console.log('Apri dialog aggiungi cliente');
-        // Implementa dialog per aggiungere cliente
-    }
-    
-    toggleCertificateFilter() {
-        console.log('Reset filtri - mostra tutti i clienti');
-        
-        // Reset tutti i campi di ricerca e filtri
-        if (this.searchInput) {
-            this.searchInput.value = '';
-        }
-        
-        if (this.searchFieldSelect) {
-            this.searchFieldSelect.value = 'name';
-        }
-        
-        if (this.sortSelect) {
-            this.sortSelect.value = 'first_name_asc';
-        }
-        
-        // Reset variabili di stato
-        this.currentSearch = '';
-        this.currentSearchField = 'name';
-        this.currentSort = 'first_name_asc';
-        this.currentPage = 1;
-        
-        // Ricarica tutti i clienti senza filtri
-        this.loadClients();
-    }
-    
-    showLoading() {
-        if (this.loadingIndicator) {
-            this.loadingIndicator.style.display = 'block';
-        }
-    }
-    
-    hideLoading() {
-        if (this.loadingIndicator) {
-            this.loadingIndicator.style.display = 'none';
-        }
-    }
-    
-    showTable() {
-        if (this.clientsTable) {
-            this.clientsTable.style.display = 'table';
-        }
-    }
-    
-    hideTable() {
-        if (this.clientsTable) {
-            this.clientsTable.style.display = 'none';
-        }
-    }
-    
-    showError(message) {
-        console.error('Errore UI:', message);
-        if (this.errorMessage) {
-            this.errorMessage.style.display = 'block';
-            this.errorMessage.innerHTML = `<p>${this.escapeHtml(message)}</p>`;
-        }
-    }
-    
-    hideError() {
-        if (this.errorMessage) {
-            this.errorMessage.style.display = 'none';
-        }
-    }
-    
-    escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-    
-    escapeRegExp(text) {
-        return (text || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    }
-    
-    getHighlightedHTML(text, query) {
-        const source = String(text || '');
-        const q = String(query || '').trim();
-        if (!q) return this.escapeHtml(source);
-        try {
-            const regex = new RegExp(this.escapeRegExp(q), 'gi');
-            let lastIndex = 0;
-            let match;
-            const parts = [];
-            while ((match = regex.exec(source)) !== null) {
-                const start = match.index;
-                const end = start + match[0].length;
-                parts.push(this.escapeHtml(source.slice(lastIndex, start)));
-                parts.push('<span class="search-highlight">', this.escapeHtml(source.slice(start, end)), '</span>');
-                lastIndex = end;
-                if (regex.lastIndex === start) regex.lastIndex++; // avoid zero-length loops
-            }
-            parts.push(this.escapeHtml(source.slice(lastIndex)));
-            return parts.join('');
-        } catch (e) {
-            // Fallback safe
-            return this.escapeHtml(source);
-        }
-    }
-    
-    truncateText(text, maxLength) {
-        if (!text || text.length <= maxLength) return text;
-        return text.substring(0, maxLength) + '...';
-    }
-}
-
-// Inizializzazione automatica quando il DOM è pronto
-document.addEventListener('DOMContentLoaded', function() {
-    if (document.getElementById('client-table-body')) {
-        const clientsUI = new ClientsUI();
-        
-        // Controlla parametri URL per ricerca automatica
-        const urlParams = new URLSearchParams(window.location.search);
-        const searchText = urlParams.get('search') || '';
-        const searchField = urlParams.get('searchField') || 'name';
-        
-        // Se ci sono parametri di ricerca, impostali e esegui la ricerca
-        if (searchText || searchField !== 'name') {
-            // Imposta i valori nei controlli
-            setTimeout(() => {
-                if (clientsUI.searchInput && searchText) {
-                    clientsUI.searchInput.value = searchText;
-                    clientsUI.currentSearch = searchText;
-                }
-                
-                if (clientsUI.searchFieldSelect && searchField) {
-                    clientsUI.searchFieldSelect.value = searchField;
-                    clientsUI.currentSearchField = searchField;
-                }
-                
-                // Esegui la ricerca
-                clientsUI.loadClients();
-            }, 100);
-        } else {
-            // Caricamento normale
-            clientsUI.loadClients();
-        }
-        
-        // Rendi disponibile globalmente per debug
-        window.clientsUI = clientsUI;
-    }
-});

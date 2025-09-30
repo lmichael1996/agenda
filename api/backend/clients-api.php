@@ -115,6 +115,7 @@ try {
             $offset = ($page - 1) * $limit;
             $search = isset($_GET['search']) ? trim($_GET['search']) : '';
             $searchField = isset($_GET['search_field']) ? trim($_GET['search_field']) : 'all';
+            $searchType = isset($_GET['search_type']) ? trim($_GET['search_type']) : 'contains';
             $sort = isset($_GET['sort']) ? trim($_GET['sort']) : 'last_name_asc';
             
             // Costruzione query con ricerca
@@ -122,28 +123,55 @@ try {
             $params = [];
             
             if (!empty($search)) {
+                // Determina il pattern di ricerca in base al tipo
+                $searchPattern = $search;
+                switch ($searchType) {
+                    case 'starts':
+                        $searchPattern = "$search%";
+                        break;
+                    case 'ends':
+                        $searchPattern = "%$search";
+                        break;
+                    case 'exact':
+                        $searchPattern = $search;
+                        break;
+                    case 'contains':
+                    default:
+                        $searchPattern = "%$search%";
+                        break;
+                }
+                
+                // Costruisce la condizione basata sul campo
                 switch ($searchField) {
                     case 'name':
-                        $searchCondition = "WHERE (first_name LIKE :search OR last_name LIKE :search OR CONCAT(first_name, ' ', last_name) LIKE :search)";
+                        if ($searchType === 'exact') {
+                            $searchCondition = "WHERE (first_name = :search OR last_name = :search OR CONCAT(first_name, ' ', last_name) = :search)";
+                        } else {
+                            $searchCondition = "WHERE (first_name LIKE :search OR last_name LIKE :search OR CONCAT(first_name, ' ', last_name) LIKE :search)";
+                        }
                         break;
                     case 'first_name':
-                        $searchCondition = "WHERE first_name LIKE :search";
+                        $searchCondition = $searchType === 'exact' ? "WHERE first_name = :search" : "WHERE first_name LIKE :search";
                         break;
                     case 'last_name':
-                        $searchCondition = "WHERE last_name LIKE :search";
+                        $searchCondition = $searchType === 'exact' ? "WHERE last_name = :search" : "WHERE last_name LIKE :search";
                         break;
                     case 'phone':
-                        $searchCondition = "WHERE phone LIKE :search";
+                        $searchCondition = $searchType === 'exact' ? "WHERE phone = :search" : "WHERE phone LIKE :search";
                         break;
                     case 'notes':
-                        $searchCondition = "WHERE notes LIKE :search";
+                        $searchCondition = $searchType === 'exact' ? "WHERE notes = :search" : "WHERE notes LIKE :search";
                         break;
                     case 'all':
                     default:
-                        $searchCondition = "WHERE first_name LIKE :search OR last_name LIKE :search OR phone LIKE :search OR notes LIKE :search";
+                        if ($searchType === 'exact') {
+                            $searchCondition = "WHERE first_name = :search OR last_name = :search OR phone = :search OR notes = :search";
+                        } else {
+                            $searchCondition = "WHERE first_name LIKE :search OR last_name LIKE :search OR phone LIKE :search OR notes LIKE :search";
+                        }
                         break;
                 }
-                $params['search'] = "%$search%";
+                $params['search'] = $searchPattern;
             }
             
             // Costruzione ORDER BY

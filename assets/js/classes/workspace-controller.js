@@ -102,6 +102,9 @@ class WorkspaceController {
         // Gestione ricerca
         this.setupSearchControls();
         
+        // Gestione ricerca avanzata
+        this.setupAdvancedSearchControls();
+        
         // Gestione note
         this.setupNotesControls();
         
@@ -142,6 +145,8 @@ class WorkspaceController {
     setupSearchControls() {
         const searchInput = document.getElementById('cerca');
         const searchBtn = document.querySelector('input[type="submit"]');
+        const searchFieldSelect = document.getElementById('search-field-select');
+        const searchTypeSelect = document.getElementById('search-type-select');
 
         if (searchInput) {
             // Debounce della ricerca
@@ -149,7 +154,7 @@ class WorkspaceController {
             searchInput.addEventListener('input', (e) => {
                 clearTimeout(searchTimeout);
                 searchTimeout = setTimeout(() => {
-                    this.handleClientSearch(e.target.value);
+                    this.handleClientSearch();
                 }, 300);
             });
         }
@@ -157,8 +162,61 @@ class WorkspaceController {
         if (searchBtn) {
             searchBtn.addEventListener('click', (e) => {
                 e.preventDefault();
-                const searchTerm = searchInput ? searchInput.value : '';
-                this.handleClientSearch(searchTerm);
+                this.handleClientSearch();
+            });
+        }
+
+        // Event listeners per i select di ricerca
+        if (searchFieldSelect) {
+            searchFieldSelect.addEventListener('change', () => {
+                if (searchInput && searchInput.value.trim()) {
+                    this.handleClientSearch();
+                }
+            });
+        }
+
+        if (searchTypeSelect) {
+            searchTypeSelect.addEventListener('change', () => {
+                if (searchInput && searchInput.value.trim()) {
+                    this.handleClientSearch();
+                }
+            });
+        }
+    }
+
+    /**
+     * Setup controlli ricerca avanzata
+     */
+    setupAdvancedSearchControls() {
+        const advancedSearchBtn = document.getElementById('advanced-search-btn');
+        const advancedSearchControls = document.getElementById('advanced-search-controls');
+        
+        if (advancedSearchBtn && advancedSearchControls) {
+            // Toggle visibility dei controlli avanzati
+            advancedSearchBtn.addEventListener('click', () => {
+                const isVisible = advancedSearchControls.style.display !== 'none';
+                
+                if (isVisible) {
+                    // Nascondi controlli avanzati
+                    advancedSearchControls.style.display = 'none';
+                    advancedSearchBtn.classList.remove('active');
+                    advancedSearchBtn.title = 'Ricerca Avanzata';
+                } else {
+                    // Mostra controlli avanzati
+                    advancedSearchControls.style.display = 'flex';
+                    advancedSearchBtn.classList.add('active');
+                    advancedSearchBtn.title = 'Nascondi Ricerca Avanzata';
+                }
+            });
+            
+            // Chiudi controlli avanzati cliccando fuori
+            document.addEventListener('click', (e) => {
+                if (!advancedSearchBtn.contains(e.target) && 
+                    !advancedSearchControls.contains(e.target)) {
+                    advancedSearchControls.style.display = 'none';
+                    advancedSearchBtn.classList.remove('active');
+                    advancedSearchBtn.title = 'Ricerca Avanzata';
+                }
             });
         }
     }
@@ -286,43 +344,84 @@ class WorkspaceController {
     /**
      * Gestione ricerca clienti
      */
-    handleClientSearch(searchTerm) {
+    handleClientSearch() {
+        const searchInput = document.getElementById('cerca');
+        const searchFieldSelect = document.getElementById('search-field-select');
+        const searchTypeSelect = document.getElementById('search-type-select');
+
+        const searchTerm = searchInput ? searchInput.value.trim() : '';
+        const searchField = searchFieldSelect ? searchFieldSelect.value : 'name';
+        const searchType = searchTypeSelect ? searchTypeSelect.value : 'contains';
+
         if (!searchTerm || searchTerm.length < 2) {
             this.clearSearchResults();
             return;
         }
 
-        console.log(`Ricerca cliente: ${searchTerm}`);
+        console.log(`Ricerca cliente: "${searchTerm}" nel campo: ${searchField} tipo: ${searchType}`);
         
-        // Trigger evento per moduli esterni
-        this.dispatchCalendarEvent('clientSearchRequested', { searchTerm });
+        // Trigger evento per moduli esterni con parametri completi
+        this.dispatchCalendarEvent('clientSearchRequested', { 
+            searchTerm, 
+            searchField, 
+            searchType 
+        });
         
         // Implementazione ricerca locale semplificata
-        this.performLocalSearch(searchTerm);
+        this.performLocalSearch(searchTerm, searchField, searchType);
     }
 
     /**
      * Esegue ricerca locale negli eventi del calendario
      */
-    performLocalSearch(searchTerm) {
+    performLocalSearch(searchTerm, searchField = 'name', searchType = 'contains') {
         // Ricerca solo negli eventi esistenti del calendario
         if (this.calendar && this.calendar.getAllEvents) {
             const events = this.calendar.getAllEvents();
-            const matches = events.filter(event => 
-                event.text && event.text.toLowerCase().includes(searchTerm.toLowerCase())
-            );
+            const matches = events.filter(event => {
+                if (!event.text) return false;
+                
+                const text = event.text.toLowerCase();
+                const term = searchTerm.toLowerCase();
+                
+                // Applica il tipo di ricerca
+                switch (searchType) {
+                    case 'starts':
+                        return text.startsWith(term);
+                    case 'ends':
+                        return text.endsWith(term);
+                    case 'exact':
+                        return text === term;
+                    case 'contains':
+                    default:
+                        return text.includes(term);
+                }
+            });
             
-            console.log(`Trovati ${matches.length} risultati locali per "${searchTerm}"`);
+            console.log(`Trovati ${matches.length} risultati locali per "${searchTerm}" (${searchType})`);
             this.highlightSearchResults(matches);
         } else {
             // Ricerca semplificata negli elementi DOM
             const eventElements = document.querySelectorAll('.calendar-note');
             const matches = Array.from(eventElements).filter(element => {
-                const text = element.textContent || '';
-                return text.toLowerCase().includes(searchTerm.toLowerCase());
+                const text = (element.textContent || '').toLowerCase();
+                const term = searchTerm.toLowerCase();
+                
+                // Applica il tipo di ricerca
+                switch (searchType) {
+                    case 'starts':
+                        return text.startsWith(term);
+                    case 'ends':
+                        return text.endsWith(term);
+                    case 'exact':
+                        return text === term;
+                    case 'contains':
+                    default:
+                        return text.includes(term);
+                }
             });
             
-            console.log(`Trovati ${matches.length} elementi che corrispondono a "${searchTerm}"`);
+            console.log(`Trovati ${matches.length} elementi che corrispondono a "${searchTerm}" (${searchType})`);
             this.highlightDOMResults(matches);
         }
     }
