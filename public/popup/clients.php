@@ -36,8 +36,8 @@ require_once '../../config/config.php';
                         <input type="search" id="client-search" placeholder="Cerca cliente..." class="search-input">
                         <select id="search-field-select" class="search-field-select">
                             <option value="name">Nome e Cognome</option>
-                            <option value="first_name">Solo Nome</option>
-                            <option value="last_name">Solo Cognome</option>
+                            <option value="first_name">Nome</option>
+                            <option value="last_name">Cognome</option>
                             <option value="phone">Telefono</option>
                             <option value="notes">Note</option>
                         </select>

@@ -29,7 +29,7 @@ function openCenteredPopup(url, windowName, width = 1600, height = 900) {
 }
 
 noteBtn.addEventListener('click', function() {
-    openCenteredPopup('popup/note.php', 'Gestione Nota', 1200, 1000);
+    openCenteredPopup('popup/notes.php', 'Gestione Nota', 900, 850);
 });
 
 clientSearchBtn.addEventListener('click', function() {

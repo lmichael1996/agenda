@@ -136,20 +136,20 @@ function openPopupWindow(type) {
         services: {
             url: 'popup/services.php',
             title: 'Gestione Servizi',
-            width: 1400,
-            height: 1000
+            width: 1000,
+            height: 850
         },
         users: {
             url: 'popup/users.php', 
             title: 'Gestione Utenti',
-            width: 1300,
+            width: 1000,
             height: 850
         },
         schedule: {
             url: 'popup/schedule.php',
             title: 'Gestione Orari',
-            width: 1200,
-            height: 1000
+            width: 800,
+            height: 950
         }
     };
     

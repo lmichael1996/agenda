@@ -267,7 +267,7 @@ require_once '../../config/config.php';
                 btn.disabled = true;
                 btn.textContent = 'Salvando...';
                 
-                if (await saveData()) closePopup('Salvato!');
+                if (await saveData()) closePopup('Orario aggiornato con successo!');
                 else { 
                     btn.disabled = false; 
                     btn.textContent = 'Salva Orario'; 
