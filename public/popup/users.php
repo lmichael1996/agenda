@@ -17,7 +17,7 @@ $sampleUsers = [];
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestione Utenti - Agenda</title>
-    <link rel="stylesheet" href="../../assets/css/popup.css">
+    <link rel="stylesheet" href="../../assets/css/list-popup.css">
     <link rel="stylesheet" href="../../assets/css/scrollbar.css">
 </head>
 <body>

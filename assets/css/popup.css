@@ -1,3 +1,8 @@
+/**
+ * POPUP CSS - Client Detail Interface
+ * Stili per popup client-detail.php e interfaccia base
+ */
+
 /* === RESET E BASE === */
 * { 
     font-family: 'Courier New', monospace; 
@@ -20,18 +25,7 @@ body {
     line-height: 1.4;
 }
 
-/* === LAYOUT PRINCIPALE === */
-.calendar-body,
-.schedule-calendar-body {
-    padding: 4px;
-    min-height: 300px;
-}
-
-.popup-content {
-    padding: 12px;
-    background: #fff;
-}
-
+/* === LAYOUT CONTENITORI === */
 .popup-window-container {
     max-width: 1200px;
     width: min(95vw, 100%);
@@ -76,7 +70,18 @@ body {
     font-weight: 700;
 }
 
-/* === STILI BASE PULSANTI === */
+.calendar-body,
+.schedule-calendar-body {
+    padding: 4px;
+    min-height: 300px;
+}
+
+.popup-content {
+    padding: 12px;
+    background: #fff;
+}
+
+/* === PULSANTI BASE === */
 button {
     background: #fff;
     color: #000;
@@ -116,30 +121,7 @@ button:disabled {
     box-shadow: none;
 }
 
-/* Varianti pulsanti */
-.close-btn { 
-    padding: 4px 8px; 
-    font-size: 10px; 
-    border: 1px solid rgba(255,255,255,0.3);
-    background: rgba(255,255,255,0.1);
-    color: #fff;
-    font-weight: bold;
-}
-
-.close-btn:hover {
-    background: rgba(255,255,255,0.2);
-    border-color: rgba(255,255,255,0.5);
-    transform: scale(1.05);
-}
-
-.toolbar-btn { 
-    padding: 10px 16px; 
-    font-size: 10px; 
-    margin: 0 3px;
-    font-weight: 600;
-    text-transform: uppercase;
-}
-
+/* Pulsanti specializzati */
 .action-btn { 
     padding: 6px 8px; 
     font-size: 8px; 
@@ -147,68 +129,69 @@ button:disabled {
     border-color: #333;
 }
 
-.save-btn { 
-    padding: 12px 24px; 
-    font-size: 12px;
-    font-weight: 700;
-    border-radius: 6px;
-    text-transform: uppercase;
-}
-
-.add-appointment-btn {
-    padding: 5px 8px;
-    font-size: 10px;
-    background: #ffffff;
-    color: #000000;
-    border: 1px solid #1e7e34;
+.control-btn {
+    width: 36px;
+    height: 32px;
+    background: #000;
+    color: #fff;
+    border: 1px solid #000;
     border-radius: 4px;
     cursor: pointer;
-    transition: all 0.2s;
-    white-space: nowrap;
-    font-family: 'Courier New';
-}
-
-.add-appointment-btn:hover {
-    background: #000000;
-    color: #ffffff;
-    transform: translateY(-1px);
-}
-
-/* === LAYOUT CONTAINER === */
-.save-btn-container,
-.schedule-save-container,
-.note-save-container {
-    margin: 20px 0;
-    text-align: center;
-    border-top: 1px solid #ccc;
-    padding-top: 12px;
-}
-
-/* === TOOLBAR UNIFICATE === */
-.schedules-toolbar,
-.users-toolbar,
-.services-toolbar,
-/* Client controls removed - now using modern-client.css */
-
-/* Gruppi di controlli */
-.toolbar-group {
+    font-size: 14px;
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 4px;
-    border-radius: 6px;
-    background: rgba(255,255,255,0.7);
-    border: 1px solid rgba(0,0,0,0.1);
+    justify-content: center;
 }
 
-.schedules-table-container,
-.table-container {
-    padding: 8px;
-    overflow-x: auto;
+.control-btn:hover {
     background: #fff;
-    border-radius: 0 0 6px 6px;
+    color: #000;
 }
 
+.nav-btn {
+    width: 32px;
+    height: 32px;
+    background: #000;
+    color: #fff;
+    border: 1px solid #000;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-btn:hover {
+    background: #fff;
+    color: #000;
+}
+
+.add-client-btn {
+    background: #fff;
+    color: #000;
+    border: 1px solid #000;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Courier New', monospace;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+}
+
+.add-client-btn:hover {
+    background: #000;
+    color: #fff;
+}
+
+
+
+/* === TABELLE EXCEL === */
 .excel-table {
     width: 100%;
     border-collapse: separate;
@@ -222,6 +205,7 @@ button:disabled {
     margin: 8px 0;
 }
 
+/* Intestazioni tabella */
 .excel-table th {
     background: #000;
     color: #fff;
@@ -247,6 +231,7 @@ button:disabled {
     border-top-right-radius: 6px;
 }
 
+/* Celle dati */
 .excel-table td {
     padding: 6px 4px;
     font-size: 11px;
@@ -276,6 +261,7 @@ button:disabled {
     border-bottom-right-radius: 6px;
 }
 
+/* Effetti tabella */
 .excel-table tr:nth-child(even) td {
     background: rgba(240,240,240,0.5);
 }
@@ -286,37 +272,145 @@ button:disabled {
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-/* === STILI BASE INPUT === */
-.cell-input, 
-.cell-textarea, 
-.cell-select,
-.closure-days-select,
-.hour-input,
-.minute-select,
-.status-select,
-.client-search-input,
-.search-input {
+/* Colonne clienti */
+.client-name-col { 
+    width: 15%; 
+    min-width: 100px; 
+}
+
+.client-surname-col { 
+    width: 15%; 
+    min-width: 120px; 
+}
+
+.client-phone-col { 
+    width: 15%; 
+    min-width: 110px; 
+}
+
+.client-note-col { 
+    width: 35%; 
+    min-width: 200px; 
+}
+
+.client-cert-col { 
+    width: 5%; 
+    min-width: 60px; 
+}
+
+.client-actions-col { 
+    width: 15%; 
+    min-width: 120px; 
+}
+
+/* === FORM E INPUT === */
+input[type="text"], 
+input[type="number"], 
+input[type="time"], 
+input[type="date"], 
+input[type="email"], 
+input[type="password"],
+select,
+textarea {
+    font-family: 'Courier New', monospace;
+    border: 1px solid #000;
+    border-radius: 4px;
+    color: #000;
+    outline: none;
+    background: #fff;
+    display: block;
     width: 100%;
+    box-sizing: border-box;
+    padding: 8px;
+    font-size: 12px;
+}
+
+/* Tipi specifici di input */
+textarea {
+    resize: vertical;
+    min-height: 60px;
+}
+
+/* Placeholder styling unificato */
+::placeholder,
+::-webkit-input-placeholder,
+::-moz-placeholder,
+:-ms-input-placeholder {
+    color: #666;
+    font-style: italic;
+    font-family: 'Courier New', monospace;
+    opacity: 1;
+}
+
+/* Stati input */
+input:focus, 
+select:focus, 
+textarea:focus {
+    border-color: #000;
+    box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
+}
+
+input:invalid {
+    border-color: #ff0000;
+}
+
+input:valid {
+    border-color: #000;
+}
+
+/* === CONTROLLI CLIENTS === */
+.unified-controls {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.controls-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.controls-row:last-child {
+    margin-bottom: 0;
+}
+
+.search-row {
+    justify-content: center;
+    gap: 30px;
+}
+
+.search-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.action-row {
+    justify-content: space-between;
+    padding-top: 15px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.search-input {
+    width: 200px;
     padding: 8px 12px;
     border: 2px solid #ddd;
     border-radius: 6px;
-    text-align: center;
     font-size: 12px;
     background: #fff;
-    font-family: inherit;
+    color: #000;
+    font-family: 'Courier New', monospace;
     font-weight: 500;
-    transition: all 0.2s ease;
-    box-sizing: border-box;
-    line-height: 1.2;
+    text-align: left;
 }
 
-/* Input specifici per ricerca */
-.search-input {
-    width: 200px;
-    text-align: left;
-    background: #fff;
-    border: 2px solid #000;
-    font-weight: 600;
+.search-input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
 }
 
 .search-input::placeholder {
@@ -325,401 +419,92 @@ button:disabled {
     font-weight: 400;
 }
 
-.cell-textarea {
-    min-height: 40px;
-    resize: vertical;
-    vertical-align: top;
-    padding: 8px 10px;
-}
-
-/* Stati focus comuni */
-.cell-input:focus, 
-.cell-textarea:focus, 
-.cell-select:focus,
-.closure-days-select:focus,
-.hour-input:focus,
-.minute-select:focus,
-.status-select:focus,
-.search-input:focus {
-    border-color: #007bff;
-    outline: none;
-    background: #fdfdfd;
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
-    transform: translateY(-1px);
-}
-
-/* Stati hover comuni */
-.cell-input:hover, 
-.cell-textarea:hover, 
-.cell-select:hover,
-.closure-days-select:hover,
-.hour-input:hover,
-.minute-select:hover,
-.status-select:hover,
-.search-input:hover {
-    border-color: #333;
-    background: rgba(0,0,0,0.02);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-/* Varianti input specifiche */
-input[type="text"].cell-input { 
-    font-size: 9px; 
-    font-weight: 500; 
-    text-align: center;
-}
-
-input[type="number"].cell-input { 
-    text-align: center;
-}
-
-.name-col input[type="text"] { 
-    font-size: 11px; 
-    font-weight: 700; 
-    text-align: center;
-    height: 24px;
-}
-
-.service-name-col input[type="text"],
-.description-col input[type="text"],
-.price-input,
-.duration-input {
-    text-align: center !important;
-}
-
-.duration-input {
-    font-weight: bold;
-}
-
-/* Varianti select specifiche */
-select.cell-select,
-select.status-select,
-select.closure-days-select,
-.select-field,
-.status-col select,
-.closure-days-col select {
+.search-field-select,
+.search-type-select,
+.sort-select {
+    padding: 8px 12px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
     text-align: center;
     text-align-last: center;
-    font-size: 9px;
+    font-size: 12px;
+    background: #fff;
+    font-family: inherit;
+    font-weight: 500;
 }
 
-/* === DIMENSIONI COLONNE TABELLE === */
-/* Colonne comuni */
-.select-col { width: 30px; }
-.name-col { width: 180px; }
-.actions-col { width: 45px; }
-.color-col { width: 60px; }
-.status-col { width: 100px; }
-
-/* Colonne schedule */
-.start-date-col, .end-date-col { width: 85px; }
-.start-time-col, .end-time-col { width: 65px; }
-.closure-days-col { width: 100px; }
-
-/* Colonne servizi */
-.service-name-col { width: 180px; }
-.price-col { width: 100px; }
-.duration-col { width: 90px; }
-.description-col { width: 250px; }
-
-/* Colonne utenti */
-.username-col { width: 120px; min-width: 120px; }
-.password-col, .confirm-password-col { width: 180px; min-width: 180px; }
-
-/* Input color picker */
-.cell-color {
-    width: 50px !important;
-    height: 36px !important;
-    padding: 4px !important;
-    border: 1px solid rgba(0,0,0,0.2);
-    border-radius: 3px;
-    cursor: pointer !important;
+.search-field-select {
+    min-width: 160px;
 }
 
-.cell-color:hover {
-    border-color: #333;
+.search-type-select {
+    min-width: 150px;
 }
 
-/* === STILI STATISTICHE E FOOTER === */
-.users-stats,
-.services-stats,
-.schedules-stats,
-/* Client stats removed - using modern interface */
-
-.users-stats strong,
-.services-stats strong,
-.schedules-stats strong,
-.client-stats strong {
-    color: #000;
-    font-weight: 700;
-    font-size: 14px;
+.sort-select {
+    min-width: 180px;
 }
 
-/* Statistiche singole */
-.stat-item {
+.pagination-section {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 4px 8px;
-    background: rgba(255,255,255,0.7);
-    border-radius: 4px;
-    border: 1px solid rgba(0,0,0,0.1);
+    gap: 8px;
 }
 
-/* === ELEMENTI SPECIALI === */
-/* Input numerici - spinner visibili */
-.duration-input::-webkit-outer-spin-button,
-.duration-input::-webkit-inner-spin-button,
-.hour-input::-webkit-outer-spin-button,
-.hour-input::-webkit-inner-spin-button {
-    opacity: 1;
-}
-
-/* === CHECKBOX E CONTROLLI INTERATTIVI === */
-input[type="checkbox"] { 
-    width: 18px; 
-    height: 18px; 
-    margin: 2px;
-    border-radius: 3px;
-    border: 2px solid rgba(0,0,0,0.3);
-    transition: all 0.25s ease;
-    cursor: pointer;
-    appearance: none;
-    background: #fff;
-    position: relative;
-}
-
-input[type="checkbox"]:hover {
-    border-color: #000;
-    transform: scale(1.1);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
-}
-
-input[type="checkbox"]:checked {
-    background: #000;
-    border-color: #000;
-}
-
-input[type="checkbox"]:checked::after {
-    content: '✓';
-    position: absolute;
-    color: white;
-    font-size: 14px;
-    font-weight: bold;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-}
-
-.row-select,
-.note-checkbox,
-.schedule-checkbox {
-    width: 20px !important;
-    height: 20px !important;
-    cursor: pointer !important;
-    accent-color: #007bff !important;
-}
-
-/* Select All checkbox */
-#select-all-services,
-#select-all-users,
-#select-all-schedules,
-#select-all-clients {
-    transform: scale(1.2);
-}
-
-/* === STATI DI VALIDAZIONE === */
-.error-highlight {
-    border-color: #e74c3c !important;
-    background-color: rgba(231, 76, 60, 0.1) !important;
-}
-
-.validation-message {
-    color: #e74c3c;
-    font-size: 10px;
-    margin-top: 2px;
-    display: none;
-}
-
-
-
-/* === STILI SPECIFICI SCHEDULE E NOTE === */
-.schedule-form,
-.note-form {
-    max-width: 700px;
-    margin: auto;
-    padding: 16px;
-    background: rgba(255,255,255,0.95);
-    border-radius: 8px;
-    border: 1px solid rgba(0,0,0,0.1);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-.note-form {
-    max-width: 500px;
-}
-
-.note-table {
-    width: 100%;
-    margin-bottom: 24px;
-}
-
-.note-table-th {
-    width: 140px;
-    font-size: 13px;
-    background: #f8f9fa;
-    border: 1px solid #dee2e6;
-    padding: 12px 10px;
-    text-align: left;
-    font-weight: 600;
-    color: #495057;
-}
-
-.date-input {
-    width: 48%;
-    display: inline-block;
-    margin-right: 4%;
-}
-
-.date-input:last-child {
-    margin-right: 0;
-}
-
-.note-calendar-body {
-    padding: 4px;
-}
-
-.schedule-table {
-    width: 100%;
-    margin-bottom: 24px;
-}
-
-.schedule-table-th {
-    font-size: 13px;
-    font-weight: bold;
-    border: 1px solid white;
-    padding: 10px 8px;
-    background: #000;
-    color: #fff;
-}
-
-.schedule-table td {
-    padding: 10px 8px;
-    font-size: 13px;
-    vertical-align: middle;
-    border-bottom: 1px solid rgba(0,0,0,0.1);
-}
-
-.schedule-checkbox {
-    height: 24px;
-    width: 24px;
-    margin: 0 auto;
-}
-
-.schedule-closure-select {
-    width: 100%;
-    min-height: 100px;
-    font-size: 12px;
-    padding: 10px;
-    border-radius: 6px;
-    border: 2px solid #ddd;
-    background: #fff;
-}
-
-.schedule-table .cell-select {
-    height: 32px;
-    font-size: 12px;
-    padding: 6px 10px;
-}
-
-.schedule-save-btn,
-.note-save-btn {
-    font-size: 14px;
-    padding: 16px 32px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    background: #fff;
-}
-
-/* === CONTROLLI TEMPORALI === */
-.time-input-group {
-    display: inline-flex;
+.info-section {
+    display: flex;
     align-items: center;
-    gap: 4px;
-    background: rgba(255,255,255,0.9);
-    border-radius: 6px;
-    padding: 2px;
-    border: 2px solid #ddd;
 }
 
-.hour-input {
-    width: 50px;
-    height: 32px;
-    display: inline-block;
+.total-info {
+    font-size: 12px;
+    font-weight: 700;
+    color: #000;
+    min-width: 80px;
     text-align: center;
-    border: 2px solid #ddd;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 600;
-    padding: 6px 4px;
-    background: #fff;
-    transition: all 0.2s ease;
 }
 
-.minute-select {
-    width: 60px;
-    height: 32px;
-    display: inline-block;
-    margin-left: 4px;
-    border: 2px solid #ddd;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 600;
+.range-info {
+    font-size: 12px;
+    font-weight: 700;
+    color: #000;
+    min-width: 80px;
     text-align: center;
-    text-align-last: center;
+}
+
+.schedules-table-container {
     background: #fff;
-    padding: 6px 4px;
-    transition: all 0.2s ease;
-}
-
-.time-separator {
-    font-weight: bold;
-    color: #333;
-    margin: 0 2px;
-}
-
-.hour-input:hover,
-.minute-select:hover {
-    border-color: #333;
-    background: #f8f9fa;
+    border-radius: 8px;
+    overflow: hidden;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.hour-input:focus,
-.minute-select:focus {
-    border-color: #007bff;
-    background: #fff;
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
-    outline: none;
-    transform: translateY(-1px);
-}
-
-/* Gestione pausa pranzo */
-.lunch-time-row {
-    transition: opacity 0.3s ease;
-}
-
-.lunch-time-row.hidden {
+/* Loading e Error */
+#loading-indicator {
+    text-align: center;
+    padding: 20px;
     display: none;
 }
 
-/* === DESIGN RESPONSIVO MOBILE-OPTIMIZED === */
+#error-message {
+    text-align: center;
+    padding: 20px;
+    color: #d32f2f;
+    display: none;
+}
 
-/* Tablet (1024px e meno) */
-@media (max-width: 1024px) {
+/* Evidenziazione ricerca */
+.search-highlight {
+    background-color: #ffeb3b;
+    color: #000;
+    font-weight: 700;
+    padding: 1px 2px;
+    border-radius: 2px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+/* === DESIGN RESPONSIVO === */
+@media (max-width: 768px) {
     .popup-window-container { 
         width: 95vw; 
         margin: 2vh auto;
@@ -728,533 +513,27 @@ input[type="checkbox"]:checked::after {
         box-shadow: 0 8px 24px rgba(0,0,0,0.2);
     }
     
-    .schedules-toolbar,
-    .users-toolbar,
-    .services-toolbar,
-    .client-controls { 
-        gap: 8px; 
-        padding: 10px 14px;
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-    
-    .toolbar-btn { 
-        font-size: 11px; 
-        padding: 8px 16px;
-        min-width: 100px;
-        flex: 0 1 auto;
-    }
-    
     .excel-table th,
     .excel-table td {
-        padding: 10px 6px;
+        padding: 8px 4px;
         font-size: 11px;
     }
-}
-
-/* Mobile Large (768px e meno) - App-like experience */
-@media (max-width: 768px) {
-    body {
-        align-items: flex-start;
-        background: #f8f9fa;
-        padding: 0;
-    }
     
-    .popup-window-container { 
-        width: 100vw; 
-        height: 100vh;
-        max-width: none;
-        border-radius: 0;
-        border: none;
-        box-shadow: none;
-        backdrop-filter: none;
-        display: flex;
+    .search-group {
         flex-direction: column;
+        align-items: stretch;
     }
     
-    .popup-window-container::before {
-        display: none;
-    }
-    
-    .window-header {
-        height: 44px;
-        font-size: 16px;
-        background: linear-gradient(135deg, #000 0%, #2c3e50 100%);
-        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-        position: sticky;
-        top: 0;
-        z-index: 100;
-    }
-    
-    .calendar-body,
-    .client-calendar-body,
-    .schedule-calendar-body {
-        flex: 1;
-        padding: 12px;
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-    
-    .schedules-toolbar,
-    .users-toolbar,
-    .services-toolbar,
-    .client-controls { 
-        flex-wrap: wrap; 
-        gap: 8px; 
-        padding: 12px;
-        background: #fff;
-        border-radius: 0;
-        border-bottom: 1px solid #e9ecef;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        position: sticky;
-        top: 44px;
-        z-index: 90;
-    }
-    
-    .toolbar-btn {
-        flex: 1 1 calc(50% - 4px);
-        min-width: 120px;
-        padding: 12px 8px;
-        font-size: 12px;
-        font-weight: 600;
-        border-radius: 8px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    
-    .excel-table { 
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        margin: 16px 0;
-    }
-    
-    .excel-table th,
-    .excel-table td { 
-        font-size: 11px; 
-        padding: 12px 8px;
-        min-height: 44px;
-    }
-    
-    .excel-table th {
-        background: linear-gradient(135deg, #000 0%, #2c3e50 100%);
-        font-size: 12px;
-        font-weight: 700;
-    }
-    
-    .client-search-input,
-    .search-input { 
+    .search-input,
+    .search-field-select,
+    .search-type-select,
+    .sort-select {
+        min-width: auto;
         width: 100%;
-        max-width: 200px;
-        padding: 12px 16px;
-        font-size: 16px; /* Evita zoom su iOS */
-        border-radius: 25px;
-        border: 2px solid #000;
     }
     
-    .client-search-group,
-    .toolbar-group {
-        flex: 1 1 100%;
-        justify-content: center;
-        margin-bottom: 8px;
-    }
-    
-    /* Miglioramento controlli temporali */
-    .hour-input,
-    .minute-select {
-        height: 44px;
-        font-size: 16px;
-        border-radius: 8px;
-        touch-action: manipulation;
-    }
-    
-    /* Checkbox più grandi per touch */
-    input[type="checkbox"] {
-        width: 24px;
-        height: 24px;
-        touch-action: manipulation;
-    }
-    
-    .row-select,
-    .note-checkbox,
-    .schedule-checkbox {
-        width: 28px !important;
-        height: 28px !important;
-    }
-}
-
-/* Mobile Small (480px e meno) - Compact mode */
-@media (max-width: 480px) {
-    .window-header {
-        height: 50px;
-        font-size: 14px;
-    }
-    
-    .calendar-body,
-    .client-calendar-body,
-    .schedule-calendar-body {
-        padding: 8px;
-    }
-    
-    .schedules-toolbar,
-    .users-toolbar,
-    .services-toolbar,
-    .client-controls { 
-        padding: 8px;
-        gap: 6px;
-    }
-    
-    .toolbar-btn { 
-        font-size: 11px; 
-        padding: 10px 6px;
-        min-width: 90px;
-        flex: 1 1 calc(50% - 3px);
-    }
-    
-    .excel-table { 
-        font-size: 10px;
-        margin: 8px 0;
-    }
-    
-    .excel-table th,
-    .excel-table td {
-        padding: 8px 4px;
-        font-size: 10px;
-        min-height: 36px;
-    }
-    
-    .excel-table th {
-        font-size: 11px;
-    }
-    
-    .client-search-input,
-    .search-input { 
-        width: 100%;
-        font-size: 16px;
-        padding: 10px 14px;
-    }
-    
-    /* Colonne tabella più strette */
-    .select-col { width: 40px; }
-    .actions-col { width: 60px; }
-    .color-col { width: 50px; }
-    .status-col { width: 80px; }
-    
-    /* Input più compatti */
-    .cell-input,
-    .cell-textarea,
-    .cell-select {
-        font-size: 14px;
-        padding: 8px 6px;
-    }
-    
-    /* Statistiche compatte */
-    .users-stats,
-    .services-stats,
-    .schedules-stats,
-    .client-stats {
-        padding: 8px 12px;
-        font-size: 10px;
+    .action-row {
+        flex-direction: column;
         gap: 12px;
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-    
-    .users-stats strong,
-    .services-stats strong,
-    .schedules-stats strong,
-    .client-stats strong {
-        font-size: 12px;
-    }
-}
-
-/* Mobile Extra Small (375px e meno) - Ultra compact */
-@media (max-width: 375px) {
-    .toolbar-btn {
-        font-size: 10px;
-        padding: 8px 4px;
-        min-width: 80px;
-    }
-    
-    .excel-table th,
-    .excel-table td {
-        padding: 6px 2px;
-        font-size: 9px;
-        min-height: 32px;
-    }
-    
-    .excel-table th {
-        font-size: 10px;
-    }
-    
-    .client-search-input,
-    .search-input {
-        padding: 8px 12px;
-        font-size: 16px;
-    }
-}
-
-
-/* === STILI SPECIFICI CLIENT === */
-.client-table {
-    width: 100%;
-    margin-bottom: 24px;
-}
-
-.client-name-col, 
-.client-surname-col {
-    width: 20%;
-}
-
-.client-phone-col {
-    width: 25%;
-}
-
-.client-note-col {
-    width: 25%;
-}
-
-.client-cert-col {
-    width: 10%;
-    text-align: center;
-}
-
-.client-action-col {
-    width: 15%;
-    text-align: center;
-}
-
-/* Client pagination removed - using modern interface */
-
-/* === STILI SPECIFICI USERS === */
-.username-col input,
-.password-col input {
-    width: 100%;
-    box-sizing: border-box;
-}
-
-/* Validazione password */
-.password-match { 
-    border: 2px solid #27ae60 !important; 
-    background-color: #d5f4e6 !important; 
-}
-
-.password-mismatch { 
-    border: 2px solid #e74c3c !important; 
-    background-color: #fdf2f2 !important; 
-}
-
-.password-empty { 
-    border: 1px solid #ddd; 
-}
-
-.password-feedback { 
-    font-size: 12px; 
-    margin-top: 2px; 
-}
-
-.feedback-match { 
-    color: #27ae60; 
-}
-
-.feedback-mismatch { 
-    color: #e74c3c; 
-}
-
-/* === STILI DI UTILITÀ === */
-.text-center { text-align: center; }
-.text-left { text-align: left; }
-.text-right { text-align: right; }
-
-.font-bold { font-weight: 700; }
-.font-semibold { font-weight: 600; }
-.font-normal { font-weight: 400; }
-
-.uppercase { text-transform: uppercase; }
-.lowercase { text-transform: lowercase; }
-.capitalize { text-transform: capitalize; }
-
-.mb-0 { margin-bottom: 0; }
-.mb-1 { margin-bottom: 4px; }
-.mb-2 { margin-bottom: 8px; }
-.mb-3 { margin-bottom: 12px; }
-.mb-4 { margin-bottom: 16px; }
-
-.mt-0 { margin-top: 0; }
-.mt-1 { margin-top: 4px; }
-.mt-2 { margin-top: 8px; }
-.mt-3 { margin-top: 12px; }
-.mt-4 { margin-top: 16px; }
-
-.p-0 { padding: 0; }
-.p-1 { padding: 4px; }
-.p-2 { padding: 8px; }
-.p-3 { padding: 12px; }
-.p-4 { padding: 16px; }
-
-/* === UTILITÀ MOBILE === */
-.mobile-only { display: none; }
-.desktop-only { display: block; }
-
-@media (max-width: 768px) {
-    .mobile-only { display: block; }
-    .desktop-only { display: none; }
-    
-    .mobile-full-width { width: 100% !important; }
-    .mobile-center { text-align: center !important; }
-    .mobile-hidden { display: none !important; }
-    .mobile-stack { 
-        flex-direction: column !important; 
-        align-items: stretch !important;
-    }
-    .mobile-no-gap { gap: 0 !important; }
-    .mobile-small-gap { gap: 4px !important; }
-}
-
-/* Miglioramenti touch */
-@media (hover: none) and (pointer: coarse) {
-    /* Touch device specific styles */
-    button,
-    .toolbar-btn,
-    .cell-input,
-    .cell-select,
-    input[type="checkbox"] {
-        touch-action: manipulation;
-        -webkit-tap-highlight-color: rgba(0,0,0,0.1);
-    }
-    
-    button:active,
-    .toolbar-btn:active {
-        transform: scale(0.98);
-        transition: transform 0.1s ease;
-    }
-    
-    /* Larger touch targets */
-    .excel-table td {
-        min-height: 44px; /* Apple recommended minimum */
-    }
-    
-    /* Prevent zoom on input focus for iOS */
-    input,
-    select,
-    textarea {
-        font-size: 16px !important;
-    }
-}
-
-/* Loading e stati */
-.loading {
-    opacity: 0.6;
-    pointer-events: none;
-    cursor: wait;
-}
-
-.hidden {
-    display: none !important;
-}
-
-.visible {
-    display: block !important;
-}
-
-/* Animazioni migliorate */
-.fade-in {
-    animation: fadeIn 0.3s ease-in-out;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.slide-in {
-    animation: slideIn 0.4s ease-out;
-}
-
-@keyframes slideIn {
-    from { transform: translateX(-100%); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
-}
-
-/* Scrollbar personalizzata per tabelle */
-.table-container,
-.schedules-table-container {
-    scrollbar-width: thin;
-    scrollbar-color: #999 #f1f1f1;
-    -webkit-overflow-scrolling: touch; /* Smooth scrolling su iOS */
-}
-
-.table-container::-webkit-scrollbar,
-.schedules-table-container::-webkit-scrollbar {
-    height: 8px;
-    width: 8px;
-}
-
-.table-container::-webkit-scrollbar-track,
-.schedules-table-container::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 4px;
-}
-
-.table-container::-webkit-scrollbar-thumb,
-.schedules-table-container::-webkit-scrollbar-thumb {
-    background: #999;
-    border-radius: 4px;
-    transition: all 0.2s ease;
-}
-
-.table-container::-webkit-scrollbar-thumb:hover,
-.schedules-table-container::-webkit-scrollbar-thumb:hover {
-    background: #666;
-}
-
-/* Mobile: Scrollbar più sottile */
-@media (max-width: 768px) {
-    .table-container::-webkit-scrollbar,
-    .schedules-table-container::-webkit-scrollbar {
-        height: 4px;
-        width: 4px;
-    }
-    
-    /* Nascondi scrollbar su mobile ma mantieni funzionalità */
-    .table-container,
-    .schedules-table-container {
-        scrollbar-width: none;
-        -ms-overflow-style: none;
-    }
-    
-    .table-container::-webkit-scrollbar,
-    .schedules-table-container::-webkit-scrollbar {
-        display: none;
-    }
-}
-
-/* === OTTIMIZZAZIONI PERFORMANCE MOBILE === */
-@media (max-width: 768px) {
-    /* Riduce gli effetti pesanti su mobile */
-    * {
-        -webkit-transform: translateZ(0);
-        transform: translateZ(0);
-        -webkit-backface-visibility: hidden;
-        backface-visibility: hidden;
-    }
-    
-    /* Ottimizza le animazioni per mobile */
-    .excel-table tr:hover td {
-        transform: none; /* Rimuove scale su mobile */
-    }
-    
-    button:hover,
-    .toolbar-btn:hover {
-        transform: none; /* Hover disabilitato su touch */
-    }
-    
-    /* Safe area per notch iPhone */
-    .popup-window-container {
-        padding-top: env(safe-area-inset-top);
-        padding-bottom: env(safe-area-inset-bottom);
-        padding-left: env(safe-area-inset-left);
-        padding-right: env(safe-area-inset-right);
     }
 }

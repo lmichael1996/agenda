@@ -18,7 +18,6 @@ require_once '../../config/config.php';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestione Cliente - Agenda</title>
     <link rel="stylesheet" href="../../assets/css/popup.css">
-    <link rel="stylesheet" href="../../assets/css/client.css">
     <link rel="stylesheet" href="../../assets/css/scrollbar.css">
 
 </head>

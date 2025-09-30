@@ -14,79 +14,7 @@ require_once '../../config/config.php';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestione Orario - Agenda</title>
     <link rel="stylesheet" href="../../assets/css/scrollbar.css">
-    <link rel="stylesheet" href="../../assets/css/popup.css">
-    <style>
-        /* Stili essenziali per schedule popup */
-        .schedule-form {
-            max-width: 700px;
-            margin: auto;
-            padding: 16px;
-        }
-        
-        .schedule-table-th {
-            width: 140px;
-            font-size: 13px;
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            padding: 12px 10px;
-            text-align: left;
-            font-weight: 600;
-            color: #495057;
-            vertical-align: top;
-        }
-        
-        .schedule-table td {
-            padding: 12px 10px;
-            border: 1px solid #dee2e6;
-            vertical-align: middle;
-            text-align: center;
-            min-height: 50px;
-        }
-        
-        .schedule-checkbox {
-            width: 18px;
-            height: 18px;
-            margin: 0 auto;
-            display: block;
-        }
-        
-        /* Centratura specifica per checkbox */
-        input[type="checkbox"].schedule-checkbox {
-            margin: 0 auto;
-            display: block;
-            position: relative;
-        }
-        
-        .date-time-container {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .hour-input {
-            width: 60px;
-            text-align: center;
-        }
-        
-        .minute-select {
-            width: 60px;
-            text-align: center;
-            text-align-last: center;
-        }
-        
-        .schedule-closure-select {
-            min-height: 80px;
-            width: 100%;
-            text-align: center;
-            text-align-last: center;
-        }
-        
-        .cell-select {
-            text-align: center;
-            text-align-last: center;
-        }
-    </style>
+    <link rel="stylesheet" href="../../assets/css/scheme-popup.css">
 </head>
 <body>
     <div class="popup-window-container">
@@ -101,8 +29,8 @@ require_once '../../config/config.php';
                             <th class="schedule-table-th">Ora Inizio</th>
                             <td>
                                 <div class="date-time-container">
-                                    <input type="number" id="schedule-start-hour" class="hour-input" min="0" max="23" value="9">
-                                    <select id="schedule-start-minute" class="minute-select">
+                                    <input type="number" id="schedule-start-hour" class="cell-input hour-input" min="0" max="23" value="9">
+                                    <select id="schedule-start-minute" class="cell-input minute-select">
                                         <?php foreach (["00","15","30","45"] as $m): ?>
                                             <option value="<?= $m ?>"><?= $m ?></option>
                                         <?php endforeach; ?>
@@ -114,8 +42,8 @@ require_once '../../config/config.php';
                             <th class="schedule-table-th">Ora Fine</th>
                             <td>
                                 <div class="date-time-container">
-                                    <input type="number" id="schedule-end-hour" class="hour-input" min="0" max="23" value="18">
-                                    <select id="schedule-end-minute" class="minute-select">
+                                    <input type="number" id="schedule-end-hour" class="cell-input hour-input" min="0" max="23" value="18">
+                                    <select id="schedule-end-minute" class="cell-input minute-select">
                                         <?php foreach (["00","15","30","45"] as $m): ?>
                                             <option value="<?= $m ?>"><?= $m ?></option>
                                         <?php endforeach; ?>
@@ -131,8 +59,8 @@ require_once '../../config/config.php';
                             <th class="schedule-table-th">Inizio Pausa</th>
                             <td>
                                 <div class="date-time-container">
-                                    <input type="number" id="lunch-start-hour" class="hour-input" min="0" max="23" value="12">
-                                    <select id="lunch-start-minute" class="minute-select">
+                                    <input type="number" id="lunch-start-hour" class="cell-input hour-input" min="0" max="23" value="12">
+                                    <select id="lunch-start-minute" class="cell-input minute-select">
                                         <?php foreach (["00","15","30","45"] as $m): ?>
                                             <option value="<?= $m ?>"><?= $m ?></option>
                                         <?php endforeach; ?>
@@ -144,8 +72,8 @@ require_once '../../config/config.php';
                             <th class="schedule-table-th">Fine Pausa</th>
                             <td>
                                 <div class="date-time-container">
-                                    <input type="number" id="lunch-end-hour" class="hour-input" min="0" max="23" value="13">
-                                    <select id="lunch-end-minute" class="minute-select">
+                                    <input type="number" id="lunch-end-hour" class="cell-input hour-input" min="0" max="23" value="13">
+                                    <select id="lunch-end-minute" class="cell-input minute-select">
                                         <?php foreach (["00","15","30","45"] as $m): ?>
                                             <option value="<?= $m ?>"><?= $m ?></option>
                                         <?php endforeach; ?>
@@ -156,7 +84,7 @@ require_once '../../config/config.php';
                         <tr>
                             <th class="schedule-table-th">Fuso Orario</th>
                             <td>
-                                <select id="schedule-timezone" class="cell-select">
+                                <select id="schedule-timezone" class="cell-input">
                                     <option value="UTC">UTC (GMT+0)</option>
                                     <optgroup label="Europa">
                                         <option value="Europe/London">Londra (GMT+0/+1)</option>
@@ -215,7 +143,7 @@ require_once '../../config/config.php';
                         <tr>
                             <th class="schedule-table-th">Giorni Chiusura</th>
                             <td>
-                                <select multiple id="schedule-closure-days" class="cell-select schedule-closure-select">
+                                <select multiple id="schedule-closure-days" class="cell-input schedule-closure-select">
                                     <option value="lunedi">Lunedì</option>
                                     <option value="martedi">Martedì</option>
                                     <option value="mercoledi">Mercoledì</option>

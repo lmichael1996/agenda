@@ -22,7 +22,7 @@ body {
 
 /* === CONTENITORE PRINCIPALE === */
 .popup-window-container {
-    max-width: 500px;
+    max-width: 900px;
     width: min(95vw, 100%);
     background: #fff;
     border: 3px solid #000;
@@ -54,30 +54,69 @@ body {
 }
 
 /* === LAYOUT CONTENUTO === */
-.calendar-body,
-.note-calendar-body {
+.calendar-body {
     padding: 4px;
     min-height: 300px;
 }
 
-.note-form {
-    max-width: 400px;
-    margin: auto;
+.schedules-section {
+    width: 100%;
+}
+
+/* === TOOLBAR === */
+.schedules-toolbar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
     padding: 8px;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    justify-content: center;
+}
+
+.toolbar-btn {
+    background: #fff;
+    color: #000;
+    border: 1px solid #000;
+    border-radius: 4px;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 500;
+    font-size: 12px;
+    padding: 8px 12px;
+    transition: all 0.2s ease;
+    text-transform: none;
+    min-height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toolbar-btn:hover {
+    background: #000;
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 /* === TABELLE === */
+.schedules-table-container {
+    max-height: 280px;
+    overflow-y: auto;
+    border: 2px solid #ffffff;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    margin: 8px 0;
+}
+
 .excel-table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
     min-width: 280px;
-    border: 2px solid #000;
-    border-radius: 8px;
-    overflow: hidden;
     background: #fff;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-    margin: 8px 0;
 }
 
 .excel-table th {
@@ -90,6 +129,9 @@ body {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 
 .excel-table th:last-child {
@@ -116,31 +158,84 @@ body {
     border-bottom: none;
 }
 
-/* === STILI SPECIFICI NOTE === */
-.note-table-th {
-    width: 140px;
-    font-size: 13px;
-    background: #f8f9fa;
-    border: 1px solid #dee2e6;
-    padding: 12px 10px;
-    text-align: left;
-    font-weight: 600;
-    color: #495057;
-    vertical-align: top;
-}
+/* === COLONNE SPECIFICHE === */
+.select-col { width: 40px; }
+.username-col { width: 150px; }
+.password-col { width: 120px; }
+.color-col { width: 80px; }
+.status-col { width: 100px; }
+.actions-col { width: 80px; }
 
-.note-table td {
-    padding: 12px 10px;
-    border: 1px solid #dee2e6;
-    vertical-align: top;
-}
+/* === COLONNE SERVIZI === */
+.service-name-col { width: 200px; }
+.price-col { width: 120px; }
+.duration-col { width: 100px; }
+.description-col { width: 250px; }
 
 /* === INPUT E CONTROLLI === */
 .cell-input, 
 .cell-textarea, 
 .cell-select,
-.hour-input,
-.minute-select {
+.status-select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    text-align: center;
+    text-align-last: center;
+    font-size: 12px;
+    background: #fff;
+    font-family: inherit;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+    line-height: 1.2;
+}
+
+.cell-input::placeholder,
+.cell-textarea::placeholder {
+    font-style: italic;
+}
+
+.cell-input:focus, 
+.cell-textarea:focus, 
+.cell-select:focus,
+.status-select:focus {
+    border-color: #007bff;
+    outline: none;
+    background: #fdfdfd;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+    transform: translateY(-1px);
+}
+
+.cell-input:hover, 
+.cell-textarea:hover, 
+.cell-select:hover,
+.status-select:hover {
+    border-color: #333;
+    background: rgba(0,0,0,0.02);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.cell-color {
+    width: 50px;
+    height: 30px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    cursor: pointer;
+    margin: 0 auto;
+    display: block;
+    transition: all 0.2s ease;
+}
+
+.cell-color:hover {
+    border-color: #333;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* === INPUT SPECIFICI === */
+.price-input,
+.duration-input {
     width: 100%;
     padding: 8px 12px;
     border: 2px solid #ddd;
@@ -155,11 +250,8 @@ body {
     line-height: 1.2;
 }
 
-.cell-input:focus, 
-.cell-textarea:focus, 
-.cell-select:focus,
-.hour-input:focus,
-.minute-select:focus {
+.price-input:focus,
+.duration-input:focus {
     border-color: #007bff;
     outline: none;
     background: #fdfdfd;
@@ -167,30 +259,24 @@ body {
     transform: translateY(-1px);
 }
 
-.cell-input:hover, 
-.cell-textarea:hover, 
-.cell-select:hover,
-.hour-input:hover,
-.minute-select:hover {
+.price-input:hover,
+.duration-input:hover {
     border-color: #333;
     background: rgba(0,0,0,0.02);
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.cell-textarea {
-    resize: vertical;
-    min-height: 60px;
-    text-align: left;
-    vertical-align: top;
-    padding: 8px 10px;
+.price-input::placeholder,
+.duration-input::placeholder {
+    font-style: italic;
 }
 
-.note-checkbox {
-    width: 18px;
-    height: 18px;
-    margin: 0;
+.error-highlight {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.15) !important;
 }
 
+/* === CHECKBOX === */
 input[type="checkbox"] { 
     width: 18px; 
     height: 18px; 
@@ -226,32 +312,10 @@ input[type="checkbox"]:checked::after {
     transform: translate(-50%, -50%);
 }
 
-/* === CONTROLLI TEMPORALI === */
-.date-time-container {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-}
-
-.date-input {
-    flex: 2;
-}
-
-.hour-input {
-    width: 60px;
-    text-align: center;
-}
-
-.minute-select {
-    width: 70px;
-    text-align: center;
-    text-align-last: center;
-}
-
 /* === PULSANTI === */
 button {
-    background: #fff;
-    color: #000;
+    background: #000;
+    color: #fff;
     border: 1px solid #000;
     border-radius: 4px;
     cursor: pointer;
@@ -268,8 +332,8 @@ button {
 }
 
 button:hover {
-    background: #000;
-    color: #fff;
+    background: #fff;
+    color: #000;
     transform: translateY(-1px);
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
@@ -282,30 +346,56 @@ button:hover {
     text-transform: uppercase;
 }
 
-.note-save-container {
+/* === AZIONI === */
+.actions-cell {
+    text-align: center;
+}
+
+.action-btn {
+    background: #fff;
+    color: #dc3545;
+    border: 1px solid #dc3545;
+    font-size: 10px;
+    padding: 4px 8px;
+    min-height: 24px;
+}
+
+.action-btn:hover {
+    background: #dc3545;
+    color: #fff;
+}
+
+/* === STATISTICHE === */
+.users-stats,
+.services-stats {
+    display: flex;
+    gap: 20px;
+    margin: 8px 0;
+    padding: 8px;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    font-size: 12px;
+    justify-content: center;
+}
+
+.users-stats strong,
+.services-stats strong {
+    color: #000;
+    font-weight: 700;
+}
+
+/* === CONTENITORI SALVA === */
+.save-btn-container {
     margin: 20px 0;
     text-align: center;
     border-top: 1px solid #ccc;
     padding-top: 12px;
 }
 
-/* === SCROLLBAR === */
-::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb {
-    background: #999;
-    border-radius: 4px;
-    transition: all 0.2s ease;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: #666;
+.save-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
 }

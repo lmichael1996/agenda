@@ -6,8 +6,7 @@
 
 // Importa le funzioni per i dati dal backend
 import { 
-    fetchClients, 
-    deleteClient 
+    fetchClients 
 } from '../../api/frontend/clients-api.js';
 
 // Stato dell'applicazione
@@ -203,24 +202,12 @@ function createClientRow(client) {
     editBtn.title = 'Aggiungi appuntamento';
     editBtn.dataset.clientId = client.id;
     
-    const deleteBtn = document.createElement('button');
-    deleteBtn.className = 'action-btn btn-delete-client';
-    deleteBtn.textContent = 'Elimina';
-    deleteBtn.title = 'Elimina cliente';
-    deleteBtn.dataset.clientId = client.id;
-    
     actionsCell.appendChild(editBtn);
-    actionsCell.appendChild(deleteBtn);
     
     // Event handlers for action buttons (prevent row click)
     editBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         addAppointment(client.id);
-    });
-    
-    deleteBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        handleDeleteClient(client.id);
     });
     
     // Assembla la riga
@@ -393,12 +380,12 @@ function addAppointment(clientId) {
         [client.first_name, client.last_name].filter(Boolean).join(' ') : 
         `Cliente ID ${clientId}`;
 
-    // Open appointment popup window with client pre-selected
+    // Open new appointment popup window with client pre-selected
     const windowFeatures = [
-        'width=800',
-        'height=700',
-        'left=' + (screen.width - 800) / 2,
-        'top=' + (screen.height - 700) / 2,
+        'width=650',
+        'height=600',
+        'left=' + (screen.width - 650) / 2,
+        'top=' + (screen.height - 600) / 2,
         'scrollbars=yes',
         'resizable=yes',
         'menubar=no',
@@ -407,58 +394,21 @@ function addAppointment(clientId) {
         'status=no'
     ].join(',');
     
-    const popupUrl = `schedule.php?clientId=${clientId}&clientName=${encodeURIComponent(clientName)}`;
-    console.log('Opening appointment popup URL:', popupUrl);
+    const popupUrl = `new-appointment.php?clientId=${clientId}&clientName=${encodeURIComponent(clientName)}`;
+    console.log('Opening new appointment popup URL:', popupUrl);
     
-    const popupWindow = window.open(popupUrl, 'AddAppointment_' + clientId, windowFeatures);
+    const popupWindow = window.open(popupUrl, 'NewAppointment_' + clientId, windowFeatures);
     
     if (popupWindow) {
         popupWindow.focus();
-        console.log(`Appointment popup opened for client: ${clientName}`);
+        console.log(`New appointment popup opened for client: ${clientName}`);
     } else {
-        console.error('Failed to open appointment popup window');
-        alert('Impossibile aprire la finestra appuntamenti. Controlla le impostazioni del browser.');
+        console.error('Failed to open new appointment popup window');
+        alert('Impossibile aprire la finestra nuovo appuntamento. Controlla le impostazioni del browser.');
     }
 }
 
-/**
- * Gestisce l'eliminazione di un cliente
- */
-async function handleDeleteClient(clientId) {
-    console.log('Deleting client with ID:', clientId);
-    
-    if (!clientId) {
-        alert('ID cliente non valido');
-        return;
-    }
 
-    // Find client data for confirmation message
-    const client = clients.find(c => c.id == clientId);
-    const clientName = client ? 
-        [client.first_name, client.last_name].filter(Boolean).join(' ') : 
-        `Cliente ID ${clientId}`;
-    
-    const confirmMessage = `Sei sicuro di voler eliminare il cliente "${clientName}"?\n\nQuesta operazione non può essere annullata.`;
-    
-    if (!confirm(confirmMessage)) {
-        return;
-    }
-    
-    try {
-        const result = await deleteClient(clientId);
-        
-        if (result.success) {
-            alert('Cliente eliminato con successo!');
-            // Refresh client list
-            loadClients();
-        } else {
-            alert('Errore durante l\'eliminazione: ' + (result.error || 'Errore sconosciuto'));
-        }
-    } catch (error) {
-        console.error('Errore eliminazione cliente:', error);
-        alert('Errore di connessione durante l\'eliminazione');
-    }
-}
 
 /**
  * Mostra il dialog per aggiungere un cliente

@@ -13,7 +13,7 @@ require_once '../../config/config.php';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestione Note - Agenda</title>
-    <link rel="stylesheet" href="../../assets/css/note-popup.css">
+    <link rel="stylesheet" href="../../assets/css/scheme-popup.css">
 </head>
 <body>
     <div class="popup-window-container">
@@ -60,7 +60,7 @@ require_once '../../config/config.php';
                         </tr>
                         <tr>
                             <th class="note-table-th">Tempo (min)</th>
-                            <td><input type="number" id="note-time" class="cell-input" min="0" max="1440" placeholder="Minuti" step="15" value="30"></td>
+                            <td><input type="number" id="note-time" class="cell-input" min="15" max="1440" placeholder="Minuti" step="15" value="30"></td>
                         </tr>
                     </tbody>
                 </table>
@@ -79,15 +79,26 @@ require_once '../../config/config.php';
                 const data = await response.json();
                 
                 if (data.success && data.users) {
-                    userSelect.innerHTML = '<option value="">Seleziona utente...</option>';
+                    userSelect.innerHTML = '';
+                    let firstActiveUser = null;
                     data.users.forEach(user => {
                         if (user.is_active == 1) { // Solo utenti attivi
                             const option = document.createElement('option');
                             option.value = user.id;
                             option.textContent = user.username;
                             userSelect.appendChild(option);
+                            
+                            // Memorizza il primo utente attivo
+                            if (!firstActiveUser) {
+                                firstActiveUser = user.id;
+                            }
                         }
                     });
+                    
+                    // Seleziona automaticamente il primo utente attivo
+                    if (firstActiveUser) {
+                        userSelect.value = firstActiveUser;
+                    }
                 } else {
                     userSelect.innerHTML = '<option value="">Errore caricamento utenti</option>';
                 }
