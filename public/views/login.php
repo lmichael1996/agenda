@@ -1,13 +1,13 @@
 <?php
 // Carica configurazione
-require_once '../config/config.php';
+require_once '../../config/config.php';
 
 // Genera token CSRF
 $csrfToken = generateCSRFToken();
 
 // Genera CAPTCHA
 try {
-    require_once '../config/captcha.php';
+    require_once '../../config/captcha.php';
     $captcha = CaptchaManager::generateCaptcha();
 } catch (Exception $e) {
     $captcha = ['type' => 'simple'];

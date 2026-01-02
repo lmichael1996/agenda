@@ -55,7 +55,7 @@ if ($isGet && $noOtherParams && ($isDirectAccess || $isFromLogout) &&
     $_SESSION['from_index'] = true;  // Flag di autorizzazione
     $_SESSION['access_time'] = time(); // Timestamp accesso
     $_SESSION['access_ip'] = $remoteAddr; // IP di accesso
-    header('Location: public/login.php');
+    header('Location: views/dashboard.php');
     exit;
 }
 
@@ -70,6 +70,6 @@ if (!$validIpFormat) $blockReason .= 'InvalidIP ';
 
 error_log("Blocked access from IP: $remoteAddr, Reason: $blockReason, UA: " . substr($userAgent, 0, 100));
 
-header('Location: public/access-denied.php');
+header('Location: views/access-denied.php');
 exit;
 ?>

@@ -66,7 +66,7 @@ require_once '../../config/config.php';
 
 <script type="module">
     // ========== GESTIONE SERVIZI ==========
-    import { fetchServices, saveAllServices } from '../../api/frontend/services-api.js';
+    import { fetchServices, saveAllServices } from '../assets/js/api/services-api.js';
     
     let servicesList = [];
     let serviceIdCounter = 1;

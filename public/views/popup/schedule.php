@@ -164,7 +164,7 @@ require_once '../../config/config.php';
     </div>
 
     <script type="module">
-        import { fetchSchedule, saveSchedule, convertFromApiFormat } from '../../api/frontend/schedule-api.js';
+        import { fetchSchedule, saveSchedule, convertFromApiFormat } from '../assets/js/api/schedule-api.js';
         
         let schedule = {};
         const closePopup = (msg) => { 

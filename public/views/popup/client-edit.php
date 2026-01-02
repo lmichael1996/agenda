@@ -292,8 +292,8 @@ if (!$clientId) {
         
         // Import API functions
         async function fetchClientDetails(clientId) {
-            const PATH = '../../api/backend/clients-api.php';
-            const response = await fetch(`${PATH}?id=${clientId}`, {
+            const PATH = '/api.php/clients';
+            const response = await fetch(`${PATH}//${clientId}`, {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json' }
             });
@@ -307,8 +307,9 @@ if (!$clientId) {
         }
         
         async function updateClient(clientData) {
-            const PATH = '../../api/backend/clients-api.php';
-            const response = await fetch(PATH, {
+            const PATH = '/api.php/clients';
+            const clientId = clientData.id;
+            const response = await fetch(`${PATH}//${clientId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(clientData)

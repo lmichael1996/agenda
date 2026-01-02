@@ -84,6 +84,6 @@ header('Expires: Thu, 01 Jan 1970 00:00:00 GMT');
 header('Clear-Site-Data: "cache", "cookies", "storage"');
 
 // Reset completo: torna all'index per ripartire da zero
-header('Location: ../index.php?from=logout');
+header('Location: ../public/index.php?from=logout');
 exit;
 ?>

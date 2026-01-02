@@ -4,17 +4,10 @@
  * La parte grafica è gestita da clients-popup.js
  */
 
-const PATH = '../../api/backend/clients-api.php';
+const PATH = '/api.php/clients';
 
 /**
  * Recupera la lista dei clienti con paginazione, ricerca e ordinamento
- * @param {number} page - Numero di pagina (default: 1)
- * @param {number} limit - Numero di elementi per pagina (default: 50)
- * @param {string} search - Testo di ricerca (default: '')
- * @param {string} searchField - Campo di ricerca (default: 'all')
- * @param {string} searchType - Tipo di ricerca: starts, contains, ends, exact (default: 'contains')
- * @param {string} sort - Ordinamento (default: 'last_name_asc')
- * @returns {Promise<Object>} Risposta con success, data, pagination
  */
 export async function fetchClients(page = 1, limit = 50, search = '', searchField = 'all', searchType = 'contains', sort = 'last_name_asc') {
     try {
@@ -58,8 +51,6 @@ export async function fetchClients(page = 1, limit = 50, search = '', searchFiel
 
 /**
  * Crea un nuovo cliente
- * @param {Object} clientData - Dati del cliente da creare
- * @returns {Promise<Object>} Risposta con success e eventuale ID del cliente creato
  */
 export async function createClient(clientData) {
     try {
@@ -92,12 +83,15 @@ export async function createClient(clientData) {
 
 /**
  * Aggiorna un cliente esistente
- * @param {Object} clientData - Dati del cliente da aggiornare (deve includere id)
- * @returns {Promise<Object>} Risposta con success
  */
 export async function updateClient(clientData) {
     try {
-        const response = await fetch(PATH, {
+        const clientId = clientData.id;
+        if (!clientId) {
+            throw new Error('ID cliente richiesto per aggiornamento');
+        }
+        
+        const response = await fetch(`${PATH}//${clientId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -126,12 +120,10 @@ export async function updateClient(clientData) {
 
 /**
  * Recupera i dettagli di un cliente specifico
- * @param {number|string} clientId - ID del cliente
- * @returns {Promise<Object>} Risposta con success e data del cliente
  */
 export async function fetchClientDetails(clientId) {
     try {
-        const response = await fetch(`${PATH}?id=${clientId}`, {
+        const response = await fetch(`${PATH}//${clientId}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -159,17 +151,14 @@ export async function fetchClientDetails(clientId) {
 
 /**
  * Elimina un cliente
- * @param {number|string} clientId - ID del cliente da eliminare
- * @returns {Promise<Object>} Risposta con success
  */
 export async function deleteClient(clientId) {
     try {
-        const response = await fetch(PATH, {
+        const response = await fetch(`${PATH}//${clientId}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ id: clientId })
+            }
         });
         
         const text = await response.text();
@@ -190,5 +179,3 @@ export async function deleteClient(clientId) {
         throw error;
     }
 }
-
-

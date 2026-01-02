@@ -10,7 +10,7 @@ header('Referrer-Policy: no-referrer');
 
 // Controllo accesso diretto
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: ../public/login.php');
+    header('Location: ../public/views/login.php');
     exit;
 }
 
@@ -78,7 +78,7 @@ $blockTime = $_SESSION['login_attempts'] >= 5 ? 300 : ($_SESSION['login_attempts
 if ($_SESSION['login_attempts'] >= 3 && (time() - $_SESSION['last_attempt']) < $blockTime) {
     $waitTime = ceil(($blockTime - (time() - $_SESSION['last_attempt'])) / 60);
     $_SESSION['login_error'] = "Accesso limitato. Riprova tra {$waitTime} minuto" . ($waitTime > 1 ? 'i' : '') . ".";
-    header('Location: ../public/login.php');
+    header('Location: ../public/views/login.php');
     exit;
 }
 
@@ -149,7 +149,7 @@ try {
         <script>
             var form = document.createElement('form');
             form.method = 'POST';
-            form.action = '../public/dashboard.php';
+            form.action = '../public/views/dashboard.php';
             
             var input = document.createElement('input');
             input.type = 'hidden';
@@ -171,7 +171,7 @@ try {
     error_log("Failed login attempt: " . ($username ?? 'unknown') . " from " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown') . " - " . $e->getMessage());
     
     $_SESSION['login_error'] = $e->getMessage();
-    header('Location: ../public/login.php');
+    header('Location: ../public/views/login.php');
     exit;
 }
 ?>

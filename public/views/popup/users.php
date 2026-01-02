@@ -67,7 +67,7 @@ $sampleUsers = [];
     </div>
 
     <script type="module">
-        import { fetchUsers, saveAllUsers } from '../../api/frontend/user-api.js';
+        import { fetchUsers, saveAllUsers } from '../assets/js/api/user-api.js';
 
         let usersList = [];
         let userIdCounter = 1;

@@ -100,8 +100,8 @@ if ($clientName) {
     </div>
 
     <script type="module">
-        import { fetchServices } from '../../api/frontend/services-api.js';
-        import { saveSchedule } from '../../api/frontend/schedule-api.js';
+        import { fetchServices } from '../assets/js/api/services-api.js';
+        import { saveSchedule } from '../assets/js/api/schedule-api.js';
 
         // Elementi DOM
         const form = document.getElementById('appointment-form');

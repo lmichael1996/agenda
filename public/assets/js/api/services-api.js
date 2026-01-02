@@ -1,6 +1,5 @@
-// JavaScript API wrapper for services-related operations
-
-const PATH = '/api/backend/services-api.php';
+// Services API
+const PATH = '/api.php/services';
     
 export async function fetchServices() {
     const response = await fetch(PATH);
@@ -33,5 +32,3 @@ export async function saveAllServices(servicesData) {
         return { success: false, error: 'Invalid JSON' };
     }
 }
-
-// Add more services API methods as needed

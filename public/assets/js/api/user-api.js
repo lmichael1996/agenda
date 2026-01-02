@@ -1,10 +1,7 @@
-// JavaScript API wrapper for user-related operations
-// Example: fetchUsers, addUser, updateUser, deleteUser
-
-const PATH = '/api/backend/user-api.php';
+// Users API
+const PATH = '/api.php/users';
     
 export async function fetchUsers() {
-    // Usa percorso assoluto per evitare problemi di fetch
     const response = await fetch(PATH);
     const text = await response.text();
     console.log('Response text:', text);
@@ -18,7 +15,7 @@ export async function fetchUsers() {
 }
 
 export async function fetchUserDetails(userId) {
-    const response = await fetch(`${PATH}?id=${userId}`);
+    const response = await fetch(`${PATH}//${userId}`);
     const text = await response.text();
     console.log('User details response:', text);
     try {
@@ -48,5 +45,3 @@ export async function saveAllUsers(usersData) {
         return { success: false, error: 'Invalid JSON' };
     }
 }
-
-// Add more user API methods as needed

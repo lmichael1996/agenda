@@ -7,7 +7,7 @@
 // Importa le funzioni per i dati dal backend
 import { 
     fetchClients 
-} from '../../api/frontend/clients-api.js';
+} from './api/clients-api.js';
 
 // Stato dell'applicazione
 let currentPage = 1;

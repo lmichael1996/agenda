@@ -296,7 +296,7 @@ require_once '../../config/config.php';
     </div>
 
     <script type="module">
-        import { fetchClientDetails } from '../../api/frontend/clients-api.js';
+        import { fetchClientDetails } from '../assets/js/api/clients-api.js';
         
         // Get client ID from URL parameters
         const urlParams = new URLSearchParams(window.location.search);
@@ -447,7 +447,7 @@ require_once '../../config/config.php';
             
             try {
                 // Import deleteClient function
-                const { deleteClient: deleteClientAPI } = await import('../../api/frontend/clients-api.js');
+                const { deleteClient: deleteClientAPI } = await import('../assets/js/api/clients-api.js');
                 
                 const result = await deleteClientAPI(currentClient.id);
                 

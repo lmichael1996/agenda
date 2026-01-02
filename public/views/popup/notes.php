@@ -71,8 +71,8 @@ require_once '../../config/config.php';
         </div>
     </div>
     <script type="module">
-        import { saveNote, formatDateForAPI, validateNoteData } from '../../api/frontend/notes-api.js';
-        import { fetchSchedule } from '../../api/frontend/schedule-api.js';
+        import { saveNote, formatDateForAPI, validateNoteData } from '../assets/js/api/notes-api.js';
+        import { fetchSchedule } from '../assets/js/api/schedule-api.js';
         
         // Carica orario di apertura dalla configurazione schedule
         async function loadOpeningHour() {
@@ -152,7 +152,7 @@ require_once '../../config/config.php';
         // Carica utenti tramite API
         async function loadUsers() {
             try {
-                const response = await fetch('../../api/backend/user-api.php');
+                const response = await fetch('/api.php/users');
                 const userSelect = document.getElementById('note-user');
                 const data = await response.json();
                 
