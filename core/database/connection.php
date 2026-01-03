@@ -9,11 +9,36 @@
  * - Funzione getDBConnection() per connessioni PDO moderne
  */
 
-// Credenziali database (singola fonte di verità)
+// ============================================
+// CONFIGURAZIONE DATABASE
+// ============================================
+
+// Database LOCALE (sviluppo)
 define('DB_HOST', 'localhost');
 define('DB_USER', 'admin');
 define('DB_PASSWORD', 'admin123');
 define('DB_NAME', 'agenda_db');
+
+// Database ONLINE (produzione) - Decommentare quando necessario
+/*
+define('DB_HOST', 'your-online-host.com');
+define('DB_USER', 'your-online-user');
+define('DB_PASSWORD', 'your-online-password');
+define('DB_NAME', 'your-online-database');
+*/
+
+// ============================================
+// SETUP DATABASE LOCALE
+// ============================================
+// Per creare il database locale esegui:
+// cd /home/mich/Software/agenda/database
+// ./setup.sh
+// 
+// Oppure manualmente:
+// mysql -u root -p < 01_create_database.sql
+// mysql -u root -p < 02_create_tables.sql
+// mysql -u root -p < 03_seed_data.sql
+// ============================================
 
 /**
  * Connessione MySQLi (per codice legacy)

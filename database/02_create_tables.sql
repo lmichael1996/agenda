@@ -12,14 +12,9 @@ CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
-    email VARCHAR(100),
-    role ENUM('user', 'admin') DEFAULT 'user',
+    type_role ENUM('user', 'admin') DEFAULT 'user',
     color VARCHAR(7) DEFAULT '#3498db',
-    is_active TINYINT(1) DEFAULT 1,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_username (username),
-    INDEX idx_active (is_active)
+    is_active TINYINT(1) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Tabella clienti
@@ -29,11 +24,7 @@ CREATE TABLE IF NOT EXISTS clients (
     last_name VARCHAR(100) NOT NULL,
     phone VARCHAR(20),
     notes TEXT,
-    has_certificate TINYINT(1) DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_fullname (last_name, first_name),
-    INDEX idx_phone (phone)
+    has_certificate TINYINT(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Tabella servizi
@@ -42,10 +33,7 @@ CREATE TABLE IF NOT EXISTS services (
     name VARCHAR(100) NOT NULL,
     duration INT NOT NULL COMMENT 'Durata in minuti',
     price DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
-    description TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_name (name)
+    description TEXT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Tabella appuntamenti
@@ -58,15 +46,9 @@ CREATE TABLE IF NOT EXISTS appointments (
     end_time DATETIME NOT NULL,
     status ENUM('scheduled', 'confirmed', 'completed', 'cancelled') DEFAULT 'scheduled',
     notes TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE,
     FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE RESTRICT,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
-    INDEX idx_start_time (start_time),
-    INDEX idx_client (client_id),
-    INDEX idx_service (service_id),
-    INDEX idx_status (status)
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Tabella note
@@ -77,11 +59,7 @@ CREATE TABLE IF NOT EXISTS notes (
     user_id INT,
     for_all TINYINT(1) DEFAULT 0 COMMENT 'Visibile a tutti gli utenti',
     note_date DATE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
-    INDEX idx_date (note_date),
-    INDEX idx_user (user_id)
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Tabella orari di lavoro
@@ -93,7 +71,5 @@ CREATE TABLE IF NOT EXISTS schedule (
     lunch_break_enabled TINYINT(1) DEFAULT 0,
     break_start TIME,
     break_end TIME,
-    is_closed TINYINT(1) DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    is_closed TINYINT(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

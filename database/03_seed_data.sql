@@ -10,13 +10,13 @@ USE agenda_db;
 -- Inserimento utente admin di default
 -- Username: admin
 -- Password: admin123
-INSERT INTO users (username, password_hash, email, role, color, is_active) VALUES
-('admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin@agenda.local', 'admin', '#e74c3c', 1);
+INSERT INTO users (username, password_hash, type_role, color, is_active) VALUES
+('admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin', '#e74c3c', 1);
 
 -- Inserimento utenti operatori di esempio
-INSERT INTO users (username, password_hash, email, role, color, is_active) VALUES
-('mario', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'mario@agenda.local', 'user', '#3498db', 1),
-('lucia', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'lucia@agenda.local', 'user', '#2ecc71', 1);
+INSERT INTO users (username, password_hash, type_role, color, is_active) VALUES
+('mario', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'user', '#3498db', 1),
+('lucia', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'user', '#2ecc71', 1);
 
 -- Inserimento clienti di esempio
 INSERT INTO clients (first_name, last_name, phone, has_certificate, notes) VALUES
@@ -49,10 +49,3 @@ INSERT INTO notes (title, content, user_id, for_all, note_date) VALUES
 ('Chiusura estiva', 'Lo studio sarà chiuso dal 10 al 25 agosto', 1, 1, '2026-08-01'),
 ('Nuovi orari', 'Da settembre orario continuato 9-17', 1, 1, '2026-09-01'),
 ('Promemoria personale', 'Ordinare nuovo materiale sanitario', 2, 0, CURDATE());
-
--- Inserimento appuntamenti di esempio (prossimi giorni)
-INSERT INTO appointments (client_id, service_id, user_id, start_time, end_time, status, notes) VALUES
-(1, 1, 2, DATE_ADD(CURDATE(), INTERVAL 1 DAY) + INTERVAL 10 HOUR, DATE_ADD(CURDATE(), INTERVAL 1 DAY) + INTERVAL 11 HOUR, 'confirmed', 'Cliente abituale'),
-(2, 3, 2, DATE_ADD(CURDATE(), INTERVAL 1 DAY) + INTERVAL 14 HOUR, DATE_ADD(CURDATE(), INTERVAL 1 DAY) + INTERVAL 14 HOUR + INTERVAL 30 MINUTE, 'scheduled', 'Primo appuntamento'),
-(3, 2, 3, DATE_ADD(CURDATE(), INTERVAL 2 DAY) + INTERVAL 9 HOUR, DATE_ADD(CURDATE(), INTERVAL 2 DAY) + INTERVAL 9 HOUR + INTERVAL 45 MINUTE, 'scheduled', NULL),
-(4, 4, 2, DATE_ADD(CURDATE(), INTERVAL 3 DAY) + INTERVAL 15 HOUR, DATE_ADD(CURDATE(), INTERVAL 3 DAY) + INTERVAL 15 HOUR + INTERVAL 30 MINUTE, 'scheduled', 'Dolore cervicale persistente');

@@ -1,5 +1,9 @@
 # File di configurazione sensibili
 config/local_config.php
+core/database/config.php
+core/database/local_config.php
+*_local.php
+*.credentials.php
 
 # Log e cache
 *.log
