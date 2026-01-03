@@ -4,8 +4,17 @@
  */
 
 if (!defined('AGENDA_APP')) {
-    http_response_code(403);
-    exit('Accesso non autorizzato');
+    // Avvia sessione se necessario
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+    
+    // Imposta messaggio di errore e redirect al login
+    $_SESSION['login_error'] = 'Accesso non autorizzato. Effettua il login.';
+    
+    // Redirect all'index che poi porta al login
+    header('Location: /index.php');
+    exit;
 }
 
 class CaptchaManager {

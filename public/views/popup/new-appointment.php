@@ -3,7 +3,7 @@
  * Popup per aggiungere nuovo appuntamento
  * Form con: Nome, Cognome, Servizio, Data e ora, Nota
  */
-require_once '../../config/config.php';
+require_once '../../core/gateway/access-control.php';
 
 // Recupera i parametri dalla URL
 $clientId = $_GET['clientId'] ?? '';

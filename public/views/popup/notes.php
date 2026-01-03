@@ -3,9 +3,9 @@
  * Popup per la gestione delle note - Finestra separata
  * Struttura orizzontale, stile uniforme con popup.css
  */
-require_once '../../config/config.php';
+require_once '../../core/gateway/access-control.php';
 
-// Il config.php gestisce automaticamente tutti i controlli per i popup
+// Il file access-control.php gestisce automaticamente tutti i controlli per i popup
 ?>
 <!DOCTYPE html>
 <html lang="it">

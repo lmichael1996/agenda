@@ -26,7 +26,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // Include funzioni token
-require_once __DIR__ . '/../utils/token_functions.php';
+require_once __DIR__ . '/../functions/token.php';
 
 // Sistema di controllo accessi universale
 $currentPage = basename($_SERVER['PHP_SELF']);
@@ -45,19 +45,22 @@ $popupPages = ['schedule.php', 'users.php', 'services.php', 'note.php', 'client.
 
 // Controllo per pagine pubbliche (richiedono passaggio da index)
 if (in_array($currentPage, $publicPages)) {
-    if (empty($_SESSION['from_index'])) {
+    // Eccezione: access-denied.php non richiede from_index
+    if ($currentPage !== 'access-denied.php' && empty($_SESSION['from_index'])) {
         error_log("Blocked direct access to $currentPage from IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
-        header('Location: ' . ($currentDir === 'public' ? '../index.php' : '../index.php'));
+        header('Location: ' . ($currentDir === 'views' ? '../../index.php' : '../index.php'));
         exit;
     }
     
-    // Verifica validità temporale dell'accesso (max 10 minuti)
-    $accessTime = $_SESSION['access_time'] ?? 0;
-    if (time() - $accessTime > 600) {
-        unset($_SESSION['from_index'], $_SESSION['access_time']);
-        error_log("Expired access token for $currentPage");
-        header('Location: ' . ($currentDir === 'public' ? '../index.php' : '../index.php'));
-        exit;
+    // Verifica validità temporale dell'accesso solo per login (max 10 minuti)
+    if ($currentPage === 'login.php') {
+        $accessTime = $_SESSION['access_time'] ?? 0;
+        if (time() - $accessTime > 600) {
+            unset($_SESSION['from_index'], $_SESSION['access_time']);
+            error_log("Expired access token for $currentPage");
+            header('Location: ' . ($currentDir === 'views' ? '../../index.php' : '../index.php'));
+            exit;
+        }
     }
 }
 
@@ -100,26 +103,27 @@ if (in_array($currentPage, $protectedPages)) {
     
     // Solo se l'IP di sessione è impostato e diverso
     if (!empty($sessionIp) && $currentIp !== $sessionIp) {
-        // Log ma non bloccare immediatamente - potrebbe essere cambio rete legittimo
+        // Log cambio IP
         error_log("IP change detected for user {$_SESSION['user_id']}: $sessionIp -> $currentIp");
         
         // Verifica se il cambio IP è troppo frequente (possibile hijacking)
         $ipChanges = $_SESSION['ip_changes'] ?? 0;
         $lastIpChange = $_SESSION['last_ip_change'] ?? 0;
         
-        if (time() - $lastIpChange < 300) { // Meno di 5 minuti dall'ultimo cambio
+        // Se meno di 5 minuti dall'ultimo cambio, incrementa contatore
+        if (time() - $lastIpChange < 300) {
             $ipChanges++;
         } else {
-            $ipChanges = 1; // Reset se è passato molto tempo
+            $ipChanges = 1; // Reset se è passato tempo sufficiente
         }
         
         $_SESSION['ip_changes'] = $ipChanges;
         $_SESSION['last_ip_change'] = time();
         $_SESSION['login_ip'] = $currentIp; // Aggiorna IP corrente
         
-        // Solo dopo 3 cambi IP rapidi, considera sospetto
+        // Dopo 3 cambi IP rapidi in 5 minuti, forza re-login
         if ($ipChanges >= 3) {
-            error_log("Suspicious IP changes for user {$_SESSION['user_id']}, forcing re-login");
+            error_log("Suspicious: 3+ rapid IP changes for user {$_SESSION['user_id']}, forcing re-login");
             session_destroy();
             session_start();
             $_SESSION['login_error'] = 'Attività sospetta rilevata. Effettua nuovamente il login.';
@@ -128,11 +132,8 @@ if (in_array($currentPage, $protectedPages)) {
         }
     }
     
-    // Gestione flag di autenticazione POST
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['just_authenticated'])) {
-        unset($_POST['just_authenticated']);
-        error_log("User {$_SESSION['user_id']} successfully accessed dashboard after authentication");
-    }
+    // Gestione flag di autenticazione POST (rimosso - non più necessario)
+    // Il redirect da auth.php è gestito direttamente
 }
 
 // Controllo per popup (richiedono autenticazione)

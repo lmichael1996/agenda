@@ -3,9 +3,9 @@
  * Popup per la gestione dei dati utente (client) - Finestra separata
  * Tabella verticale con tutti i dati: nome, cognome, telefono, nota, certificato
  */
-require_once '../../config/config.php';
+require_once '../../core/gateway/access-control.php';
 
-// Il config.php gestisce automaticamente tutti i controlli per i popup:
+// Il file access-control.php gestisce automaticamente tutti i controlli per i popup:
 // - Autenticazione utente obbligatoria  
 // - Headers di sicurezza
 // - Controlli anti-hijacking

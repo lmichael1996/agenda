@@ -5,9 +5,9 @@
  */
 
 // Carica configurazione e controlli di sicurezza
-require_once '../../config/config.php';
+// require_once '../../core/gateway/access-control.php';
 
-// Il file config.php gestisce automaticamente tutti i controlli di sicurezza:
+// Il file access-control.php gestisce automaticamente tutti i controlli di sicurezza:
 // - Autenticazione utente
 // - Anti session hijacking (IP + User Agent)
 // - Scadenza sessione
@@ -16,7 +16,7 @@ require_once '../../config/config.php';
 // - Logging accessi
 
 // Carica funzioni calendario (dopo verifiche sicurezza)
-require_once '../../utils/calendar_functions.php';
+require_once '../../core/functions/calendar.php';
 
 // Genera dati per il calendario
 $days = getCurrentWeekDays();
@@ -63,7 +63,7 @@ $currentDate = $today->format('Y-m-d');
         <a href="#" data-popup-window="schedule" class="sidebar-link">
             <span class="sidebar-text">Orario</span>
         </a>
-        <a href="../../utils/logout.php" class="logout sidebar-link" onclick="return confirm('Sei sicuro di voler uscire?')">
+        <a href="../../core/functions/logout.php" class="logout sidebar-link" onclick="return confirm('Sei sicuro di voler uscire?')">
             <span class="sidebar-text">Logout</span>
         </a>
     </div>

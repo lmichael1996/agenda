@@ -1,30 +1,51 @@
 <?php
-// Carica configurazione
-require_once '../../config/config.php';
+/**
+ * Login Page - Autenticazione utente con sistema anti-brute-force
+ */
 
-// Genera token CSRF
-$csrfToken = generateCSRFToken();
-
-// Genera CAPTCHA
-try {
-    require_once '../../config/captcha.php';
-    $captcha = CaptchaManager::generateCaptcha();
-} catch (Exception $e) {
-    $captcha = ['type' => 'simple'];
+// Avvia sessione
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
 }
 
-// Controlla se c'è un errore di login
-$loginError = $_SESSION['login_error'] ?? '';
-unset($_SESSION['login_error']);
+// Carica configurazione (include token.php e gestisce controlli from_index)
+require_once '../../core/gateway/access-control.php';
 
-// Sistema di sicurezza equilibrato
+// ========== SISTEMA ANTI-BRUTE-FORCE ==========
 $loginAttempts = $_SESSION['login_attempts'] ?? 0;
 $lastAttempt = $_SESSION['last_attempt'] ?? 0;
 
-// Blocco progressivo: 3 tentativi = 2 min, 5+ tentativi = 5 min
-$blockTime = $loginAttempts >= 5 ? 300 : ($loginAttempts >= 3 ? 120 : 0);
-$isBlocked = $loginAttempts >= 3 && (time() - $lastAttempt) < $blockTime;
+// Blocco progressivo: 3-4 tentativi = 2 min, 5+ tentativi = 5 min
+$blockTime = 0;
+if ($loginAttempts >= 5) {
+    $blockTime = 300; // 5 minuti
+} elseif ($loginAttempts >= 3) {
+    $blockTime = 120; // 2 minuti
+}
+
+$isBlocked = $blockTime > 0 && (time() - $lastAttempt) < $blockTime;
 $remainingTime = $isBlocked ? ceil(($blockTime - (time() - $lastAttempt)) / 60) : 0;
+
+// Reset tentativi se è passato abbastanza tempo
+if (!$isBlocked && $loginAttempts > 0 && (time() - $lastAttempt) > 600) {
+    $_SESSION['login_attempts'] = 0;
+    $loginAttempts = 0;
+}
+
+// ========== GENERA TOKEN E CAPTCHA ==========
+$csrfToken = generateCSRFToken();
+
+try {
+    require_once '../../core/functions/captcha.php';
+    $captcha = CaptchaManager::generateCaptcha();
+} catch (Exception $e) {
+    error_log("Login: Captcha generation failed - " . $e->getMessage());
+    $captcha = ['type' => 'simple', 'challenge_id' => uniqid()];
+}
+
+// ========== MESSAGGI DI ERRORE ==========
+$loginError = $_SESSION['login_error'] ?? '';
+unset($_SESSION['login_error']);
 ?>
 
 <!DOCTYPE html>
@@ -58,7 +79,7 @@ $remainingTime = $isBlocked ? ceil(($blockTime - (time() - $lastAttempt)) / 60) 
         <?php endif; ?>
         
         <?php if (!$isBlocked): ?>
-        <form method="post" action="../config/auth.php">
+        <form method="post" action="../../core/gateway/auth.php">
             <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
             <input type="text" name="username" placeholder="Username" required autocomplete="username">
             <input type="password" name="password" placeholder="Password" required autocomplete="current-password">

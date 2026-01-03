@@ -63,7 +63,7 @@ agenda/
 2. **Configurazione del server web**
    - Punta la document root su `/path/to/agenda/`
    - Assicurati che PHP sia abilitato
-   - Configura il database in `config/db.php`
+   - Configura il database in `utils/db.php`
 
 3. **Permessi**
    ```bash
@@ -73,7 +73,7 @@ agenda/
 
 ## 📋 Configurazione
 
-### File config/config.php
+### File utils/config.php
 
 Principali impostazioni configurabili:
 
@@ -146,7 +146,7 @@ La directory `api/` è predisposta per futuri endpoint REST:
 
 Per attivare il debug:
 
-1. Modifica `config/config.php`:
+1. Modifica `utils/config.php`:
    ```php
    ini_set('display_errors', 1);
    error_reporting(E_ALL);
@@ -174,6 +174,6 @@ Per modifiche allo stile o funzionalità:
 1. **CSS**: Modifica i file in `assets/css/`
 2. **JavaScript**: Modifica i file in `assets/js/`
 3. **PHP**: Modifica template in `views/` o logica in `includes/`
-4. **Configurazione**: Modifica `config/config.php`
+4. **Configurazione**: Modifica `utils/config.php`
 
 Mantieni la separazione tra logica, presentazione e configurazione.

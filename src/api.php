@@ -24,27 +24,8 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // Carica configurazione e database
-require_once __DIR__ . '/../config/config.php';
-require_once __DIR__ . '/../config/db.php';
-
-// Funzione per ottenere connessione PDO
-function getDBConnection() {
-    $host = 'localhost';
-    $user = 'admin';
-    $password = 'admin123';
-    $dbname = 'agenda_db';
-    
-    try {
-        $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $user, $password);
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        return $pdo;
-    } catch (PDOException $e) {
-        error_log("Errore connessione PDO: " . $e->getMessage());
-        http_response_code(500);
-        echo json_encode(['success' => false, 'error' => 'Errore connessione database']);
-        exit;
-    }
-}
+require_once __DIR__ . '/../core/gateway/access-control.php';
+require_once __DIR__ . '/../core/database/connection.php';  // Contiene getDBConnection()
 
 // Carica i controller
 require_once __DIR__ . '/Controllers/ClientsController.php';
