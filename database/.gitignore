@@ -1,0 +1,15 @@
+# Backup files
+*.sql.backup
+*.sql.bak
+backup_*.sql
+
+# Dump files
+*.dump
+
+# Temporary files
+*.tmp
+*.swp
+*~
+
+# Local configuration overrides
+local_*.sql
