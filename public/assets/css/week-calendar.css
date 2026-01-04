@@ -27,7 +27,7 @@ body {
 /* Header */
 .calendar-header-row {
     display: grid;
-    grid-template-columns: 60px repeat(7, 1fr);
+    grid-template-columns: 65px repeat(7, 1fr);
     min-width: 1100px;
     position: sticky;
     top: 0;
@@ -51,8 +51,9 @@ body {
     color: #fff;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
     border-right: 1px solid #fff;
+    padding-right: 8px;
     position: relative;
 }
 
@@ -76,7 +77,7 @@ body {
 /* Griglia */
 .calendar-grid {
     display: grid;
-    grid-template-columns: 60px repeat(7, 1fr);
+    grid-template-columns: 65px repeat(7, 1fr);
     min-width: 1100px;
     border: 2px solid #000;
     border-top: none;
@@ -95,40 +96,37 @@ body {
     font-size: 0.75em;
     font-weight: 500;
     height: 40px;
-    padding: 2px 4px 0 0;
-    margin-top: -10px;
+    padding: 0 8px 0 0;
+    margin-top: -6px;
 }
 
 .hour-label-time {
-    width: 100%;
     text-align: right;
-    padding: 2px 4px;
-    border-radius: 3px;
 }
 
 .hour-label-past { background: #333; }
 
 /* Celle */
 .day {
-    background: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.7);
     border: 1px solid #000;
     transition: background 0.2s;
     min-height: 40px;
 }
 
 .day.today {
-    background: rgba(233, 236, 239, 0.9);
+    background: rgba(233, 236, 239, 0.75);
     border-right: 2px solid #000;
     border-left: 2px solid #000;
 }
 
 .day:hover {
-    background: rgba(233, 236, 239, 0.9) !important;
+    background: rgba(233, 236, 239, 0.75) !important;
     cursor: pointer;
 }
 
 .day.selected {
-    background: rgba(108, 117, 125, 0.9) !important;
+    background: rgba(108, 117, 125, 0.8) !important;
     color: white;
 }
 
@@ -244,5 +242,5 @@ body {
 }
 
 @media (hover: none) and (max-width: 768px) {
-    .day:hover { background: rgba(255, 255, 255, 0.85); }
+    .day:hover { background: rgba(255, 255, 255, 0.7); }
 }
