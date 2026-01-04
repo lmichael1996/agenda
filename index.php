@@ -4,10 +4,12 @@
  * Gestisce routing iniziale: utenti autenticati → dashboard, altri → login
  */
 
-// Carica gateway di sicurezza e controlli
-require_once __DIR__ . '/core/gateway/index.php';
+// Definisce costante di protezione
+define('AGENDA_APP', true);
 
-// Redirect al login
-header('Location: public/views/login.php');
-exit;
+// Carica il router per gestire autenticazione e routing
+require_once __DIR__ . '/src/Auth/Router.php';
+
+// Gestisce il routing automatico
+handleRouting();
 ?>

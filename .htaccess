@@ -5,6 +5,21 @@
     </RequireAll>
 </Files>
 
+# Enable AcceptPathInfo for API routing
+AcceptPathInfo On
+
+# Rewrite rules for API
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Allow direct access to existing files
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteRule ^ - [L]
+    
+    # Route API requests to public/api.php
+    RewriteRule ^api\.php/(.*)$ public/api.php/$1 [L,QSA]
+</IfModule>
+
 # Blocca accesso diretto a file sensibili
 <FilesMatch "\.(md|txt|log)$">
     Require all denied

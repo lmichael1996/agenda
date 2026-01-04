@@ -9,7 +9,7 @@
 body {
     margin: 0;
     padding: 0;
-    background: #f5f5f5 url('../images/background.png') center center no-repeat fixed;
+    background: #f5f5f5 url('../images/background.jpg') center center no-repeat fixed;
     background-size: auto;
     color: #000;
     display: flex;
@@ -104,7 +104,7 @@ body {
     text-align: center;
     vertical-align: middle;
     min-height: 32px;
-    background: #fff;
+    background: rgba(255, 255, 255, 0.85);
     transition: all 0.2s ease;
 }
 

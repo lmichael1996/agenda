@@ -3,7 +3,7 @@
  * Popup per i dettagli cliente - Finestra separata
  * Stile nota con tabella verticale
  */
-require_once '../../core/gateway/access-control.php';
+require_once '../../../src/Auth/AccessControl.php';
 
 // Il file access-control.php gestisce automaticamente tutti i controlli per i popup
 ?>

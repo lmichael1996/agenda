@@ -1,6 +1,5 @@
-/* LOGIN CSS - Struttura Semplificata */
+/* Login CSS */
 
-/* === BASE === */
 * {
     box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
@@ -8,7 +7,7 @@
 
 body {
     font-family: 'Courier New';
-    background: url('../images/background.png') center no-repeat fixed;
+    background: url('../images/background.jpg') center no-repeat fixed;
     margin: 0;
     padding: 10px;
     display: flex;
@@ -17,7 +16,7 @@ body {
     min-height: 100vh;
 }
 
-/* === CONTENITORE PRINCIPALE === */
+/* Contenitori */
 .login-box, .error-box {
     background: rgba(255, 255, 255, 0.9);
     border-radius: 12px;
@@ -34,39 +33,7 @@ body {
     font-size: 2rem;
 }
 
-/* === MESSAGGI === */
-.error-message {
-    background: #ffebee;
-    color: #d32f2f;
-    border: 1px solid #ffcdd2;
-}
-
-.attempts-warning {
-    background: linear-gradient(135deg, #ffa726, #ff9800);
-    color: white;
-    border-left: 4px solid #f57c00;
-    animation: slideInDown 0.3s ease;
-}
-
-.attempts-info {
-    background: linear-gradient(135deg, #42a5f5, #2196f3);
-    color: white;
-    border-left: 4px solid #1976d2;
-}
-
-.security-notice {
-    background: linear-gradient(135deg, #e8f5e8, #c8e6c9);
-    color: #2e7d32;
-    border-left: 4px solid #4caf50;
-}
-
-.temporary-block {
-    background: linear-gradient(135deg, #78909c, #607d8b);
-    color: white;
-    border-left: 4px solid #455a64;
-    margin-top: 20px;
-}
-
+/* Messaggi */
 .error-message, .attempts-warning, .attempts-info, .security-notice, .temporary-block {
     padding: 10px 15px;
     border-radius: 8px;
@@ -74,7 +41,13 @@ body {
     font-size: 14px;
 }
 
-/* === FORM === */
+.error-message { background: #ffebee; color: #d32f2f; border: 1px solid #ffcdd2; }
+.attempts-warning { background: #ff9800; color: white; border-left: 4px solid #f57c00; }
+.attempts-info { background: #2196f3; color: white; border-left: 4px solid #1976d2; }
+.security-notice { background: #c8e6c9; color: #2e7d32; border-left: 4px solid #4caf50; }
+.temporary-block { background: #607d8b; color: white; border-left: 4px solid #455a64; margin-top: 20px; }
+
+/* Form */
 input[type="text"], input[type="password"], input[type="submit"] {
     font-family: inherit;
     width: 100%;
@@ -82,11 +55,11 @@ input[type="text"], input[type="password"], input[type="submit"] {
     margin: 8px 0;
     border-radius: 8px;
     font-size: 16px;
-    border: 1px solid #222;
 }
 
 input[type="text"], input[type="password"] {
     background: #fff;
+    border: 1px solid #222;
 }
 
 input[type="text"]:focus, input[type="password"]:focus {
@@ -102,30 +75,21 @@ input[type="submit"] {
     font-weight: bold;
 }
 
-input[type="submit"]:hover {
-    background: #444;
-}
+input[type="submit"]:hover { background: #444; }
 
-/* === CAPTCHA === */
+/* Captcha */
 .captcha-container {
-    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    background: #f8f9fa;
     border: 2px solid #dee2e6;
     border-radius: 12px;
     margin: 20px 0;
     padding: 20px;
-    transition: all 0.3s ease;
-}
-
-.captcha-container:hover {
-    border-color: #1976d2;
-    box-shadow: 0 6px 20px rgba(25, 118, 210, 0.15);
 }
 
 .recaptcha-checkbox {
     display: flex;
     align-items: center;
     cursor: pointer;
-    user-select: none;
 }
 
 .custom-checkbox {
@@ -133,20 +97,13 @@ input[type="submit"]:hover {
     height: 32px;
     border: 3px solid #6c757d;
     border-radius: 6px;
-    background: linear-gradient(135deg, #ffffff, #f8f9fa);
+    background: #fff;
     margin-right: 15px;
     position: relative;
-    transition: all 0.4s ease;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.custom-checkbox:hover {
-    border-color: #495057;
-    transform: scale(1.05);
 }
 
 .custom-checkbox.verified {
-    background: linear-gradient(135deg, #4caf50, #388e3c);
+    background: #4caf50;
     border-color: #2e7d32;
 }
 
@@ -175,62 +132,50 @@ input[type="submit"]:hover {
     transform: translate(-50%, -50%);
 }
 
-/* === ANIMAZIONI === */
 @keyframes spin {
     0% { transform: translate(-50%, -50%) rotate(0deg); }
     100% { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
-@keyframes slideInDown {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
+/* Responsive */
+@media (max-width: 768px) {
+    body { padding: 15px; }
+    .login-box, .error-box { padding: 30px 25px; max-width: 100%; }
+    .login-box h2, .error-box h2 { font-size: 1.75rem; margin-bottom: 25px; }
 }
 
-/* === RESPONSIVE === */
-@media (max-width: 768px) {
-    .login-box, .error-box {
-        padding: 20px;
-        margin: 10px;
-        border-radius: 8px;
-    }
-    
-    .login-box h2, .error-box h2 {
-        font-size: 1.5rem;
-        margin-bottom: 20px;
-    }
-    
-    .error-message, .attempts-warning, .attempts-info, .security-notice {
-        padding: 8px 12px;
-        font-size: 12px;
-        margin-bottom: 12px;
-    }
-    
-    .captcha-container {
-        margin: 15px 0;
-        padding: 12px;
-        border-radius: 6px;
-    }
-    
-    .custom-checkbox {
-        width: 24px;
-        height: 24px;
-        border-width: 2px;
-        margin-right: 8px;
-    }
-    
-    input[type="text"], input[type="password"], input[type="submit"] {
-        padding: 12px;
-        margin: 6px 0;
-        border-radius: 6px;
-        -webkit-appearance: none;
-        appearance: none;
-    }
-    
-    input[type="submit"]:active {
-        transform: scale(0.98);
-    }
-    
-    .attempts-warning {
-        animation: none;
-    }
+@media (max-width: 480px) {
+    body { padding: 10px; background-attachment: scroll; }
+    .login-box, .error-box { padding: 25px 20px; border-radius: 10px; width: 100%; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25); }
+    .login-box h2, .error-box h2 { font-size: 1.5rem; margin-bottom: 20px; }
+    .error-message, .attempts-warning, .attempts-info, .security-notice, .temporary-block { padding: 10px 12px; font-size: 13px; margin-bottom: 10px; border-radius: 6px; line-height: 1.4; }
+    input[type="text"], input[type="password"], input[type="submit"] { padding: 14px 12px; margin: 10px 0; -webkit-appearance: none; appearance: none; }
+    input[type="submit"] { padding: 16px 12px; font-size: 17px; margin-top: 15px; touch-action: manipulation; }
+    input[type="submit"]:active { transform: scale(0.98); background: #333; }
+    .captcha-container { margin: 15px 0; padding: 15px; border-radius: 8px; }
+    .recaptcha-checkbox { gap: 12px; }
+    .custom-checkbox { width: 28px; height: 28px; border-width: 2px; margin-right: 0; flex-shrink: 0; }
+    .custom-checkbox.verified::after { font-size: 16px; }
+    .spinner { width: 18px; height: 18px; border-width: 2px; }
+}
+
+@media (max-width: 390px) {
+    body { padding: 8px; }
+    .login-box, .error-box { padding: 22px 18px; }
+    .login-box h2, .error-box h2 { font-size: 1.4rem; margin-bottom: 18px; }
+    .error-message, .attempts-warning, .attempts-info, .security-notice, .temporary-block { padding: 9px 11px; font-size: 12.5px; }
+    input[type="text"], input[type="password"] { padding: 13px 11px; }
+    input[type="submit"] { padding: 15px 11px; font-size: 16px; }
+}
+
+@media (max-width: 375px) {
+    body { padding: 5px; }
+    .login-box, .error-box { padding: 20px 15px; border-radius: 8px; }
+    .login-box h2, .error-box h2 { font-size: 1.3rem; margin-bottom: 15px; }
+    .error-message, .attempts-warning, .attempts-info, .security-notice, .temporary-block { padding: 8px 10px; font-size: 12px; margin-bottom: 8px; }
+    .captcha-container { padding: 12px; margin: 12px 0; }
+    input[type="text"], input[type="password"] { padding: 12px 10px; margin: 8px 0; }
+    input[type="submit"] { padding: 14px 10px; margin-top: 12px; }
+    .custom-checkbox { width: 26px; height: 26px; }
+    .custom-checkbox.verified::after { font-size: 15px; }
 }

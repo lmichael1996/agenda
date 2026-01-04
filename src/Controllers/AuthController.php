@@ -26,7 +26,7 @@ class AuthController {
         
         // Query preparata per sicurezza
         $stmt = $this->conn->prepare(
-            'SELECT id, username, password_hash, role, is_active 
+            'SELECT id, username, password_hash, type_role, is_active 
              FROM users 
              WHERE username = ? 
              LIMIT 1'

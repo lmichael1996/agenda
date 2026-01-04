@@ -1,23 +1,47 @@
 <?php
 /**
- * Redirect per accesso negato
- * Invece di mostrare una pagina di errore, reindirizza al login con messaggio
+ * Pagina di Accesso Negato - Errore di Sicurezza
+ * Mostra un messaggio di errore senza possibilità di tornare al login
  */
-
-// Avvia sessione se necessario
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
 
 // Log del tentativo di accesso bloccato
 $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
 $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? 'unknown';
 $referer = $_SERVER['HTTP_REFERER'] ?? 'none';
-error_log("Access denied - redirecting to login - IP: $ip, UA: $userAgent, Referer: $referer");
+$timestamp = date('Y-m-d H:i:s');
 
-// Imposta messaggio di errore
-$_SESSION['login_error'] = 'Accesso non autorizzato. Effettua il login per continuare.';
+error_log("SECURITY: Access denied - IP: $ip, UA: $userAgent, Referer: $referer, Time: $timestamp");
 
-// Redirect al login
-header('Location: login.php');
-exit;
+// Impedisci cache della pagina di errore
+header('Cache-Control: no-cache, no-store, must-revalidate');
+header('Pragma: no-cache');
+header('Expires: 0');
+
+// Status HTTP 403 Forbidden
+http_response_code(403);
+?>
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accesso Negato - Agenda</title>
+    <link rel="stylesheet" href="/public/assets/css/login.css">
+</head>
+<body>
+    <div class="login-box">
+        <h2>🚫 Accesso Negato</h2>
+        
+        <div class="error-message">
+            <strong>Non disponi dei permessi necessari</strong><br><br>
+            Il tuo tentativo di accesso è stato registrato per motivi di sicurezza.
+        </div>
+        
+        <div class="temporary-block">
+            <p><strong>Codice Errore:</strong> 403 - Forbidden</p>
+            <p><strong>IP:</strong> <?php echo htmlspecialchars($ip); ?></p>
+            <small><?php echo htmlspecialchars($timestamp); ?></small>
+        </div>
+    </div>
+</body>
+</html>

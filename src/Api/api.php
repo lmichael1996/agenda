@@ -24,15 +24,15 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // Carica configurazione e database
-require_once __DIR__ . '/../core/gateway/access-control.php';
-require_once __DIR__ . '/../core/database/connection.php';  // Contiene getDBConnection()
+require_once __DIR__ . '/../Auth/AccessControl.php';
+require_once __DIR__ . '/../Database/Connection.php';  // Contiene getDBConnection()
 
 // Carica i controller
-require_once __DIR__ . '/Controllers/ClientsController.php';
-require_once __DIR__ . '/Controllers/ServicesController.php';
-require_once __DIR__ . '/Controllers/ScheduleController.php';
-require_once __DIR__ . '/Controllers/NotesController.php';
-require_once __DIR__ . '/Controllers/UsersController.php';
+require_once __DIR__ . '/../Controllers/ClientsController.php';
+require_once __DIR__ . '/../Controllers/ServicesController.php';
+require_once __DIR__ . '/../Controllers/ScheduleController.php';
+require_once __DIR__ . '/../Controllers/NotesController.php';
+require_once __DIR__ . '/../Controllers/UsersController.php';
 
 // Ottieni connessione database
 $db = getDBConnection();
@@ -44,27 +44,23 @@ $scheduleController = new ScheduleController($db);
 $notesController = new NotesController($db);
 $usersController = new UsersController($db);
 
-// Parse della richiesta
-$requestUri = $_SERVER['REQUEST_URI'];
+// Parse della richiesta - Solo query string
 $method = $_SERVER['REQUEST_METHOD'];
+$resource = $_GET['endpoint'] ?? '';
+$action = $_GET['action'] ?? '';
+$id = $_GET['id'] ?? null;
 
-// Rimuovi query string
-$path = parse_url($requestUri, PHP_URL_PATH);
-
-// Determina il controller e l'azione
-$pathParts = array_filter(explode('/', $path));
-$pathParts = array_values($pathParts); // Reindicizza
-
-// Formato: /api.php/resource/action/id
-if (count($pathParts) < 2) {
+// Valida che ci sia un endpoint
+if (empty($resource)) {
     http_response_code(400);
-    echo json_encode(['success' => false, 'error' => 'Richiesta non valida']);
+    echo json_encode([
+        'success' => false, 
+        'error' => 'Parametro endpoint richiesto',
+        'usage' => 'api.php?endpoint=services',
+        'available' => ['clients', 'services', 'schedule', 'notes', 'users']
+    ]);
     exit;
 }
-
-$resource = $pathParts[1] ?? ''; // clients, services, schedule, notes, users
-$action = $pathParts[2] ?? '';   // Azione specifica (opzionale)
-$id = $pathParts[3] ?? null;     // ID specifico (opzionale)
 
 // Gestisci input JSON per POST/PUT
 $input = null;
@@ -113,9 +109,143 @@ function handleClientsResource($controller, $method, $action, $id, $input) {
             if (!empty($id)) {
                 echo json_encode($controller->getById($id));
             } elseif (!empty($_GET['search'])) {
-                echo json_encode($controller->search($_GET['search']));
+                // Ricerca con paginazione
+                $page = intval($_GET['page'] ?? 1);
+                $limit = intval($_GET['limit'] ?? 50);
+                $searchField = $_GET['search_field'] ?? 'all';
+                $searchType = $_GET['search_type'] ?? 'contains';
+                $sort = $_GET['sort'] ?? 'last_name_asc';
+                
+                $result = $controller->getAll();
+                
+                if ($result['success'] && isset($result['data'])) {
+                    $clients = $result['data'];
+                    $searchQuery = $_GET['search'];
+                    
+                    // Filtra clienti in base alla ricerca
+                    $filtered = array_filter($clients, function($client) use ($searchQuery, $searchField, $searchType) {
+                        $query = strtolower(trim($searchQuery));
+                        
+                        // Determina il campo su cui cercare
+                        $searchIn = [];
+                        if ($searchField === 'all' || $searchField === 'name') {
+                            $searchIn[] = strtolower($client['first_name'] . ' ' . $client['last_name']);
+                        }
+                        if ($searchField === 'first_name' || $searchField === 'all') {
+                            $searchIn[] = strtolower($client['first_name']);
+                        }
+                        if ($searchField === 'last_name' || $searchField === 'all') {
+                            $searchIn[] = strtolower($client['last_name']);
+                        }
+                        if ($searchField === 'phone' || $searchField === 'all') {
+                            $searchIn[] = strtolower($client['phone'] ?? '');
+                        }
+                        if ($searchField === 'notes' || $searchField === 'all') {
+                            $searchIn[] = strtolower($client['notes'] ?? '');
+                        }
+                        
+                        // Applica il tipo di ricerca
+                        foreach ($searchIn as $text) {
+                            $match = false;
+                            switch ($searchType) {
+                                case 'starts':
+                                    $match = strpos($text, $query) === 0;
+                                    break;
+                                case 'ends':
+                                    $match = substr($text, -strlen($query)) === $query;
+                                    break;
+                                case 'exact':
+                                    $match = $text === $query;
+                                    break;
+                                case 'contains':
+                                default:
+                                    $match = strpos($text, $query) !== false;
+                                    break;
+                            }
+                            if ($match) return true;
+                        }
+                        return false;
+                    });
+                    
+                    // Ordina i risultati
+                    usort($filtered, function($a, $b) use ($sort) {
+                        switch ($sort) {
+                            case 'first_name_asc':
+                                return strcasecmp($a['first_name'], $b['first_name']);
+                            case 'first_name_desc':
+                                return strcasecmp($b['first_name'], $a['first_name']);
+                            case 'last_name_desc':
+                                return strcasecmp($b['last_name'], $a['last_name']);
+                            case 'last_name_asc':
+                            default:
+                                return strcasecmp($a['last_name'], $b['last_name']);
+                        }
+                    });
+                    
+                    // Paginazione
+                    $total = count($filtered);
+                    $totalPages = ceil($total / $limit);
+                    $offset = ($page - 1) * $limit;
+                    $paginatedClients = array_slice($filtered, $offset, $limit);
+                    
+                    echo json_encode([
+                        'success' => true,
+                        'data' => array_values($paginatedClients),
+                        'pagination' => [
+                            'page' => $page,
+                            'limit' => $limit,
+                            'total' => $total,
+                            'totalPages' => $totalPages
+                        ]
+                    ]);
+                } else {
+                    echo json_encode($result);
+                }
             } else {
-                echo json_encode($controller->getAll());
+                // Lista completa con paginazione
+                $page = intval($_GET['page'] ?? 1);
+                $limit = intval($_GET['limit'] ?? 50);
+                $sort = $_GET['sort'] ?? 'last_name_asc';
+                
+                $result = $controller->getAll();
+                
+                if ($result['success'] && isset($result['data'])) {
+                    $clients = $result['data'];
+                    
+                    // Ordina
+                    usort($clients, function($a, $b) use ($sort) {
+                        switch ($sort) {
+                            case 'first_name_asc':
+                                return strcasecmp($a['first_name'], $b['first_name']);
+                            case 'first_name_desc':
+                                return strcasecmp($b['first_name'], $a['first_name']);
+                            case 'last_name_desc':
+                                return strcasecmp($b['last_name'], $a['last_name']);
+                            case 'last_name_asc':
+                            default:
+                                return strcasecmp($a['last_name'], $b['last_name']);
+                        }
+                    });
+                    
+                    // Paginazione
+                    $total = count($clients);
+                    $totalPages = ceil($total / $limit);
+                    $offset = ($page - 1) * $limit;
+                    $paginatedClients = array_slice($clients, $offset, $limit);
+                    
+                    echo json_encode([
+                        'success' => true,
+                        'data' => array_values($paginatedClients),
+                        'pagination' => [
+                            'page' => $page,
+                            'limit' => $limit,
+                            'total' => $total,
+                            'totalPages' => $totalPages
+                        ]
+                    ]);
+                } else {
+                    echo json_encode($result);
+                }
             }
             break;
             

@@ -1,7 +1,7 @@
 <?php
 /**
  * Database Connection - Credenziali e connessioni centralizzate
- * File: core/database/connection.php
+ * File: src/Database/Connection.php
  * 
  * Fornisce:
  * - Costanti per credenziali database

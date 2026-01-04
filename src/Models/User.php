@@ -26,7 +26,8 @@ class User {
         $this->id = $data['id'] ?? null;
         $this->username = $data['username'] ?? '';
         $this->email = $data['email'] ?? '';
-        $this->role = $data['role'] ?? 'user';
+        // Supporta sia 'role' che 'type_role' per compatibilità
+        $this->role = $data['role'] ?? $data['type_role'] ?? 'user';
         $this->created_at = $data['created_at'] ?? null;
     }
     

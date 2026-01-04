@@ -3,7 +3,7 @@
  * Popup per la gestione delle note - Finestra separata
  * Struttura orizzontale, stile uniforme con popup.css
  */
-require_once '../../core/gateway/access-control.php';
+require_once '../../../src/Auth/AccessControl.php';
 
 // Il file access-control.php gestisce automaticamente tutti i controlli per i popup
 ?>
@@ -152,7 +152,7 @@ require_once '../../core/gateway/access-control.php';
         // Carica utenti tramite API
         async function loadUsers() {
             try {
-                const response = await fetch('/api.php/users');
+                const response = await fetch('../../../src/Api/api.php?endpoint=users');
                 const userSelect = document.getElementById('note-user');
                 const data = await response.json();
                 

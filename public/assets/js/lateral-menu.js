@@ -1,64 +1,59 @@
 /**
  * Gestione menu laterale - Desktop & Mobile
  */
+
+import { openCenteredPopup } from './utils/windows.js';
+
+// ============================================================================
+// STATE
+// ============================================================================
+const state = {
+    isOpen: false,
+    hoverTimeout: null,
+    isMobile: window.innerWidth <= 768
+};
+
+// ============================================================================
+// DOM SELECTORS
+// ============================================================================
 const sidebar = document.getElementById("sidebar");
 const sidebarToggle = document.querySelector(".sidebar-toggle");
 
-// Stato
-let isOpen = false;
-let hoverTimeout = null;
-let isMobile = window.innerWidth <= 768;
-
-// Aggiorna stato mobile su resize
-window.addEventListener('resize', () => {
-    const wasMobile = isMobile;
-    isMobile = window.innerWidth <= 768;
-    
-    // Se cambia da mobile a desktop o viceversa, reset del menu
-    if (wasMobile !== isMobile) {
-        closeSidebar();
+// ============================================================================
+// CONSTANTS
+// ============================================================================
+const POPUP_CONFIGS = {
+    services: {
+        url: 'popup/services.php',
+        title: 'Gestione Servizi',
+        width: 1000,
+        height: 850
+    },
+    users: {
+        url: 'popup/users.php', 
+        title: 'Gestione Utenti',
+        width: 1000,
+        height: 850
+    },
+    schedule: {
+        url: 'popup/schedule.php',
+        title: 'Gestione Orari',
+        width: 800,
+        height: 950
     }
-});
+};
 
-function openSidebar() {
-    if (isOpen) return;
-    
-    clearTimeout(hoverTimeout);
-    
-    if (isMobile) {
-        sidebar.classList.add('sidebar-open');
-        createBackdrop();
-    } else {
-        sidebar.style.width = "240px";
-    }
-    
-    isOpen = true;
-}
+const TIMINGS = {
+    hover: {
+        open: 100,
+        close: 50
+    },
+    mobileClose: 300
+};
 
-function closeSidebar() {
-    if (!isOpen) return;
-    
-    clearTimeout(hoverTimeout);
-    
-    if (isMobile) {
-        sidebar.classList.remove('sidebar-open');
-        removeBackdrop();
-    } else {
-        sidebar.style.width = "0px";
-    }
-    
-    isOpen = false;
-}
-
-function toggleSidebar() {
-    if (isOpen) {
-        closeSidebar();
-    } else {
-        openSidebar();
-    }
-}
-
-// Crea backdrop per mobile
+// ============================================================================
+// BACKDROP MANAGEMENT
+// ============================================================================
 function createBackdrop() {
     let backdrop = document.querySelector('.sidebar-backdrop');
     if (!backdrop) {
@@ -70,7 +65,6 @@ function createBackdrop() {
     backdrop.addEventListener('click', closeSidebar);
 }
 
-// Rimuovi backdrop
 function removeBackdrop() {
     const backdrop = document.querySelector('.sidebar-backdrop');
     if (backdrop) {
@@ -79,108 +73,118 @@ function removeBackdrop() {
     }
 }
 
-// Eventi sidebar
-if (sidebar) {
-    // Imposta transizione CSS
-    sidebar.style.transition = 'width 0.3s ease';
+// ============================================================================
+// SIDEBAR CONTROL
+// ============================================================================
+function openSidebar() {
+    if (state.isOpen) return;
     
-    // Desktop: hover behavior
-    if (!isMobile) {
-        sidebar.addEventListener('mouseenter', () => {
-            if (!isMobile) {
-                clearTimeout(hoverTimeout);
-                hoverTimeout = setTimeout(openSidebar, 100);
-            }
-        });
-        
-        sidebar.addEventListener('mouseleave', () => {
-            if (!isMobile) {
-                clearTimeout(hoverTimeout);
-                hoverTimeout = setTimeout(closeSidebar, 50);
-            }
-        });
+    clearTimeout(state.hoverTimeout);
+    
+    if (state.isMobile) {
+        sidebar.classList.add('sidebar-open');
+        createBackdrop();
+    } else {
+        sidebar.style.width = "240px";
     }
     
-    // Mobile: click toggle button
-    if (sidebarToggle) {
-        sidebarToggle.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            toggleSidebar();
-        });
-    }
-    
-    // Stato iniziale chiuso
-    closeSidebar();
-    
-    // Gestione click sui link popup
-    sidebar.addEventListener('click', function(e) {
-        const target = e.target.closest('[data-popup-window]');
-        if (!target) return;
-        
-        e.preventDefault();
-        
-        const popupType = target.getAttribute('data-popup-window');
-        openPopupWindow(popupType);
-        
-        // Chiudi menu su mobile dopo click
-        if (isMobile) {
-            setTimeout(closeSidebar, 300);
-        }
-    });
+    state.isOpen = true;
 }
 
-// Funzione per aprire finestre popup
-function openPopupWindow(type) {
-    const popupConfigs = {
-        services: {
-            url: 'popup/services.php',
-            title: 'Gestione Servizi',
-            width: 1000,
-            height: 850
-        },
-        users: {
-            url: 'popup/users.php', 
-            title: 'Gestione Utenti',
-            width: 1000,
-            height: 850
-        },
-        schedule: {
-            url: 'popup/schedule.php',
-            title: 'Gestione Orari',
-            width: 800,
-            height: 950
-        }
-    };
+function closeSidebar() {
+    if (!state.isOpen) return;
     
-    const config = popupConfigs[type];
-    if (!config) {
-        console.error('Tipo popup non riconosciuto:', type);
-        return;
+    clearTimeout(state.hoverTimeout);
+    
+    if (state.isMobile) {
+        sidebar.classList.remove('sidebar-open');
+        removeBackdrop();
+    } else {
+        sidebar.style.width = "0px";
     }
     
-    // Calcola posizione centrale
-    const left = (screen.width - config.width) / 2;
-    const top = (screen.height - config.height) / 2;
+    state.isOpen = false;
+}
+
+function toggleSidebar() {
+    state.isOpen ? closeSidebar() : openSidebar();
+}
+
+// ============================================================================
+// EVENT HANDLERS
+// ============================================================================
+function handleResize() {
+    const wasMobile = state.isMobile;
+    state.isMobile = window.innerWidth <= 768;
     
-    const windowFeatures = [
-        `width=${config.width}`,
-        `height=${config.height}`,
-        `left=${left}`,
-        `top=${top}`,
-        'scrollbars=yes',
-        'resizable=yes',
-        'menubar=no',
-        'toolbar=no',
-        'location=no',
-        'status=no'
-    ].join(',');
-    
-    const popupWindow = window.open(config.url, config.title, windowFeatures);
-    
-    if (popupWindow) {
-        popupWindow.focus();
-    } else {
-        alert('Impossibile aprire la finestra popup. Controlla le impostazioni del browser.');
+    if (wasMobile !== state.isMobile) {
+        closeSidebar();
     }
 }
+
+function handleSidebarClick(e) {
+    const target = e.target.closest('[data-popup-window]');
+    if (!target) return;
+    
+    e.preventDefault();
+    
+    const popupType = target.getAttribute('data-popup-window');
+    const config = POPUP_CONFIGS[popupType];
+    
+    if (config) {
+        openCenteredPopup(config.url, config.title, config.width, config.height);
+        
+        if (state.isMobile) {
+            setTimeout(closeSidebar, TIMINGS.mobileClose);
+        }
+    } else {
+        console.error('Tipo popup non riconosciuto:', popupType);
+    }
+}
+
+function handleMouseEnter() {
+    if (!state.isMobile) {
+        clearTimeout(state.hoverTimeout);
+        state.hoverTimeout = setTimeout(openSidebar, TIMINGS.hover.open);
+    }
+}
+
+function handleMouseLeave() {
+    if (!state.isMobile) {
+        clearTimeout(state.hoverTimeout);
+        state.hoverTimeout = setTimeout(closeSidebar, TIMINGS.hover.close);
+    }
+}
+
+function handleToggleClick(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleSidebar();
+}
+
+// ============================================================================
+// INITIALIZATION
+// ============================================================================
+function init() {
+    if (!sidebar) return;
+    
+    sidebar.style.transition = 'width 0.3s ease';
+    
+    // Event listeners
+    window.addEventListener('resize', handleResize);
+    sidebar.addEventListener('click', handleSidebarClick);
+    
+    if (!state.isMobile) {
+        sidebar.addEventListener('mouseenter', handleMouseEnter);
+        sidebar.addEventListener('mouseleave', handleMouseLeave);
+    }
+    
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', handleToggleClick);
+    }
+    
+    closeSidebar();
+}
+
+// Start
+init();

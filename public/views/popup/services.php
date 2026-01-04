@@ -5,7 +5,7 @@
  */
 
 // Carica configurazione e controlli di sicurezza
-require_once '../../core/gateway/access-control.php';
+require_once '../../../src/Auth/AccessControl.php';
 
 // Il file access-control.php gestisce automaticamente tutti i controlli per i popup
 ?>
@@ -64,25 +64,120 @@ require_once '../../core/gateway/access-control.php';
 
     </div>
 
-<script type="module">
+<script>
     // ========== GESTIONE SERVIZI ==========
-    import { fetchServices, saveAllServices } from '../assets/js/api/services-api.js';
     
     let servicesList = [];
     let serviceIdCounter = 1;
 
-    // Funzioni di utilità
-    async function loadServicesFromApi() {
+    // ========== API FUNCTIONS ==========
+    
+    async function loadServicesFromDb() {
         try {
-            const data = await fetchServices();
+            console.log('Inizio caricamento servizi...');
+            const response = await fetch('../../../src/Api/api.php?endpoint=services');
+            console.log('Response status:', response.status);
+            console.log('Response ok:', response.ok);
+            console.log('Response headers:', response.headers.get('content-type'));
+            
+            const text = await response.text();
+            console.log('Response text length:', text.length);
+            console.log('Response text:', text);
+            
+            if (!text || text.trim() === '') {
+                console.error('Risposta vuota dal server');
+                alert('Errore: risposta vuota dal server');
+                return false;
+            }
+            
+            let data;
+            try {
+                data = JSON.parse(text);
+            } catch (jsonError) {
+                console.error('Errore parsing JSON:', jsonError);
+                console.error('Testo ricevuto:', text);
+                alert('Errore parsing JSON. Vedi console per dettagli.');
+                return false;
+            }
+            
+            console.log('Risposta caricamento servizi:', data);
+            
             if (data.success && Array.isArray(data.services)) {
                 servicesList = data.services;
                 serviceIdCounter = servicesList.length ? Math.max(...servicesList.map(s => s.id)) + 1 : 1;
+                console.log('Servizi caricati:', servicesList.length);
+                console.log('Primo servizio:', servicesList[0]);
+                return true;
+            } else {
+                console.error('Errore caricamento servizi:', data);
+                alert('Errore caricamento servizi dal database: ' + (data.error || 'Errore sconosciuto'));
+                return false;
             }
         } catch (e) {
-            console.error('Errore caricamento servizi:', e);
+            console.error('Errore connessione API:', e);
+            alert('Errore di connessione al server: ' + e.message);
+            return false;
         }
     }
+    
+    async function saveServicesToDb(services) {
+        try {
+            const response = await fetch('../../../src/Api/api.php?endpoint=services', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ services: services })
+            });
+            
+            const data = await response.json();
+            console.log('Risposta salvataggio:', data);
+            
+            return data;
+        } catch (e) {
+            console.error('Errore salvataggio:', e);
+            return { success: false, error: 'Errore di connessione' };
+        }
+    }
+    
+    async function createServiceInDb(service) {
+        try {
+            const response = await fetch('../../../src/Api/api.php?endpoint=services', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: service.name,
+                    price: service.price,
+                    durationMinutes: service.durationMinutes,
+                    description: service.description
+                })
+            });
+            
+            const data = await response.json();
+            return data;
+        } catch (e) {
+            console.error('Errore creazione servizio:', e);
+            return { success: false, error: 'Errore di connessione' };
+        }
+    }
+    
+    async function deleteServiceFromDb(id) {
+        try {
+            const response = await fetch(`../../../src/Api/api.php?endpoint=services&id=${id}`, {
+                method: 'DELETE'
+            });
+            
+            const data = await response.json();
+            return data;
+        } catch (e) {
+            console.error('Errore eliminazione servizio:', e);
+            return { success: false, error: 'Errore di connessione' };
+        }
+    }
+
+    // ========== UI FUNCTIONS ==========
 
     function escapeHtml(str) {
         if (str === null || str === undefined) return '';
@@ -95,7 +190,7 @@ require_once '../../core/gateway/access-control.php';
                 <td><input type="checkbox" class="row-select"></td>
                 <td><input type="text" value="${escapeHtml(service.name)}" class="cell-input"></td>
                 <td><input type="number" value="${Number(service.price).toFixed(2)}" step="1" min="0" max="9999.99" class="cell-input price-input"></td>
-                <td><input type="number" value="${service.durationMinutes}" step="15" min="15" max="480" class="cell-input duration-input"></td>
+                <td><input type="number" value="${service.durationMinutes || service.duration}" step="15" min="15" max="480" class="cell-input duration-input"></td>
                 <td><textarea class="cell-textarea" rows="2" placeholder="Descrizione dettagliata...">${escapeHtml(service.description)}</textarea></td>
                 <td class="actions-cell"><button class="action-btn btn-delete-single" data-service-id="${service.id}" title="Elimina">Elimina</button></td>
             </tr>
@@ -103,16 +198,29 @@ require_once '../../core/gateway/access-control.php';
     }
 
     function renderServicesTable() {
+        console.log('=== RENDER TABLE ===');
         const tbody = document.getElementById('services-list');
-        if (!tbody) return;
+        console.log('tbody element:', tbody);
+        console.log('servicesList:', servicesList);
+        
+        if (!tbody) {
+            console.error('Elemento tbody non trovato!');
+            return;
+        }
         
         if (!servicesList.length) {
+            console.log('Nessun servizio da mostrare');
             tbody.innerHTML = '<tr><td colspan="6">Nessun servizio configurato</td></tr>';
             updateSelectionStats();
             return;
         }
         
-        tbody.innerHTML = servicesList.map(generateServiceRow).join('');
+        console.log('Generazione righe per', servicesList.length, 'servizi');
+        const rows = servicesList.map(generateServiceRow).join('');
+        console.log('HTML generato (primi 200 char):', rows.substring(0, 200));
+        
+        tbody.innerHTML = rows;
+        console.log('Righe inserite nel DOM');
         updateSelectionStats();
     }
 
@@ -134,7 +242,7 @@ require_once '../../core/gateway/access-control.php';
         const duration = parseInt(inputs[2]?.value) || 15;
         const description = inputs[3]?.value?.trim() || '';
         
-        // Validazione solo per nome obbligatorio
+        // Validazione nome obbligatorio
         if (!name) {
             inputs[0].classList.add('error-highlight');
             return false;
@@ -151,7 +259,8 @@ require_once '../../core/gateway/access-control.php';
         return true;
     }
 
-    // Gestori eventi principali
+    // ========== EVENT HANDLERS ==========
+
     function onAddService() {
         const newService = {
             id: 'temp_' + Date.now(),
@@ -170,27 +279,87 @@ require_once '../../core/gateway/access-control.php';
         }, 0);
     }
 
-    function onDeleteSingle(id) {
+    async function onDeleteSingle(id) {
         const service = servicesList.find(s => s.id == id);
         if (!service) return;
 
-        if (!confirm(`Eliminare servizio ${service.name} dalla tabella?`)) return;
-
-        servicesList = servicesList.filter(s => s.id != id);
-        renderServicesTable();
+        if (!confirm(`Eliminare servizio "${service.name}"?`)) return;
+        
+        // Se è un servizio temporaneo (non ancora salvato), elimina solo dalla lista
+        if (String(id).startsWith('temp_')) {
+            servicesList = servicesList.filter(s => s.id != id);
+            renderServicesTable();
+            return;
+        }
+        
+        // Altrimenti elimina dal database
+        const deleteBtn = event.target;
+        deleteBtn.disabled = true;
+        deleteBtn.textContent = '...';
+        
+        try {
+            const result = await deleteServiceFromDb(id);
+            
+            if (result.success) {
+                servicesList = servicesList.filter(s => s.id != id);
+                renderServicesTable();
+                alert('Servizio eliminato con successo');
+            } else {
+                alert('Errore: ' + (result.error || 'Impossibile eliminare il servizio'));
+                deleteBtn.disabled = false;
+                deleteBtn.textContent = '🗑️';
+            }
+        } catch (e) {
+            alert('Errore di connessione: ' + e.message);
+            deleteBtn.disabled = false;
+            deleteBtn.textContent = '🗑️';
+        }
     }
 
-    function onDeleteSelected() {
+    async function onDeleteSelected() {
         const selectedCheckboxes = document.querySelectorAll('.row-select:checked');
         if (selectedCheckboxes.length === 0) {
             alert('Nessun servizio selezionato');
             return;
         }
         
-        if (!confirm(`Eliminare ${selectedCheckboxes.length} servizio/i selezionato/i dalla tabella?`)) return;
+        if (!confirm(`Eliminare ${selectedCheckboxes.length} servizio/i selezionato/i?`)) return;
         
         const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.closest('tr').dataset.serviceId);
-        servicesList = servicesList.filter(s => !selectedIds.includes(String(s.id)));
+        
+        // Separa servizi temporanei da quelli salvati
+        const tempIds = selectedIds.filter(id => String(id).startsWith('temp_'));
+        const dbIds = selectedIds.filter(id => !String(id).startsWith('temp_'));
+        
+        // Elimina temporanei immediatamente
+        servicesList = servicesList.filter(s => !tempIds.includes(String(s.id)));
+        
+        // Elimina quelli dal database
+        if (dbIds.length > 0) {
+            const deleteBtn = document.getElementById('delete-selected-btn');
+            deleteBtn.disabled = true;
+            deleteBtn.textContent = 'Eliminazione...';
+            
+            let errors = [];
+            for (const id of dbIds) {
+                const result = await deleteServiceFromDb(id);
+                if (result.success) {
+                    servicesList = servicesList.filter(s => s.id != id);
+                } else {
+                    errors.push(`Servizio ${id}: ${result.error}`);
+                }
+            }
+            
+            deleteBtn.disabled = false;
+            deleteBtn.textContent = 'Elimina Selezionati';
+            
+            if (errors.length > 0) {
+                alert('Alcuni servizi non sono stati eliminati:\n' + errors.join('\n'));
+            } else {
+                alert('Servizi eliminati con successo');
+            }
+        }
+        
         renderServicesTable();
         document.getElementById('select-all-services').checked = false;
     }
@@ -200,7 +369,6 @@ require_once '../../core/gateway/access-control.php';
         let allValid = true;
         document.querySelectorAll('#services-list tr[data-service-id]').forEach(row => {
             const serviceId = row.dataset.serviceId;
-            // Supporta sia ID numerici che temporanei (stringhe)
             const isValid = syncRowToModel(row, serviceId);
             if (!isValid) allValid = false;
         });
@@ -225,15 +393,13 @@ require_once '../../core/gateway/access-control.php';
         saveBtn.disabled = true;
         
         try {
-            const result = await saveAllServices(servicesList);
+            const result = await saveServicesToDb(servicesList);
             
             if (result.success) {
                 alert('Servizi salvati con successo!');
-                // Ricarica i dati dal database
-                await loadServicesFromApi();
+                await loadServicesFromDb();
                 renderServicesTable();
                 
-                // Chiudi la finestra popup dopo il salvataggio
                 setTimeout(() => {
                     window.close();
                 }, 500);
@@ -249,53 +415,58 @@ require_once '../../core/gateway/access-control.php';
         }
     }
 
-    // Event listeners
-    document.addEventListener('click', e => {
-        const deleteBtn = e.target.closest('.btn-delete-single');
-        if (deleteBtn) {
-            const id = deleteBtn.dataset.serviceId;
-            // Non convertire a int per supportare ID temporanei come 'temp_123'
-            onDeleteSingle(id);
-        }
-    });
-
-    // Event listener per validazione in tempo reale (senza salvataggio automatico)
-    document.addEventListener('input', e => {
-        if (e.target.classList.contains('cell-input') || 
-            e.target.classList.contains('cell-textarea')) {
-            const row = e.target.closest('tr');
-            if (row) {
-                const serviceId = row.dataset.serviceId;
-                // Supporta sia ID numerici che temporanei (stringhe)
-                syncRowToModel(row, serviceId);
-            }
-        }
-    });
-
-    document.addEventListener('change', e => {
-        if (e.target.id === 'select-all-services') {
-            const checked = e.target.checked;
-            document.querySelectorAll('.row-select').forEach(cb => cb.checked = checked);
-            updateSelectionStats();
-        }
-        
-        if (e.target.classList.contains('row-select')) {
-            updateSelectionStats();
-        }
-    });
+    // ========== INIT ==========
 
     document.addEventListener('DOMContentLoaded', async () => {
-        await loadServicesFromApi();
-        renderServicesTable();
+        console.log('=== DOM LOADED ===');
+        console.log('Caricamento servizi...');
         
+        const loaded = await loadServicesFromDb();
+        console.log('Dati caricati:', loaded);
+        console.log('servicesList length:', servicesList.length);
+        console.log('servicesList:', servicesList);
+        
+        renderServicesTable();
+        console.log('Tabella renderizzata');
+        
+        // Event listeners pulsanti
         document.getElementById('add-service-btn')?.addEventListener('click', onAddService);
         document.getElementById('delete-selected-btn')?.addEventListener('click', onDeleteSelected);
         document.getElementById('save-all-btn')?.addEventListener('click', onSaveAll);
         
+        // Event listener select all
         document.getElementById('select-all-services')?.addEventListener('change', e => {
             const checked = e.target.checked;
             document.querySelectorAll('.row-select').forEach(cb => cb.checked = checked);
             updateSelectionStats();
+        });
+        
+        // Event listener checkbox individuali
+        document.addEventListener('change', e => {
+            if (e.target.classList.contains('row-select')) {
+                updateSelectionStats();
+            }
+        });
+        
+        // Event listener delete singolo
+        document.addEventListener('click', e => {
+            const deleteBtn = e.target.closest('.btn-delete-single');
+            if (deleteBtn) {
+                const id = deleteBtn.dataset.serviceId;
+                onDeleteSingle(id);
+            }
+        });
+        
+        // Event listener validazione input
+        document.addEventListener('input', e => {
+            if (e.target.classList.contains('cell-input') || 
+                e.target.classList.contains('cell-textarea')) {
+                const row = e.target.closest('tr');
+                if (row) {
+                    const serviceId = row.dataset.serviceId;
+                    syncRowToModel(row, serviceId);
+                }
+            }
         });
     });
 </script>

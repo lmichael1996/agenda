@@ -22,11 +22,11 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit('405 Method Not Allowed');
 }
 
-// Include dipendenze
-require_once __DIR__ . '/../functions/captcha.php';
-require_once __DIR__ . '/../functions/token.php';
-require_once __DIR__ . '/../database/connection.php';
-require_once __DIR__ . '/../../src/Controllers/AuthController.php';
+// Include dipendenze (token.php DEVE essere caricato prima di captcha.php perché definisce AGENDA_APP)
+require_once __DIR__ . '/../Helpers/Token.php';
+require_once __DIR__ . '/../Helpers/Captcha.php';
+require_once __DIR__ . '/../Database/Connection.php';
+require_once __DIR__ . '/../Controllers/AuthController.php';
 
 // Inizializza controller
 $authController = new AuthController($conn);

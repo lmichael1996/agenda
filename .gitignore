@@ -1,7 +1,7 @@
 # File di configurazione sensibili
 config/local_config.php
-core/database/config.php
-core/database/local_config.php
+src/Database/config.php
+src/Database/local_config.php
 *_local.php
 *.credentials.php
 

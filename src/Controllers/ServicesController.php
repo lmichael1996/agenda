@@ -77,7 +77,7 @@ class ServicesController {
                     continue;
                 }
                 
-                $stmt->execute([$name, $price, $duration, $description]);
+                $stmt->execute([$name, $duration, $price, $description]);
             }
             
             if (!empty($errors)) {

@@ -9,7 +9,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // Carica configurazione (include token.php e gestisce controlli from_index)
-require_once '../../core/gateway/access-control.php';
+require_once '../../src/Auth/AccessControl.php';
 
 // ========== SISTEMA ANTI-BRUTE-FORCE ==========
 $loginAttempts = $_SESSION['login_attempts'] ?? 0;
@@ -36,7 +36,7 @@ if (!$isBlocked && $loginAttempts > 0 && (time() - $lastAttempt) > 600) {
 $csrfToken = generateCSRFToken();
 
 try {
-    require_once '../../core/functions/captcha.php';
+    require_once '../../src/Helpers/Captcha.php';
     $captcha = CaptchaManager::generateCaptcha();
 } catch (Exception $e) {
     error_log("Login: Captcha generation failed - " . $e->getMessage());
@@ -54,7 +54,7 @@ unset($_SESSION['login_error']);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Agenda</title>
-    <link rel="stylesheet" href="../assets/css/login.css">
+    <link rel="stylesheet" href="/public/assets/css/login.css">
 </head>
 <body>
     <div class="login-box">
@@ -79,7 +79,7 @@ unset($_SESSION['login_error']);
         <?php endif; ?>
         
         <?php if (!$isBlocked): ?>
-        <form method="post" action="../../core/gateway/auth.php">
+        <form method="post" action="../../src/Auth/Authentication.php">
             <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
             <input type="text" name="username" placeholder="Username" required autocomplete="username">
             <input type="password" name="password" placeholder="Password" required autocomplete="current-password">
@@ -112,6 +112,6 @@ unset($_SESSION['login_error']);
         <?php endif; ?>
     </div>
 
-    <script src="../assets/js/calendar-login.js"></script>
+    <script src="/public/assets/js/calendar-login.js"></script>
 </body>
 </html>

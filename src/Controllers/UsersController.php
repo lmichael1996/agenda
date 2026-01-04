@@ -21,9 +21,15 @@ class UsersController {
         $result = $this->service->getAll();
         
         if ($result['success'] && isset($result['data'])) {
-            $result['data'] = array_map(function($user) {
+            $users = array_map(function($user) {
                 return $user->toArray();
             }, $result['data']);
+            
+            // Formato per compatibilità frontend
+            return [
+                'success' => true,
+                'users' => $users
+            ];
         }
         
         return $result;

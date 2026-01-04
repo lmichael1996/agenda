@@ -5,7 +5,7 @@
  */
 
 // Carica configurazione e controlli di sicurezza
-// require_once '../../core/gateway/access-control.php';
+require_once '../../src/Auth/AccessControl.php';
 
 // Il file access-control.php gestisce automaticamente tutti i controlli di sicurezza:
 // - Autenticazione utente
@@ -16,7 +16,7 @@
 // - Logging accessi
 
 // Carica funzioni calendario (dopo verifiche sicurezza)
-require_once '../../core/functions/calendar.php';
+require_once '../../src/Helpers/Calendar.php';
 
 // Genera dati per il calendario
 $days = getCurrentWeekDays();
@@ -63,7 +63,7 @@ $currentDate = $today->format('Y-m-d');
         <a href="#" data-popup-window="schedule" class="sidebar-link">
             <span class="sidebar-text">Orario</span>
         </a>
-        <a href="../../core/functions/logout.php" class="logout sidebar-link" onclick="return confirm('Sei sicuro di voler uscire?')">
+        <a href="../../src/Auth/Logout.php" class="logout sidebar-link" onclick="return confirm('Sei sicuro di voler uscire?')">
             <span class="sidebar-text">Logout</span>
         </a>
     </div>
@@ -148,8 +148,8 @@ $currentDate = $today->format('Y-m-d');
     </div>
 
     <!-- JavaScript -->
-    <script src="../assets/js/lateral-menu.js"></script>
-    <script src="../assets/js/top-menu.js"></script>
+    <script type="module" src="../assets/js/lateral-menu.js"></script>
+    <script type="module" src="../assets/js/top-menu.js"></script>
     <script type="module" src="../assets/js/calendar-events.js"></script>
 </body>
 </html>

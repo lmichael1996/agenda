@@ -5,7 +5,7 @@
  */
 
 // Carica configurazione e controlli di sicurezza
-require_once '../../core/gateway/access-control.php';
+require_once '../../../src/Auth/AccessControl.php';
 
 // Il file access-control.php gestisce automaticamente tutti i controlli per i popup
 // Sostituito: i dati utenti ora vengono caricati dalle API
@@ -43,7 +43,7 @@ $sampleUsers = [];
                                 <th class="username-col">Username</th>
                                 <th class="password-col">Password</th>
                                 <th class="color-col">Colore</th>
-                                <th class="status-col">Stato</th>
+                                <th class="role-col">Ruolo</th>
                                 <th class="actions-col">Azioni</th>
                             </tr>
                         </thead>
@@ -66,11 +66,41 @@ $sampleUsers = [];
         </div>
     </div>
 
-    <script type="module">
-        import { fetchUsers, saveAllUsers } from '../assets/js/api/user-api.js';
-
+    <script>
         let usersList = [];
         let userIdCounter = 1;
+
+        // ========== API FUNCTIONS ==========
+        
+        async function fetchUsers() {
+            try {
+                const response = await fetch('../../../src/Api/api.php?endpoint=users');
+                const data = await response.json();
+                return data;
+            } catch (e) {
+                console.error('Errore caricamento utenti:', e);
+                return { success: false, error: 'Errore di connessione' };
+            }
+        }
+        
+        async function saveAllUsers(users) {
+            try {
+                const response = await fetch('../../../src/Api/api.php?endpoint=users', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ users: users })
+                });
+                const data = await response.json();
+                return data;
+            } catch (e) {
+                console.error('Errore salvataggio utenti:', e);
+                return { success: false, error: 'Errore di connessione' };
+            }
+        }
+
+        // ========== UI FUNCTIONS ==========
 
         function escapeHtml(str) {
             if (str === null || str === undefined) return '';
@@ -88,9 +118,9 @@ $sampleUsers = [];
                     <td><input type="password" value="" placeholder="${passwordPlaceholder}" class="cell-input"></td>
                     <td><input type="color" value="${escapeHtml(user.color)}" class="cell-color"></td>
                     <td>
-                        <select class="status-select">
-                            <option value="attivo" ${user.is_active == 1 ? 'selected' : ''}>Attivo</option>
-                            <option value="inattivo" ${user.is_active == 0 ? 'selected' : ''}>Inattivo</option>
+                        <select class="role-select">
+                            <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
+                            <option value="user" ${user.role === 'user' ? 'selected' : ''}>User</option>
                         </select>
                     </td>
                     <td class="actions-cell">
@@ -123,13 +153,21 @@ $sampleUsers = [];
 
         async function loadUsersFromApi() {
             try {
+                console.log('Caricamento utenti...');
                 const data = await fetchUsers();
+                console.log('Dati ricevuti:', data);
+                
                 if (data.success && Array.isArray(data.users)) {
                     usersList = data.users;
                     userIdCounter = usersList.length ? Math.max(...usersList.map(u => u.id)) + 1 : 1;
+                    console.log('Utenti caricati:', usersList.length);
+                } else {
+                    console.error('Errore nel formato dati:', data);
+                    alert('Errore caricamento utenti dal database');
                 }
             } catch (e) {
                 console.error('Errore caricamento utenti:', e);
+                alert('Errore di connessione al server');
             }
         }
 

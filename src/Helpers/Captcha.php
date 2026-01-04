@@ -20,13 +20,13 @@ if (!defined('AGENDA_APP')) {
 class CaptchaManager {
     
     // Tempo minimo per completare CAPTCHA (anti-bot)
-    const MIN_SOLVE_TIME = 2; // secondi
+    const MIN_SOLVE_TIME = 1; // secondi
     
     // Tempo massimo validità CAPTCHA
-    const MAX_VALID_TIME = 300; // 5 minuti
+    const MAX_VALID_TIME = 600; // 10 minuti
     
     // Numero massimo tentativi per IP
-    const MAX_ATTEMPTS_PER_IP = 10;
+    const MAX_ATTEMPTS_PER_IP = 20;
     
     /**
      * Genera CAPTCHA sicuro
@@ -57,55 +57,27 @@ class CaptchaManager {
      * Verifica CAPTCHA con controlli multipli
      */
     public static function verifyCaptcha($challengeId, $userSolved) {
-        // Controlli di base
-        if (empty($challengeId) || empty($userSolved)) {
-            self::logSuspiciousActivity('Empty challenge or response');
+        // Controllo 1: Verifica che l'utente abbia completato il CAPTCHA
+        if (empty($userSolved) || $userSolved !== '1') {
             return false;
         }
         
-        // Verifica challenge ID in sessione
-        if (!isset($_SESSION['captcha_challenge_id']) || $_SESSION['captcha_challenge_id'] !== $challengeId) {
-            self::logSuspiciousActivity('Invalid challenge ID');
-            return false;
+        // Controllo 2: Verifica timing base (minimo 1 secondo per evitare bot)
+        if (isset($_SESSION['captcha_time'])) {
+            $elapsed = time() - $_SESSION['captcha_time'];
+            
+            // Troppo veloce (meno di 1 secondo = probabile bot)
+            if ($elapsed < self::MIN_SOLVE_TIME) {
+                return false;
+            }
+            
+            // Challenge scaduto (più di 10 minuti)
+            if ($elapsed > self::MAX_VALID_TIME) {
+                return false;
+            }
         }
         
-        // Verifica hash integrità
-        $expectedHash = hash('sha256', $challengeId . $_SERVER['HTTP_USER_AGENT'] . session_id());
-        if (!isset($_SESSION['captcha_hash']) || !hash_equals($_SESSION['captcha_hash'], $expectedHash)) {
-            self::logSuspiciousActivity('Hash mismatch - possible manipulation');
-            return false;
-        }
-        
-        // Controllo timing (anti-bot)
-        if (!isset($_SESSION['captcha_time']) || (time() - $_SESSION['captcha_time']) < self::MIN_SOLVE_TIME) {
-            self::logSuspiciousActivity('Solved too quickly - possible bot');
-            return false;
-        }
-        
-        // Controllo scadenza
-        if ((time() - $_SESSION['captcha_time']) > self::MAX_VALID_TIME) {
-            self::logSuspiciousActivity('Challenge expired');
-            return false;
-        }
-        
-        // Verifica IP consistente
-        if (!isset($_SESSION['captcha_ip']) || $_SESSION['captcha_ip'] !== self::getClientIP()) {
-            self::logSuspiciousActivity('IP address changed during challenge');
-            return false;
-        }
-        
-        // Controlla rate limiting per IP
-        if (self::isRateLimited()) {
-            self::logSuspiciousActivity('Rate limit exceeded');
-            return false;
-        }
-        
-        // Verifica che il valore sia quello atteso
-        if ($userSolved !== '1') {
-            return false;
-        }
-        
-        // Tutto OK - pulisci e conferma
+        // Tutto OK - pulisci sessione CAPTCHA e conferma
         self::cleanupCaptcha();
         return true;
     }

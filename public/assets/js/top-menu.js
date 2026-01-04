@@ -1,53 +1,69 @@
+/**
+ * Gestione menu superiore - Note e Ricerca Clienti
+ */
+
+import { openCenteredPopup, buildSearchUrl } from './utils/windows.js';
+
+// ============================================================================
+// DOM SELECTORS
+// ============================================================================
 const noteBtn = document.getElementById('note-btn');
 const clientSearchBtn = document.getElementById('client-search');
+const searchInput = document.getElementById('cerca');
+const searchFieldSelect = document.getElementById('search-field-select');
+const searchTypeSelect = document.getElementById('search-type-select');
 
-/**
- * Funzione utility per aprire popup centrati
- * @param {string} url - URL da aprire
- * @param {string} windowName - Nome della finestra
- * @param {number} width - Larghezza della finestra (default: 1600)
- * @param {number} height - Altezza della finestra (default: 900)
- * @returns {Window} - Riferimento alla finestra aperta
- */
-function openCenteredPopup(url, windowName, width = 1600, height = 900) {
-    const left = window.screenX + (window.outerWidth - width) / 2;
-    const top = window.screenY + (window.outerHeight - height) / 2;
-    const features = [
-        `width=${width}`,
-        `height=${height}`,
-        `left=${left}`,
-        `top=${top}`,
-        'scrollbars=yes',
-        'resizable=yes',
-        'menubar=no',
-        'toolbar=no',
-        'location=no',
-        'status=no'
-    ].join(',');
-    
-    return window.open(url, windowName, features);
+// ============================================================================
+// CONSTANTS
+// ============================================================================
+const POPUP_CONFIGS = {
+    notes: {
+        url: 'popup/notes.php',
+        title: 'Gestione Nota',
+        width: 900,
+        height: 850
+    },
+    clients: {
+        url: 'popup/clients.php',
+        title: 'Gestione Cliente',
+        width: 1600,
+        height: 900
+    }
+};
+
+// ============================================================================
+// EVENT HANDLERS
+// ============================================================================
+function handleNoteClick() {
+    const config = POPUP_CONFIGS.notes;
+    openCenteredPopup(config.url, config.title, config.width, config.height);
 }
 
-noteBtn.addEventListener('click', function() {
-    openCenteredPopup('popup/notes.php', 'Gestione Nota', 900, 850);
-});
+function handleClientSearchClick() {
+    const searchParams = {
+        text: searchInput?.value.trim() || '',
+        field: searchFieldSelect?.value || '',
+        type: searchTypeSelect?.value || ''
+    };
+    
+    const config = POPUP_CONFIGS.clients;
+    const url = buildSearchUrl(config.url, searchParams);
+    
+    openCenteredPopup(url, config.title, config.width, config.height);
+}
 
-clientSearchBtn.addEventListener('click', function() {
-    // Ottieni i valori di ricerca dal dashboard
-    const searchText = document.getElementById('cerca').value.trim();
-    const searchField = document.getElementById('search-field-select').value;
-    const searchType = document.getElementById('search-type-select').value;
-    
-    // Costruisci URL con parametri di ricerca - sempre includi tutti i parametri
-    const params = new URLSearchParams();
-    if (searchText) params.set('search', searchText);
-    params.set('searchField', searchField); // Sempre includi searchField
-    params.set('searchType', searchType);   // Sempre includi searchType
-    
-    let url = 'popup/clients.php';
-    if (params.toString()) {
-        url += '?' + params.toString();
+// ============================================================================
+// INITIALIZATION
+// ============================================================================
+function init() {
+    if (noteBtn) {
+        noteBtn.addEventListener('click', handleNoteClick);
     }
     
-    openCenteredPopup(url, 'Gestione Cliente');
-});
+    if (clientSearchBtn) {
+        clientSearchBtn.addEventListener('click', handleClientSearchClick);
+    }
+}
+
+// Start
+init();

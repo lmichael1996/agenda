@@ -1,28 +1,20 @@
-/**
- * Stylesheet calendario settimanale
- * @author Michael Leanza
- */
+/* Calendario Settimanale */
 
-/* === STILI BASE UNIFICATI === */
 * { 
     font-family: 'Courier New'; 
     box-sizing: border-box;
 }
 
-body {
+html, body {
     margin: 0;
     padding: 0;
+}
+
+body {
     background: #f8f9fa;
     color: #000;
     font-size: 14px;
     line-height: 1.4;
-}
-
-/* Riduzione spazio header superiore */
-html, body {
-    margin: 0;
-    padding: 0;
-    border: 0;
 }
 
 .dashboard-container {
@@ -32,7 +24,7 @@ html, body {
     background: #fff;
 }
 
-/* === LAYOUT CALENDARIO MODERNO === */
+/* Header */
 .calendar-header-row {
     display: grid;
     grid-template-columns: 60px repeat(7, 1fr);
@@ -52,36 +44,24 @@ html, body {
     isolation: isolate;
 }
 
-.hour-label-empty {
-    font-size: 0.8em;
-    background: #000;
-    color: #fff;
-    display: flex;
-    height: 60%;
-    align-items: center;
-    justify-content: center;
-    border-right: 1px solid #fff;
-    position: relative;
-    z-index: 100;
-}
-
+.hour-label-empty,
 .hour-label-bottom {
     font-size: 0.8em;
     background: #000;
     color: #fff;
     display: flex;
-    height: 40%;
     align-items: center;
     justify-content: center;
     border-right: 1px solid #fff;
     position: relative;
-    z-index: 1;
 }
+
+.hour-label-empty { height: 60%; z-index: 100; }
+.hour-label-bottom { height: 40%; z-index: 1; }
 
 .header-day {
     text-align: center;
     font-weight: 600;
-    font-size: 1em;
     background: #000;
     color: #fff;
     border-right: 1px solid #fff;
@@ -89,22 +69,11 @@ html, body {
     line-height: 1.1;
 }
 
-.header-day.today {
-    background: #fff;
-    color: #000;
-}
+.header-day.today { background: #fff; color: #000; }
+.header-date { font-size: 0.9em; color: #ccc; font-weight: 400; }
+.header-day.today .header-date { color: #666; }
 
-.header-date {
-    font-size: 0.9em;
-    color: #ccc;
-    font-weight: 400;
-}
-
-.header-day.today .header-date {
-    color: #666;
-}
-
-/* === GRIGLIA CALENDARIO MODERNA === */
+/* Griglia */
 .calendar-grid {
     display: grid;
     grid-template-columns: 60px repeat(7, 1fr);
@@ -112,7 +81,7 @@ html, body {
     border: 2px solid #000;
     border-top: none;
     border-radius: 0 0 8px 8px;
-    background: #fff;
+    background: url('../images/background.jpg') center no-repeat fixed;
     overflow: hidden;
 }
 
@@ -128,7 +97,6 @@ html, body {
     height: 40px;
     padding: 2px 4px 0 0;
     margin-top: -10px;
-    position: relative;
 }
 
 .hour-label-time {
@@ -136,49 +104,45 @@ html, body {
     text-align: right;
     padding: 2px 4px;
     border-radius: 3px;
-    position: relative;
 }
 
-.hour-label-past { 
-    color: #ffffff;
-    background: #333;
-}
+.hour-label-past { background: #333; }
 
+/* Celle */
 .day {
-    background: #fff;
-    border: 1px solid #000000;
-    transition: background 0.2s ease;
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid #000;
+    transition: background 0.2s;
     min-height: 40px;
 }
 
 .day.today {
-    background: #e9ecef;
-    border: 1px solid #000000;
-    border-right: 2px solid #000000;
-    border-left: 2px solid #000000;
+    background: rgba(233, 236, 239, 0.9);
+    border-right: 2px solid #000;
+    border-left: 2px solid #000;
 }
 
-/* === STILI INTERATTIVI UNIFICATI === */
 .day:hover {
-    background: #e9ecef !important;
+    background: rgba(233, 236, 239, 0.9) !important;
     cursor: pointer;
 }
 
 .day.selected {
-    background: #6c757d !important;
+    background: rgba(108, 117, 125, 0.9) !important;
     color: white;
 }
 
 .search-highlight {
-    animation: highlight-pulse 2s ease-in-out;
+    animation: pulse 2s ease-in-out;
     box-shadow: 0 0 10px #ffc107;
 }
 
-@keyframes highlight-pulse {
+@keyframes pulse {
     0%, 100% { background-color: transparent; }
     50% { background-color: #fff3cd; }
 }
 
+/* Pannello Note */
 .notes-panel {
     position: fixed;
     top: 60px;
@@ -189,78 +153,42 @@ html, body {
     border-left: 2px solid #000;
     border-radius: 8px 0 0 0;
     box-shadow: -4px 0 8px rgba(0,0,0,0.1);
-    transition: right 0.3s ease;
+    transition: right 0.3s;
     z-index: 1000;
 }
 
-.notes-panel.visible {
-    right: 0;
-}
+.notes-panel.visible { right: 0; }
 
-/* === DESIGN RESPONSIVO UNIFICATO === */
-
-/* Tablet (1024px e meno) */
+/* Responsive */
 @media (max-width: 1024px) {
-    .calendar-header-row,
-    .calendar-grid {
+    .calendar-header-row, .calendar-grid {
         grid-template-columns: 50px repeat(7, 1fr);
         min-width: 900px;
     }
-    
-    .header-day {
-        font-size: 0.9em;
-        padding: 6px 2px;
-    }
-    
-    .hour-label {
-        height: 36px;
-        font-size: 0.7em;
-        margin-top: -8px;
-        padding: 2px 3px 0 0;
-    }
-    
-    .day {
-        min-height: 36px;
-    }
+    .header-day { font-size: 0.9em; padding: 6px 2px; }
+    .hour-label { height: 36px; font-size: 0.7em; margin-top: -8px; padding: 2px 3px 0 0; }
+    .day { min-height: 36px; }
 }
 
-/* Mobile Large (768px e meno) */
 @media (max-width: 768px) {
-    .calendar-header-row,
-    .calendar-grid {
+    body { font-size: 13px; background-attachment: scroll; }
+    .dashboard-container { padding: 5px; }
+    .calendar-header-row, .calendar-grid {
         grid-template-columns: 40px repeat(7, 1fr);
         min-width: 100%;
         border: 1px solid #000;
-    }
-    
-    .calendar-header-row {
         border-radius: 6px 6px 0 0;
     }
-    
-    .calendar-grid {
-        border-radius: 0 0 6px 6px;
-    }
-    
-    .hour-label {
-        height: 32px;
-        font-size: 0.65em;
-        margin-top: -6px;
-        padding: 1px 3px 0 0;
-    }
-    
-    .header-day {
-        font-size: 0.8em;
-        padding: 5px 2px;
-    }
-    
-    .header-date {
-        font-size: 0.75em;
-    }
-    
+    .calendar-grid { border-radius: 0 0 6px 6px; background-attachment: scroll; }
+    .hour-label { height: 32px; font-size: 0.65em; margin-top: -6px; padding: 1px 3px 0 0; }
+    .header-day { font-size: 0.8em; padding: 5px 2px; }
+    .header-date { font-size: 0.75em; }
     .day {
         min-height: 32px;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
     }
-    
+    .day:active { background: rgba(108, 117, 125, 0.85) !important; }
     .notes-panel {
         width: 100%;
         right: -100%;
@@ -272,78 +200,49 @@ html, body {
     }
 }
 
-/* Mobile Small (480px e meno) */
 @media (max-width: 480px) {
-    .calendar-header-row,
-    .calendar-grid {
+    body { font-size: 12px; overflow-x: auto; }
+    .dashboard-container { padding: 3px; overflow-x: auto; }
+    .calendar-header-row, .calendar-grid {
         grid-template-columns: 35px repeat(7, 1fr);
-        font-size: 0.75em;
-    }
-    
-    .calendar-header-row {
+        font-size: 0.9em;
         border-radius: 4px 4px 0 0;
     }
-    
-    .calendar-grid {
-        border-radius: 0 0 4px 4px;
-    }
-    
-    .hour-label-empty,
-    .hour-label {
-        font-size: 0.6em;
-    }
-    
-    .hour-label {
-        height: 28px;
-        margin-top: -5px;
-        padding: 1px 2px 0 0;
-    }
-    
-    .header-day {
-        font-size: 0.75em;
-        padding: 6px 0 2px;
-    }
-    
-    .header-date {
-        font-size: 0.7em;
-    }
-    
-    .day {
-        min-height: 28px;
-        font-size: 0.7em;
-    }
-    
-    .mobile-layout .dashboard-controls {
-        padding: 8px;
-        gap: 6px;
-    }
+    .calendar-grid { border-radius: 0 0 4px 4px; }
+    .hour-label-empty, .hour-label-bottom { font-size: 0.65em; }
+    .hour-label { height: 28px; font-size: 0.6em; margin-top: -5px; padding: 1px 2px 0 0; }
+    .header-day { font-size: 0.75em; padding: 5px 1px 2px; line-height: 1; }
+    .header-date { font-size: 0.7em; }
+    .day { min-height: 28px; font-size: 0.85em; padding: 2px 1px; }
 }
 
-/* Mobile Extra Small (375px e meno) */
+@media (max-width: 390px) {
+    body { font-size: 11px; }
+    .dashboard-container { padding: 2px; }
+    .calendar-header-row, .calendar-grid { grid-template-columns: 32px repeat(7, 1fr); font-size: 0.85em; }
+    .hour-label-empty, .hour-label-bottom { font-size: 0.6em; }
+    .hour-label { height: 26px; font-size: 0.55em; margin-top: -4px; }
+    .header-day { font-size: 0.7em; padding: 4px 0 2px; }
+    .header-date { font-size: 0.65em; }
+    .day { min-height: 26px; font-size: 0.8em; }
+}
+
 @media (max-width: 375px) {
-    .calendar-header-row,
-    .calendar-grid {
+    body { font-size: 10px; }
+    .dashboard-container { padding: 1px; }
+    .calendar-header-row, .calendar-grid {
         grid-template-columns: 30px repeat(7, 1fr);
+        font-size: 0.8em;
+        border-radius: 3px 3px 0 0;
     }
-    
-    .hour-label-empty,
-    .hour-label {
-        font-size: 0.55em;
-    }
-    
-    .hour-label {
-        height: 24px;
-        margin-top: -4px;
-        padding: 1px 2px 0 0;
-    }
-    
-    .header-day {
-        font-size: 0.65em;
-        padding: 4px 0 2px;
-    }
-    
-    .day {
-        min-height: 24px;
-    }
+    .calendar-grid { border-radius: 0 0 3px 3px; }
+    .hour-label-empty, .hour-label-bottom { font-size: 0.55em; }
+    .hour-label { height: 24px; font-size: 0.5em; margin-top: -4px; padding: 1px 2px 0 0; }
+    .header-day { font-size: 0.65em; padding: 3px 0 1px; line-height: 0.9; }
+    .header-date { font-size: 0.6em; }
+    .day { min-height: 24px; font-size: 0.75em; padding: 1px; }
 }
 
+@media (hover: none) and (max-width: 768px) {
+    .day:hover { background: rgba(255, 255, 255, 0.85); }
+}
