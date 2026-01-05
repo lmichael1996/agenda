@@ -179,10 +179,12 @@ const handleViewChange = (viewType, weekInput, dateInput) => {
     if (viewType === 'week') {
         if (weekInput) weekInput.hidden = false;
         if (dateInput) dateInput.hidden = true;
+        document.body.classList.remove('day-view');
         showWeekView();
     } else if (viewType === 'day') {
         if (weekInput) weekInput.hidden = true;
         if (dateInput) dateInput.hidden = false;
+        document.body.classList.add('day-view');
         showDayView();
     }
 
@@ -408,12 +410,7 @@ const updateEventCounters = () => {
 const showWeekView = () => {
     console.log('Vista settimana');
     
-    const calendarGrid = document.querySelector('.calendar-grid');
     const headerRow = document.querySelector('.calendar-header-row');
-    
-    if (calendarGrid) {
-        calendarGrid.style.gridTemplateColumns = 'auto repeat(7, 1fr)';
-    }
     
     if (headerRow) {
         const headerDays = headerRow.querySelectorAll('.header-day');
@@ -435,12 +432,7 @@ const showDayView = () => {
         return;
     }
     
-    const calendarGrid = document.querySelector('.calendar-grid');
     const headerRow = document.querySelector('.calendar-header-row');
-    
-    if (calendarGrid) {
-        calendarGrid.style.gridTemplateColumns = 'auto 1fr';
-    }
     
     if (headerRow) {
         const headerDays = headerRow.querySelectorAll('.header-day');

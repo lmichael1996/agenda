@@ -45,7 +45,7 @@ $currentDate = $today->format('Y-m-d');
     <link rel="stylesheet" href="../assets/css/top-header.css">
     <link rel="stylesheet" href="../assets/css/scrollbar.css">
     <link rel="stylesheet" href="../assets/css/calendar-events.css">
-    <link rel="stylesheet" href="../assets/css/week-calendar.css">
+    <link rel="stylesheet" href="../assets/css/calendar.css">
     <link rel="stylesheet" href="../assets/css/lateral-menu.css">
 </head>
 <body>
@@ -127,8 +127,7 @@ $currentDate = $today->format('Y-m-d');
         <!-- Calendar Grid -->
         <div class="calendar-grid">
             <?php foreach ($intervals as $time): ?>
-                <?php $isPastOrNow = ($time <= $nowTime); ?>
-                <div class="hour-label<?= $isPastOrNow ? ' hour-label-past' : '' ?>">
+                <div class="hour-label">
                     <span class="hour-label-time"><?= $time ?></span>
                 </div>
 

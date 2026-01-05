@@ -1,11 +1,16 @@
 /* Calendario Settimanale */
 
+:root {
+    --calendar-days: 7;
+}
+
+body.day-view {
+    --calendar-days: 1;
+}
+
 * { 
     font-family: 'Courier New'; 
     box-sizing: border-box;
-}
-
-html, body {
     margin: 0;
     padding: 0;
 }
@@ -27,7 +32,7 @@ body {
 /* Header */
 .calendar-header-row {
     display: grid;
-    grid-template-columns: 65px repeat(7, 1fr);
+    grid-template-columns: 65px repeat(var(--calendar-days), 1fr);
     min-width: 1100px;
     position: sticky;
     top: 0;
@@ -44,8 +49,23 @@ body {
     isolation: isolate;
 }
 
-.hour-label-empty,
+.hour-label-empty {
+    z-index: 100;
+    font-size: 0.8em;
+    background: #000;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    border-right: 1px solid #fff;
+    border-bottom: 1px solid #fff;
+    padding-right: 8px;
+    position: relative;
+}
+
 .hour-label-bottom {
+    height: 40%; 
+    z-index: 1;
     font-size: 0.8em;
     background: #000;
     color: #fff;
@@ -56,9 +76,6 @@ body {
     padding-right: 8px;
     position: relative;
 }
-
-.hour-label-empty { height: 60%; z-index: 100; }
-.hour-label-bottom { height: 40%; z-index: 1; }
 
 .header-day {
     text-align: center;
@@ -77,7 +94,7 @@ body {
 /* Griglia */
 .calendar-grid {
     display: grid;
-    grid-template-columns: 65px repeat(7, 1fr);
+    grid-template-columns: 65px repeat(var(--calendar-days), 1fr);
     min-width: 1100px;
     border: 2px solid #000;
     border-top: none;
@@ -100,11 +117,13 @@ body {
     margin-top: -6px;
 }
 
+.hour-label:first-of-type {
+    margin-top: 0;
+}
+
 .hour-label-time {
     text-align: right;
 }
-
-.hour-label-past { background: #333; }
 
 /* Celle */
 .day {
@@ -116,8 +135,7 @@ body {
 
 .day.today {
     background: rgba(233, 236, 239, 0.75);
-    border-right: 2px solid #000;
-    border-left: 2px solid #000;
+    border: 1px solid #000;
 }
 
 .day:hover {
@@ -159,34 +177,66 @@ body {
 
 /* Responsive */
 @media (max-width: 1024px) {
-    .calendar-header-row, .calendar-grid {
+    .calendar-header-row, 
+    .calendar-grid {
         grid-template-columns: 50px repeat(7, 1fr);
         min-width: 900px;
     }
-    .header-day { font-size: 0.9em; padding: 6px 2px; }
-    .hour-label { height: 36px; font-size: 0.7em; margin-top: -8px; padding: 2px 3px 0 0; }
-    .day { min-height: 36px; }
+    .header-day { 
+        font-size: 0.9em; 
+        padding: 6px 2px; 
+    }
+    .hour-label { 
+        height: 36px; 
+        font-size: 0.7em; 
+        margin-top: -5px; 
+        padding: 0 6px 0 0; 
+    }
+    .day { 
+        min-height: 36px; 
+    }
 }
 
 @media (max-width: 768px) {
-    body { font-size: 13px; background-attachment: scroll; }
-    .dashboard-container { padding: 5px; }
-    .calendar-header-row, .calendar-grid {
+    body { 
+        font-size: 13px; 
+        background-attachment: scroll; 
+    }
+    .dashboard-container { 
+        padding: 5px; 
+    }
+    .calendar-header-row, 
+    .calendar-grid {
         grid-template-columns: 40px repeat(7, 1fr);
         min-width: 100%;
         border: 1px solid #000;
         border-radius: 6px 6px 0 0;
     }
-    .calendar-grid { border-radius: 0 0 6px 6px; background-attachment: scroll; }
-    .hour-label { height: 32px; font-size: 0.65em; margin-top: -6px; padding: 1px 3px 0 0; }
-    .header-day { font-size: 0.8em; padding: 5px 2px; }
-    .header-date { font-size: 0.75em; }
+    .calendar-grid { 
+        border-radius: 0 0 6px 6px; 
+        background-attachment: scroll; 
+    }
+    .hour-label { 
+        height: 32px; 
+        font-size: 0.65em; 
+        margin-top: -4px; 
+        padding: 0 4px 0 0; 
+    }
+    .header-day { 
+        font-size: 0.8em; 
+        padding: 5px 2px; 
+    }
+    .header-date { 
+        font-size: 0.75em; 
+    }
     .day {
         min-height: 32px;
         touch-action: manipulation;
         -webkit-tap-highlight-color: transparent;
     }
-    .day:active { background: rgba(108, 117, 125, 0.85) !important; }
+    .day:active { 
+        background: rgba(108, 117, 125, 0.85) !important; 
+    }
     .notes-panel {
         width: 100%;
         right: -100%;
@@ -199,48 +249,125 @@ body {
 }
 
 @media (max-width: 480px) {
-    body { font-size: 12px; overflow-x: auto; }
-    .dashboard-container { padding: 3px; overflow-x: auto; }
-    .calendar-header-row, .calendar-grid {
+    body { 
+        font-size: 12px; 
+        overflow-x: auto; 
+    }
+    .dashboard-container { 
+        padding: 3px; 
+        overflow-x: auto; 
+    }
+    .calendar-header-row, 
+    .calendar-grid {
         grid-template-columns: 35px repeat(7, 1fr);
         font-size: 0.9em;
         border-radius: 4px 4px 0 0;
     }
-    .calendar-grid { border-radius: 0 0 4px 4px; }
-    .hour-label-empty, .hour-label-bottom { font-size: 0.65em; }
-    .hour-label { height: 28px; font-size: 0.6em; margin-top: -5px; padding: 1px 2px 0 0; }
-    .header-day { font-size: 0.75em; padding: 5px 1px 2px; line-height: 1; }
-    .header-date { font-size: 0.7em; }
-    .day { min-height: 28px; font-size: 0.85em; padding: 2px 1px; }
+    .calendar-grid { 
+        border-radius: 0 0 4px 4px; 
+    }
+    .hour-label-empty, 
+    .hour-label-bottom { 
+        font-size: 0.65em; 
+    }
+    .hour-label { 
+        height: 28px; 
+        font-size: 0.6em; 
+        margin-top: -3px; 
+        padding: 0 3px 0 0; 
+    }
+    .header-day { 
+        font-size: 0.75em; 
+        padding: 5px 1px 2px; 
+        line-height: 1; 
+    }
+    .header-date { 
+        font-size: 0.7em; 
+    }
+    .day { 
+        min-height: 28px; 
+        font-size: 0.85em; 
+        padding: 2px 1px; 
+    }
 }
 
 @media (max-width: 390px) {
-    body { font-size: 11px; }
-    .dashboard-container { padding: 2px; }
-    .calendar-header-row, .calendar-grid { grid-template-columns: 32px repeat(7, 1fr); font-size: 0.85em; }
-    .hour-label-empty, .hour-label-bottom { font-size: 0.6em; }
-    .hour-label { height: 26px; font-size: 0.55em; margin-top: -4px; }
-    .header-day { font-size: 0.7em; padding: 4px 0 2px; }
-    .header-date { font-size: 0.65em; }
-    .day { min-height: 26px; font-size: 0.8em; }
+    body { 
+        font-size: 11px; 
+    }
+    .dashboard-container { 
+        padding: 2px; 
+    }
+    .calendar-header-row, 
+    .calendar-grid { 
+        grid-template-columns: 32px repeat(7, 1fr); 
+        font-size: 0.85em; 
+    }
+    .hour-label-empty, 
+    .hour-label-bottom { 
+        font-size: 0.6em; 
+    }
+    .hour-label { 
+        height: 26px; 
+        font-size: 0.55em; 
+        margin-top: -3px; 
+    }
+    .header-day { 
+        font-size: 0.7em; 
+        padding: 4px 0 2px; 
+    }
+    .header-date { 
+        font-size: 0.65em; 
+    }
+    .day { 
+        min-height: 26px; 
+        font-size: 0.8em; 
+    }
 }
 
 @media (max-width: 375px) {
-    body { font-size: 10px; }
-    .dashboard-container { padding: 1px; }
-    .calendar-header-row, .calendar-grid {
+    body { 
+        font-size: 10px; 
+    }
+    .dashboard-container { 
+        padding: 1px; 
+    }
+    .calendar-header-row, 
+    .calendar-grid {
         grid-template-columns: 30px repeat(7, 1fr);
         font-size: 0.8em;
         border-radius: 3px 3px 0 0;
     }
-    .calendar-grid { border-radius: 0 0 3px 3px; }
-    .hour-label-empty, .hour-label-bottom { font-size: 0.55em; }
-    .hour-label { height: 24px; font-size: 0.5em; margin-top: -4px; padding: 1px 2px 0 0; }
-    .header-day { font-size: 0.65em; padding: 3px 0 1px; line-height: 0.9; }
-    .header-date { font-size: 0.6em; }
-    .day { min-height: 24px; font-size: 0.75em; padding: 1px; }
+    .calendar-grid { 
+        border-radius: 0 0 3px 3px; 
+    }
+    .hour-label-empty, 
+    .hour-label-bottom { 
+        font-size: 0.55em; 
+    }
+    .hour-label { 
+        height: 24px; 
+        font-size: 0.5em; 
+        margin-top: -3px; 
+        padding: 0 2px 0 0; 
+    }
+    .header-day { 
+        font-size: 0.65em; 
+        padding: 3px 0 1px; 
+        line-height: 0.9; 
+    }
+    .header-date { 
+        font-size: 0.6em; 
+    }
+    .day { 
+        min-height: 24px; 
+        font-size: 0.75em; 
+        padding: 1px; 
+    }
 }
 
 @media (hover: none) and (max-width: 768px) {
-    .day:hover { background: rgba(255, 255, 255, 0.7); }
+    .day:hover { 
+        background: rgba(255, 255, 255, 0.7); 
+    }
 }

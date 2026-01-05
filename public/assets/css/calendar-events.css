@@ -11,6 +11,17 @@
   justify-content: flex-end;
   position: absolute;
   z-index: 1;
+  transition: opacity 0.2s ease, transform 0.1s ease;
+}
+
+.calendar-note:active {
+  cursor: grabbing;
+}
+
+.calendar-note.dragging {
+  opacity: 0.5;
+  transform: scale(0.95);
+  cursor: grabbing;
 }
 
 .calendar-note-text {
@@ -36,4 +47,25 @@
   align-self: flex-end;
   margin-right: 2px;
   margin-bottom: 2px;
+  transition: all 0.2s ease;
+  border-radius: 4px;
+}
+
+.resize-btn:hover {
+  color: #333;
+  background: rgba(0, 0, 0, 0.05);
+  transform: scale(1.15);
+}
+
+.resize-btn:active {
+  color: #000;
+  background: rgba(0, 0, 0, 0.1);
+  transform: scale(1.1);
+}
+
+.calendar-note.resizing {
+  transition: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-color: #667eea;
+  z-index: 10;
 }

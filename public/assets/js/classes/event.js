@@ -109,8 +109,14 @@ class Event {
                 e.preventDefault();
                 return;
             }
+            this.element.classList.add('dragging');
             setDraggedEvent(this.element);
+            e.dataTransfer.effectAllowed = 'move';
             e.dataTransfer.setData('text/plain', this.text);
+        });
+
+        this.element.addEventListener('dragend', (e) => {
+            this.element.classList.remove('dragging');
         });
 
         // Resize eventi
@@ -126,6 +132,7 @@ class Event {
         this.isResizing = true;
         this.startY = e.clientY;
         this.startHeight = this.element.offsetHeight;
+        this.element.classList.add('resizing');
         document.body.style.cursor = 'ns-resize';
         
         document.addEventListener('mousemove', this.onMouseMove.bind(this));
@@ -155,6 +162,7 @@ class Event {
     onMouseUp() {
         if (this.isResizing) {
             this.isResizing = false;
+            this.element.classList.remove('resizing');
             document.body.style.cursor = '';
             document.removeEventListener('mousemove', this.onMouseMove.bind(this));
             document.removeEventListener('mouseup', this.onMouseUp.bind(this));
