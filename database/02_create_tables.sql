@@ -72,14 +72,20 @@ CREATE TABLE IF NOT EXISTS notes (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Tabella orari di lavoro
-CREATE TABLE IF NOT EXISTS schedule (
+-- Tabella impostazioni globali (unico record con id=1)
+CREATE TABLE IF NOT EXISTS settings (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    day_of_week ENUM('lunedi', 'martedi', 'mercoledi', 'giovedi', 'venerdi', 'sabato', 'domenica') NOT NULL UNIQUE,
-    opening_time TIME,
-    closing_time TIME,
+    opening_time TIME NOT NULL DEFAULT '09:00:00',
+    closing_time TIME NOT NULL DEFAULT '18:00:00',
     lunch_break_enabled TINYINT(1) DEFAULT 0,
-    break_start TIME,
-    break_end TIME,
-    is_closed TINYINT(1) DEFAULT 0
+    break_start TIME DEFAULT '12:30:00',
+    break_end TIME DEFAULT '13:30:00',
+    timezone VARCHAR(50) DEFAULT 'Europe/Rome',
+    closed_monday TINYINT(1) DEFAULT 0,
+    closed_tuesday TINYINT(1) DEFAULT 0,
+    closed_wednesday TINYINT(1) DEFAULT 0,
+    closed_thursday TINYINT(1) DEFAULT 0,
+    closed_friday TINYINT(1) DEFAULT 0,
+    closed_saturday TINYINT(1) DEFAULT 1,
+    closed_sunday TINYINT(1) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

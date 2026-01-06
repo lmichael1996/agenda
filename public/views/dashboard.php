@@ -149,8 +149,10 @@ $currentDate = $today->format('Y-m-d');
                     <?php 
                     $dayDate = $day->format('d-m-Y');
                     $isTodayClass = isToday($day) ? ' today' : '';
+                    $isClosedClass = isClosedDay($day) ? ' closed-day' : '';
+                    $isLunchBreakClass = isLunchBreak($time) ? ' lunch-break' : '';
                     ?>
-                    <div class="day<?= $isTodayClass ?>"
+                    <div class="day<?= $isTodayClass ?><?= $isClosedClass ?><?= $isLunchBreakClass ?>"
                          data-date="<?= $dayDate ?>"
                          data-time="<?= $time ?>">
                     </div>

@@ -83,6 +83,10 @@ try {
             handleScheduleResource($scheduleController, $method, $action, $id, $input);
             break;
             
+        case 'settings':
+            handleSettingsResource($db, $method, $input);
+            break;
+            
         case 'notes':
             handleNotesResource($notesController, $method, $action, $id, $input);
             break;
@@ -431,6 +435,93 @@ function handleUsersResource($controller, $method, $action, $id, $input) {
             } else {
                 http_response_code(400);
                 echo json_encode(['success' => false, 'error' => 'ID richiesto per eliminazione']);
+            }
+            break;
+            
+        default:
+            http_response_code(405);
+            echo json_encode(['success' => false, 'error' => 'Metodo non supportato']);
+    }
+}
+
+function handleSettingsResource($db, $method, $input) {
+    switch ($method) {
+        case 'GET':
+            try {
+                $stmt = $db->prepare('SELECT * FROM settings WHERE id = 1');
+                $stmt->execute();
+                $data = $stmt->fetch(PDO::FETCH_ASSOC);
+                
+                if ($data) {
+                    echo json_encode(['success' => true, 'data' => $data]);
+                } else {
+                    // Restituisci valori di default se non esiste il record
+                    echo json_encode([
+                        'success' => true,
+                        'data' => [
+                            'opening_time' => '09:00:00',
+                            'closing_time' => '18:00:00',
+                            'lunch_break_enabled' => 0,
+                            'break_start' => '12:30:00',
+                            'break_end' => '13:30:00',
+                            'timezone' => 'Europe/Rome',
+                            'closed_monday' => 0,
+                            'closed_tuesday' => 0,
+                            'closed_wednesday' => 0,
+                            'closed_thursday' => 0,
+                            'closed_friday' => 0,
+                            'closed_saturday' => 1,
+                            'closed_sunday' => 1
+                        ]
+                    ]);
+                }
+            } catch (PDOException $e) {
+                error_log("Settings GET error: " . $e->getMessage());
+                http_response_code(500);
+                echo json_encode(['success' => false, 'error' => 'Errore nel recupero delle impostazioni']);
+            }
+            break;
+            
+        case 'PUT':
+            try {
+                // Aggiorna o inserisci il record con id=1
+                $stmt = $db->prepare('INSERT INTO settings (id, opening_time, closing_time, lunch_break_enabled, break_start, break_end, 
+                                      closed_monday, closed_tuesday, closed_wednesday, closed_thursday, closed_friday, closed_saturday, closed_sunday) 
+                                      VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
+                                      ON DUPLICATE KEY UPDATE 
+                                      opening_time = VALUES(opening_time),
+                                      closing_time = VALUES(closing_time),
+                                      lunch_break_enabled = VALUES(lunch_break_enabled),
+                                      break_start = VALUES(break_start),
+                                      break_end = VALUES(break_end),
+                                      closed_monday = VALUES(closed_monday),
+                                      closed_tuesday = VALUES(closed_tuesday),
+                                      closed_wednesday = VALUES(closed_wednesday),
+                                      closed_thursday = VALUES(closed_thursday),
+                                      closed_friday = VALUES(closed_friday),
+                                      closed_saturday = VALUES(closed_saturday),
+                                      closed_sunday = VALUES(closed_sunday)');
+                
+                $stmt->execute([
+                    $input['opening_time'] ?? '09:00:00',
+                    $input['closing_time'] ?? '18:00:00',
+                    $input['lunch_break_enabled'] ?? 0,
+                    $input['break_start'] ?? '12:30:00',
+                    $input['break_end'] ?? '13:30:00',
+                    $input['closed_monday'] ?? 0,
+                    $input['closed_tuesday'] ?? 0,
+                    $input['closed_wednesday'] ?? 0,
+                    $input['closed_thursday'] ?? 0,
+                    $input['closed_friday'] ?? 0,
+                    $input['closed_saturday'] ?? 1,
+                    $input['closed_sunday'] ?? 1
+                ]);
+                
+                echo json_encode(['success' => true, 'message' => 'Impostazioni salvate con successo']);
+            } catch (PDOException $e) {
+                error_log("Settings PUT error: " . $e->getMessage());
+                http_response_code(500);
+                echo json_encode(['success' => false, 'error' => 'Errore nel salvataggio delle impostazioni']);
             }
             break;
             

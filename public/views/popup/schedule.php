@@ -163,9 +163,7 @@ require_once '../../../src/Auth/AccessControl.php';
         </div>
     </div>
 
-    <script type="module">
-        import { fetchSchedule, saveSchedule, convertFromApiFormat } from '../assets/js/api/schedule-api.js';
-        
+    <script>
         let schedule = {};
         const closePopup = (msg) => { 
             if(msg) alert(msg); 
@@ -173,25 +171,52 @@ require_once '../../../src/Auth/AccessControl.php';
         };
 
         // API functions
+        const fetchSchedule = async () => {
+            const response = await fetch('../../../src/Api/api.php?endpoint=settings');
+            return await response.json();
+        };
+        
+        const saveSchedule = async (data) => {
+            const response = await fetch('../../../src/Api/api.php?endpoint=settings', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            return await response.json();
+        };
+        
         const loadData = async () => {
             try {
                 const res = await fetchSchedule();
+                console.log('Risposta API schedule:', res);
+                
                 if (res.success && res.data) {
-                    schedule = convertFromApiFormat(res.data);
+                    schedule = res.data;
                 } else {
-                    // Se non ci sono dati nel database, chiudi finestra
-                    closePopup('Nessun orario configurato');
-                    return;
+                    // Usa valori di default se non ci sono dati
+                    schedule = {
+                        opening_time: '09:00:00',
+                        closing_time: '18:00:00',
+                        lunch_break_enabled: false,
+                        break_start: '12:30:00',
+                        break_end: '13:30:00'
+                    };
+                    console.log('Uso valori di default');
                 }
             } catch (e) { 
+                console.error('Errore caricamento:', e);
                 closePopup('Errore caricamento: ' + e.message); 
             }
         };
         
         const saveData = async () => {
             try {
-                return (await saveSchedule(schedule)).success;
+                console.log('Salvataggio dati:', schedule);
+                const result = await saveSchedule(schedule);
+                console.log('Risposta salvataggio:', result);
+                return result.success;
             } catch (e) {
+                console.error('Errore salvataggio:', e);
                 const msg = e.message.includes('401') ? 'Sessione scaduta' : e.message.includes('400') ? 'Dati non validi' : 'Errore connessione';
                 closePopup(msg);
                 return false;
@@ -204,33 +229,68 @@ require_once '../../../src/Auth/AccessControl.php';
         );
         
         const setTime = (id, time) => {
-            const [h, m] = time.split(':');
+            if (!time) return;
+            // Gestisce formato HH:MM o HH:MM:SS
+            const parts = time.split(':');
+            const h = parts[0];
+            const m = parts[1] || '00';
             document.getElementById(id + '-hour').value = parseInt(h);
             document.getElementById(id + '-minute').value = m;
         };
         
-        const getTime = (id) => `${document.getElementById(id + '-hour').value.padStart(2, '0')}:${document.getElementById(id + '-minute').value}`;
+        const getTime = (id) => {
+            const h = document.getElementById(id + '-hour').value.padStart(2, '0');
+            const m = document.getElementById(id + '-minute').value;
+            return `${h}:${m}:00`;
+        };
         
         const loadForm = () => {
-            setTime('schedule-start', schedule.startTime || '08:00');
-            setTime('schedule-end', schedule.endTime || '18:00');
-            setTime('lunch-start', schedule.lunchStartTime || '12:30');
-            setTime('lunch-end', schedule.lunchEndTime || '13:30');
-            document.getElementById('lunch-break-enabled').checked = schedule.lunchBreakEnabled || false;
+            setTime('schedule-start', schedule.opening_time || '09:00:00');
+            setTime('schedule-end', schedule.closing_time || '18:00:00');
+            setTime('lunch-start', schedule.break_start || '12:30:00');
+            setTime('lunch-end', schedule.break_end || '13:30:00');
+            document.getElementById('lunch-break-enabled').checked = schedule.lunch_break_enabled || false;
             document.getElementById('schedule-timezone').value = schedule.timezone || 'Europe/Rome';
-            Array.from(document.getElementById('schedule-closure-days').options).forEach(opt => opt.selected = schedule.closureDays?.includes(opt.value));
+            
+            // Carica giorni di chiusura
+            const closureDaysSelect = document.getElementById('schedule-closure-days');
+            const dayMap = {
+                'closed_monday': 'lunedi',
+                'closed_tuesday': 'martedi',
+                'closed_wednesday': 'mercoledi',
+                'closed_thursday': 'giovedi',
+                'closed_friday': 'venerdi',
+                'closed_saturday': 'sabato',
+                'closed_sunday': 'domenica'
+            };
+            
+            Array.from(closureDaysSelect.options).forEach(opt => opt.selected = false);
+            for (const [dbField, dayValue] of Object.entries(dayMap)) {
+                if (schedule[dbField]) {
+                    Array.from(closureDaysSelect.options).find(opt => opt.value === dayValue).selected = true;
+                }
+            }
+            
             toggleLunch();
         };
         
         const saveForm = () => {
+            const closureDaysSelect = document.getElementById('schedule-closure-days');
+            const selectedDays = Array.from(closureDaysSelect.selectedOptions).map(opt => opt.value);
+            
             schedule = {
-                startTime: getTime('schedule-start'),
-                endTime: getTime('schedule-end'),
-                lunchBreakEnabled: document.getElementById('lunch-break-enabled').checked,
-                lunchStartTime: getTime('lunch-start'),
-                lunchEndTime: getTime('lunch-end'),
-                timezone: document.getElementById('schedule-timezone').value,
-                closureDays: Array.from(document.getElementById('schedule-closure-days').selectedOptions).map(opt => opt.value)
+                opening_time: getTime('schedule-start'),
+                closing_time: getTime('schedule-end'),
+                lunch_break_enabled: document.getElementById('lunch-break-enabled').checked ? 1 : 0,
+                break_start: getTime('lunch-start'),
+                break_end: getTime('lunch-end'),
+                closed_monday: selectedDays.includes('lunedi') ? 1 : 0,
+                closed_tuesday: selectedDays.includes('martedi') ? 1 : 0,
+                closed_wednesday: selectedDays.includes('mercoledi') ? 1 : 0,
+                closed_thursday: selectedDays.includes('giovedi') ? 1 : 0,
+                closed_friday: selectedDays.includes('venerdi') ? 1 : 0,
+                closed_saturday: selectedDays.includes('sabato') ? 1 : 0,
+                closed_sunday: selectedDays.includes('domenica') ? 1 : 0
             };
         };
         
