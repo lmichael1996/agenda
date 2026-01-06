@@ -26,14 +26,14 @@ const POPUP_CONFIGS = {
     services: {
         url: 'popup/services.php',
         title: 'Gestione Servizi',
-        width: 1000,
-        height: 850
+        width: 1500,
+        height: 1100
     },
     users: {
         url: 'popup/users.php', 
         title: 'Gestione Utenti',
-        width: 1000,
-        height: 850
+        width: 1200,
+        height: 1000
     },
     schedule: {
         url: 'popup/schedule.php',

@@ -38,9 +38,8 @@ class Calendar {
     generateEvents() {
         if (!this.slotElements) return;
         
-        // Genera eventi di demo usando EventManager
-        this.eventManager.generateDemoEvents(this.slotElements);
-        console.log('Eventi demo generati tramite EventManager');
+        // Gli eventi vengono caricati dal database tramite calendar-events.js
+        console.log('Slot pronti per ricevere eventi dal database');
     }
     
     highlightCurrentTime() {

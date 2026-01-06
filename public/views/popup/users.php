@@ -158,9 +158,10 @@ $sampleUsers = [];
                 console.log('Dati ricevuti:', data);
                 
                 if (data.success && Array.isArray(data.users)) {
-                    usersList = data.users;
-                    userIdCounter = usersList.length ? Math.max(...usersList.map(u => u.id)) + 1 : 1;
-                    console.log('Utenti caricati:', usersList.length);
+                    // Filtra l'utente default (id=1) dalla visualizzazione
+                    usersList = data.users.filter(u => u.id != 1);
+                    userIdCounter = usersList.length ? Math.max(...usersList.map(u => u.id)) + 1 : 2; // Parte da 2 perché 1 è riservato
+                    console.log('Utenti caricati (escluso default):', usersList.length);
                 } else {
                     console.error('Errore nel formato dati:', data);
                     alert('Errore caricamento utenti dal database');
@@ -174,10 +175,9 @@ $sampleUsers = [];
         function addNewRow() {
             const newUser = {
                 id: 'temp_' + Date.now(),
-                username: 'Nuovo Utente ' + (usersList.length + 1),
-                color: '#3498db',
-                is_active: 1,
-                isPending: true
+                username: 'nuovo_utente_' + (usersList.length + 1),
+                role: 'user',
+                color: '#3498db'
             };
             usersList.push(newUser);
             renderUsersTable();
@@ -214,14 +214,14 @@ $sampleUsers = [];
                 const username = row.cells[1].querySelector('input').value.trim();
                 const password = row.cells[2].querySelector('input').value.trim();
                 const color = row.cells[3].querySelector('input').value;
-                const isActive = row.cells[4].querySelector('select').value === 'attivo' ? 1 : 0;
+                const role = row.cells[4].querySelector('select').value; // admin o user
                 const userId = row.dataset.userId;
                 
                 if (username) { // Solo se c'è un username
                     const userData = {
                         username,
                         color,
-                        is_active: isActive
+                        role: role
                     };
                     
                     // Includi password solo se è stata inserita
@@ -286,7 +286,14 @@ $sampleUsers = [];
                 return;
             }
             
-            if (!confirm(`Salvare ${users.length} utenti nel database?\n\nATTENZIONE: Questa operazione sostituirà tutti gli utenti esistenti.`)) {
+            // Avviso importante: password obbligatorie
+            const usersWithoutPassword = users.filter(u => !u.password && !u.id);
+            if (usersWithoutPassword.length > 0) {
+                alert('ATTENZIONE: Nuovi utenti senza password trovati. Password obbligatoria per nuovi utenti!');
+                return;
+            }
+            
+            if (!confirm(`Salvare ${users.length} utenti nel database?\n\nATTENZIONE:\n- Questa operazione sostituirà tutti gli utenti esistenti\n- Per utenti esistenti: lascia password vuota per NON cambiarla\n- Per nuovi utenti: la password è OBBLIGATORIA`)) {
                 return;
             }
             

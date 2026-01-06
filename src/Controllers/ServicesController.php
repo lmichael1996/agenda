@@ -43,55 +43,81 @@ class ServicesController {
      */
     public function saveAll($services) {
         if (!is_array($services)) {
+            error_log("saveAll: services non è un array - tipo: " . gettype($services));
             return ['success' => false, 'error' => 'Dati servizi non validi'];
         }
+        
+        error_log("saveAll: Ricevuti " . count($services) . " servizi");
         
         try {
             $this->db->beginTransaction();
             
-            // Elimina tutti i servizi esistenti
-            $this->db->exec('DELETE FROM services');
+            // Prima aggiorna tutti gli appuntamenti che usano servizi diversi dal default al servizio di default
+            $updateStmt = $this->db->prepare('UPDATE appointments SET service_id = 1 WHERE service_id != 1');
+            $updateStmt->execute();
+            error_log("saveAll: Aggiornati " . $updateStmt->rowCount() . " appuntamenti al servizio default");
             
-            // Inserisce tutti i nuovi servizi
+            // Ora elimina tutti i servizi TRANNE quello di default (id=1)
+            $deleteResult = $this->db->exec('DELETE FROM services WHERE id != 1');
+            error_log("saveAll: Eliminati $deleteResult servizi dal database");
+            
+            // Inserisce tutti i nuovi servizi (saltando quello con id=1 se presente)
             $stmt = $this->db->prepare('INSERT INTO services (name, duration, price, description) VALUES (?, ?, ?, ?)');
             
             $errors = [];
+            $inserted = 0;
             foreach ($services as $service) {
+                // Salta il servizio di default se presente nell'array
+                if (isset($service['id']) && $service['id'] == 1) {
+                    error_log("saveAll: Saltato servizio default id=1");
+                    continue;
+                }
+                
                 $name = $service['name'] ?? '';
                 $price = floatval($service['price'] ?? 0);
                 $duration = intval($service['durationMinutes'] ?? 30);
                 $description = $service['description'] ?? '';
                 
+                error_log("saveAll: Processando servizio '$name' - price=$price, duration=$duration");
+                
                 if (empty($name)) {
+                    error_log("saveAll: Saltato servizio senza nome");
                     continue;
                 }
                 
                 // Validazione
                 if ($price < 0 || $price > 9999.99) {
                     $errors[] = "Prezzo non valido per servizio {$name}";
+                    error_log("saveAll: Errore validazione prezzo per '$name'");
                     continue;
                 }
                 
                 if ($duration < 15 || $duration > 480 || $duration % 15 !== 0) {
                     $errors[] = "Durata non valida per servizio {$name}";
+                    error_log("saveAll: Errore validazione durata per '$name': $duration");
                     continue;
                 }
                 
                 $stmt->execute([$name, $duration, $price, $description]);
+                $inserted++;
             }
+            
+            error_log("saveAll: Inseriti $inserted servizi");
             
             if (!empty($errors)) {
                 $this->db->rollBack();
+                error_log("saveAll: Rollback per errori: " . implode(', ', $errors));
                 return ['success' => false, 'error' => 'Errori durante il salvataggio', 'details' => $errors];
             }
             
             $this->db->commit();
+            error_log("saveAll: Commit completato con successo");
             return ['success' => true, 'message' => 'Servizi salvati con successo'];
             
         } catch (PDOException $e) {
             $this->db->rollBack();
-            error_log("Errore saveAll services: " . $e->getMessage());
-            return ['success' => false, 'error' => 'Errore nel salvataggio dei servizi'];
+            error_log("saveAll: Errore PDO - " . $e->getMessage());
+            return ['success' => false, 'error' => 'Errore nel salvataggio dei servizi', 'details' => $e->getMessage()];
         }
     }
     

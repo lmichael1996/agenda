@@ -3,26 +3,7 @@ import { Event } from './event.js';
 class EventManager {
     constructor() {
         this.events = [];
-        this.demoEvents = [
-            { slotIndex: 1, text: 'Evento Martedì', duration: 30 },
-            { slotIndex: 5, text: 'Evento Sabato', duration: 45 },
-            { slotIndex: 14, text: 'Riunione Team', duration: 60 },
-            { slotIndex: 21, text: 'Call Cliente', duration: 90 }
-        ];
-    }
-    
-    // Genera eventi di demo
-    generateDemoEvents(slots) {
-        this.demoEvents.forEach(eventData => {
-            const slot = slots[eventData.slotIndex];
-            if (slot) {
-                const event = this.createEvent(eventData.text, eventData.duration, slot);
-                this.addEventToSlot(event, slot);
-            }
-        });
-        
-        console.log(`Generati ${this.events.length} eventi demo`);
-        return slots;
+        // Gli eventi vengono caricati dal database tramite calendar-events.js
     }
     
     // Crea un nuovo evento

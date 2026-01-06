@@ -120,20 +120,26 @@ class ServiceService {
      */
     public function delete($id) {
         try {
-            // Verifica se ci sono appuntamenti associati
-            $stmt = $this->db->prepare('SELECT COUNT(*) FROM appointments WHERE service_id = ?');
-            $stmt->execute([$id]);
-            $count = $stmt->fetchColumn();
-            
-            if ($count > 0) {
-                return ['success' => false, 'error' => 'Impossibile eliminare: ci sono appuntamenti associati a questo servizio'];
+            // Protezione: non permettere eliminazione del servizio di default
+            if ($id == 1) {
+                return ['success' => false, 'error' => 'Il servizio di default non può essere eliminato'];
             }
             
+            // Aggiorna gli appuntamenti che usano questo servizio al servizio di default (id=1)
+            $stmt = $this->db->prepare('UPDATE appointments SET service_id = 1, note = CONCAT(COALESCE(note, ""), "\n[Servizio originale eliminato]") WHERE service_id = ?');
+            $stmt->execute([$id]);
+            $affectedAppointments = $stmt->rowCount();
+            
+            // Ora elimina il servizio
             $stmt = $this->db->prepare('DELETE FROM services WHERE id = ?');
             $stmt->execute([$id]);
             
             if ($stmt->rowCount() > 0) {
-                return ['success' => true, 'message' => 'Servizio eliminato con successo'];
+                $message = 'Servizio eliminato con successo';
+                if ($affectedAppointments > 0) {
+                    $message .= " ($affectedAppointments appuntamenti aggiornati al servizio generico)";
+                }
+                return ['success' => true, 'message' => $message];
             } else {
                 return ['success' => false, 'error' => 'Servizio non trovato'];
             }

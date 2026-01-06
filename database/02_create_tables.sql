@@ -13,8 +13,7 @@ CREATE TABLE IF NOT EXISTS users (
     username VARCHAR(50) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     type_role ENUM('user', 'admin') DEFAULT 'user',
-    color VARCHAR(7) DEFAULT '#3498db',
-    is_active TINYINT(1) DEFAULT 1
+    color VARCHAR(7) DEFAULT '#3498db'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Tabella clienti
@@ -36,20 +35,30 @@ CREATE TABLE IF NOT EXISTS services (
     description TEXT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Tabella appuntamenti
-CREATE TABLE IF NOT EXISTS appointments (
+-- Tabella super appuntamenti (appuntamento principale)
+CREATE TABLE IF NOT EXISTS super_appointments (
     id INT AUTO_INCREMENT PRIMARY KEY,
     client_id INT NOT NULL,
-    service_id INT NOT NULL,
-    user_id INT,
     start_time DATETIME NOT NULL,
-    end_time DATETIME NOT NULL,
-    status ENUM('scheduled', 'confirmed', 'completed', 'cancelled') DEFAULT 'scheduled',
-    notes TEXT,
-    FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE,
-    FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE RESTRICT,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+    FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tabella appuntamenti (servizi dell'appuntamento)
+CREATE TABLE IF NOT EXISTS appointments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    super_appointment_id INT NOT NULL,
+    service_id INT NOT NULL DEFAULT 1,
+    user_id INT NOT NULL DEFAULT 1,
+    duration INT NOT NULL COMMENT 'Durata in minuti',
+    note TEXT,
+    FOREIGN KEY (super_appointment_id) REFERENCES super_appointments(id) ON DELETE CASCADE,
+    FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE RESTRICT,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- NOTA: MySQL/MariaDB non supporta ON DELETE SET DEFAULT.
+-- L'aggiornamento al servizio default (id=1) e all'utente default (id=1) 
+-- è gestito a livello applicativo nel controller prima dell'eliminazione.
 
 -- Tabella note
 CREATE TABLE IF NOT EXISTS notes (

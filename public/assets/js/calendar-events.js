@@ -46,6 +46,9 @@ const initializeCalendar = async () => {
         state.calendar = new state.CalendarClass('.calendar-grid .day');
         window.calendar = state.calendar;
         console.log('Calendario inizializzato');
+        
+        // Carica appuntamenti dal database
+        loadAppointmentsFromDB();
     } else {
         throw new Error('Classe Calendar non disponibile');
     }
@@ -198,12 +201,8 @@ const handleViewChange = (viewType, weekInput, dateInput) => {
 const handleWeekChange = (weekValue) => {
     console.log(`Cambio settimana: ${weekValue}`);
     
-    if (state.dateManager && state.dateManager.setWeek) {
-        state.dateManager.setWeek(weekValue);
-    }
-
-    dispatchCalendarEvent('weekChanged', { week: weekValue });
-    updateWeekDisplay(weekValue);
+    // Carica appuntamenti via AJAX
+    loadAppointmentsForWeek(weekValue);
 };
 
 const handleDateChange = (dateValue) => {
@@ -501,6 +500,204 @@ window.calendarAPI = {
         return [];
     }
 };
+
+// === GESTIONE APPUNTAMENTI ===
+// Pulisce tutti gli eventi dal calendario
+const clearAllEvents = () => {
+    if (state.calendar && state.calendar.eventManager) {
+        state.calendar.eventManager.clearAllEvents();
+        console.log('✅ Eventi rimossi dal calendario');
+    }
+};
+
+// Aggiorna le date nell'header del calendario
+const updateCalendarHeader = (weekValue) => {
+    // Parse formato settimana: 2026-W02
+    const match = weekValue.match(/(\d{4})-W(\d{2})/);
+    if (!match) return;
+    
+    const year = parseInt(match[1]);
+    const weekNumber = parseInt(match[2]);
+    
+    // Calcola il lunedì di quella settimana ISO
+    const jan4 = new Date(year, 0, 4); // 4 gennaio è sempre nella settimana 1
+    const jan4Day = jan4.getDay() || 7; // domenica = 7
+    const mondayWeek1 = new Date(jan4);
+    mondayWeek1.setDate(jan4.getDate() - jan4Day + 1);
+    
+    // Aggiungi le settimane
+    const monday = new Date(mondayWeek1);
+    monday.setDate(mondayWeek1.getDate() + (weekNumber - 1) * 7);
+    
+    const dayNames = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'];
+    
+    // Aggiorna ogni colonna dell'header
+    for (let i = 0; i < 7; i++) {
+        const headerDay = document.getElementById(`header-day-${i}`);
+        if (headerDay) {
+            const currentDate = new Date(monday);
+            currentDate.setDate(monday.getDate() + i);
+            
+            const day = String(currentDate.getDate()).padStart(2, '0');
+            const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+            const yearStr = currentDate.getFullYear();
+            
+            headerDay.innerHTML = `${dayNames[i]}<br><span class="header-date">${day}/${month}/${yearStr}</span>`;
+        }
+    }
+    
+    console.log('✅ Header calendario aggiornato');
+};
+
+// Aggiorna gli attributi data-date degli slot del calendario
+const updateCalendarSlots = (weekValue) => {
+    // Parse formato settimana: 2026-W02
+    const match = weekValue.match(/(\d{4})-W(\d{2})/);
+    if (!match) return;
+    
+    const year = parseInt(match[1]);
+    const weekNumber = parseInt(match[2]);
+    
+    // Calcola il lunedì di quella settimana ISO
+    const jan4 = new Date(year, 0, 4); // 4 gennaio è sempre nella settimana 1
+    const jan4Day = jan4.getDay() || 7; // domenica = 7
+    const mondayWeek1 = new Date(jan4);
+    mondayWeek1.setDate(jan4.getDate() - jan4Day + 1);
+    
+    // Aggiungi le settimane
+    const monday = new Date(mondayWeek1);
+    monday.setDate(mondayWeek1.getDate() + (weekNumber - 1) * 7);
+    
+    // Aggiorna data-date per ogni colonna
+    const allSlots = document.querySelectorAll('.calendar-grid .day');
+    const slotsPerDay = allSlots.length / 7;
+    
+    for (let day = 0; day < 7; day++) {
+        const currentDate = new Date(monday);
+        currentDate.setDate(monday.getDate() + day);
+        
+        const dayStr = String(currentDate.getDate()).padStart(2, '0');
+        const monthStr = String(currentDate.getMonth() + 1).padStart(2, '0');
+        const yearStr = currentDate.getFullYear();
+        const dateStr = `${dayStr}-${monthStr}-${yearStr}`;
+        
+        // Aggiorna tutti gli slot di quel giorno
+        for (let slot = 0; slot < slotsPerDay; slot++) {
+            const slotIndex = slot * 7 + day;
+            if (allSlots[slotIndex]) {
+                allSlots[slotIndex].setAttribute('data-date', dateStr);
+            }
+        }
+    }
+    
+    console.log('✅ Slot calendario aggiornati');
+};
+
+// Carica appuntamenti per una settimana specifica via AJAX
+const loadAppointmentsForWeek = async (weekValue) => {
+    console.log(`📅 Caricamento appuntamenti per settimana: ${weekValue}`);
+    
+    try {
+        const response = await fetch(`../api/appointments.php?week=${weekValue}`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const appointments = await response.json();
+        
+        if (appointments.error) {
+            console.error('❌ Errore dal server:', appointments.error);
+            return;
+        }
+        
+        console.log(`✅ Ricevuti ${appointments.length} appuntamenti dal server`);
+        
+        // Pulisci eventi esistenti
+        clearAllEvents();
+        
+        // Aggiorna header del calendario
+        updateCalendarHeader(weekValue);
+        
+        // Aggiorna data-date degli slot
+        updateCalendarSlots(weekValue);
+        
+        // Carica nuovi eventi
+        loadAppointmentsFromDB(appointments);
+        
+    } catch (error) {
+        console.error('❌ Errore durante il caricamento degli appuntamenti:', error);
+    }
+};
+
+// === CARICAMENTO DATI DAL DATABASE ===
+const loadAppointmentsFromDB = (appointmentsData = null) => {
+    console.log('=== CARICAMENTO APPUNTAMENTI DAL DATABASE ===');
+    
+    // Use parameter or fallback to window.appointmentsData
+    const appointments = appointmentsData || window.appointmentsData;
+    
+    if (!appointments) {
+        console.warn('⚠️ Nessun dato appuntamenti disponibile');
+        return;
+    }
+    
+    console.log(`✅ Trovati ${appointments.length} appuntamenti nel database`);
+    
+    if (appointments.length === 0) {
+        console.warn('⚠️ Array appuntamenti vuoto');
+        return;
+    }
+    
+    appointments.forEach((apt, index) => {
+        console.log(`\n--- Appuntamento ${index + 1}/${appointments.length} ---`);
+        console.log(`Cliente: ${apt.client_name}, Servizio: ${apt.service_name}`);
+        console.log(`Data: ${apt.date}, Ora: ${apt.time}, Durata: ${apt.duration} min`);
+        
+        // Trova lo slot corretto per data e ora
+        const slot = document.querySelector(`.day[data-date="${apt.date}"][data-time="${apt.time}"]`);
+        
+        if (slot && state.calendar) {
+            // Crea l'evento con il nome del cliente e servizio
+            const eventText = `${apt.client_name} - ${apt.service_name}`;
+            const event = state.calendar.createEvent(eventText, apt.duration, slot);
+            
+            if (event && event.element) {
+                // Aggiungi l'evento allo slot (IMPORTANTE!)
+                state.calendar.eventManager.addEventToSlot(event, slot);
+                
+                // Aggiungi colore dell'operatore
+                event.element.style.backgroundColor = apt.user_color;
+                event.element.style.borderColor = apt.user_color;
+                
+                // Aggiungi dati custom all'elemento
+                event.element.dataset.appointmentId = apt.id;
+                event.element.dataset.clientId = apt.client_id;
+                event.element.dataset.serviceId = apt.service_id;
+                event.element.dataset.userId = apt.user_id;
+                event.element.dataset.price = apt.price;
+                
+                // Aggiungi tooltip con info complete
+                event.element.title = `Cliente: ${apt.client_name}\nServizio: ${apt.service_name}\nOperatore: ${apt.user_name}\nDurata: ${apt.duration} min\nPrezzo: €${apt.price}${apt.note ? '\nNote: ' + apt.note : ''}`;
+                
+                console.log(`✅ Evento creato con successo`);
+            } else {
+                console.error(`❌ Impossibile creare evento`);
+            }
+        } else {
+            if (!slot) {
+                console.error(`❌ Slot non trovato per data="${apt.date}" time="${apt.time}"`);
+            }
+            if (!state.calendar) {
+                console.error('❌ state.calendar non disponibile');
+            }
+        }
+    });
+    
+    console.log('\n=== CARICAMENTO COMPLETATO ===');
+    console.log(`Eventi totali nel calendario: ${state.calendar ? state.calendar.getAllEvents().length : 0}`);
+};
+
 
 // === AVVIO ===
 document.addEventListener('DOMContentLoaded', init);

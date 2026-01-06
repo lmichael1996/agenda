@@ -6,9 +6,8 @@
 class User {
     public $id;
     public $username;
-    public $email;
     public $role;
-    public $created_at;
+    public $color;
     
     /**
      * Costruttore
@@ -25,10 +24,9 @@ class User {
     public function hydrate($data) {
         $this->id = $data['id'] ?? null;
         $this->username = $data['username'] ?? '';
-        $this->email = $data['email'] ?? '';
         // Supporta sia 'role' che 'type_role' per compatibilità
         $this->role = $data['role'] ?? $data['type_role'] ?? 'user';
-        $this->created_at = $data['created_at'] ?? null;
+        $this->color = $data['color'] ?? '#3498db';
     }
     
     /**
@@ -38,9 +36,8 @@ class User {
         return [
             'id' => $this->id,
             'username' => $this->username,
-            'email' => $this->email,
             'role' => $this->role,
-            'created_at' => $this->created_at
+            'color' => $this->color
         ];
     }
     
@@ -52,10 +49,6 @@ class User {
         
         if (empty(trim($this->username)) || strlen($this->username) < 3) {
             $errors[] = 'Username deve essere almeno 3 caratteri';
-        }
-        
-        if (!empty($this->email) && !filter_var($this->email, FILTER_VALIDATE_EMAIL)) {
-            $errors[] = 'Email non valida';
         }
         
         if (!in_array($this->role, ['user', 'admin'])) {

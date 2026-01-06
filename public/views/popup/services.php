@@ -103,10 +103,13 @@ require_once '../../../src/Auth/AccessControl.php';
             console.log('Risposta caricamento servizi:', data);
             
             if (data.success && Array.isArray(data.services)) {
-                servicesList = data.services;
+                // Filtra il servizio di default (id=1) dalla lista visibile
+                servicesList = data.services.filter(s => s.id != 1);
                 serviceIdCounter = servicesList.length ? Math.max(...servicesList.map(s => s.id)) + 1 : 1;
-                console.log('Servizi caricati:', servicesList.length);
-                console.log('Primo servizio:', servicesList[0]);
+                console.log('Servizi caricati (escluso default):', servicesList.length);
+                if (servicesList.length > 0) {
+                    console.log('Primo servizio:', servicesList[0]);
+                }
                 return true;
             } else {
                 console.error('Errore caricamento servizi:', data);
@@ -279,86 +282,30 @@ require_once '../../../src/Auth/AccessControl.php';
         }, 0);
     }
 
-    async function onDeleteSingle(id) {
+    function onDeleteSingle(id) {
         const service = servicesList.find(s => s.id == id);
         if (!service) return;
 
-        if (!confirm(`Eliminare servizio "${service.name}"?`)) return;
+        if (!confirm(`Rimuovere servizio "${service.name}" dalla lista?\n\nNOTA: La modifica sarà effettiva solo dopo aver premuto "Salva Tutti i Servizi".`)) return;
         
-        // Se è un servizio temporaneo (non ancora salvato), elimina solo dalla lista
-        if (String(id).startsWith('temp_')) {
-            servicesList = servicesList.filter(s => s.id != id);
-            renderServicesTable();
-            return;
-        }
-        
-        // Altrimenti elimina dal database
-        const deleteBtn = event.target;
-        deleteBtn.disabled = true;
-        deleteBtn.textContent = '...';
-        
-        try {
-            const result = await deleteServiceFromDb(id);
-            
-            if (result.success) {
-                servicesList = servicesList.filter(s => s.id != id);
-                renderServicesTable();
-                alert('Servizio eliminato con successo');
-            } else {
-                alert('Errore: ' + (result.error || 'Impossibile eliminare il servizio'));
-                deleteBtn.disabled = false;
-                deleteBtn.textContent = '🗑️';
-            }
-        } catch (e) {
-            alert('Errore di connessione: ' + e.message);
-            deleteBtn.disabled = false;
-            deleteBtn.textContent = '🗑️';
-        }
+        // Rimuove il servizio solo dalla lista locale (non dal database)
+        servicesList = servicesList.filter(s => s.id != id);
+        renderServicesTable();
     }
 
-    async function onDeleteSelected() {
+    function onDeleteSelected() {
         const selectedCheckboxes = document.querySelectorAll('.row-select:checked');
         if (selectedCheckboxes.length === 0) {
             alert('Nessun servizio selezionato');
             return;
         }
         
-        if (!confirm(`Eliminare ${selectedCheckboxes.length} servizio/i selezionato/i?`)) return;
+        if (!confirm(`Rimuovere ${selectedCheckboxes.length} servizio/i selezionato/i dalla lista?\n\nNOTA: La modifica sarà effettiva solo dopo aver premuto "Salva Tutti i Servizi".`)) return;
         
         const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.closest('tr').dataset.serviceId);
         
-        // Separa servizi temporanei da quelli salvati
-        const tempIds = selectedIds.filter(id => String(id).startsWith('temp_'));
-        const dbIds = selectedIds.filter(id => !String(id).startsWith('temp_'));
-        
-        // Elimina temporanei immediatamente
-        servicesList = servicesList.filter(s => !tempIds.includes(String(s.id)));
-        
-        // Elimina quelli dal database
-        if (dbIds.length > 0) {
-            const deleteBtn = document.getElementById('delete-selected-btn');
-            deleteBtn.disabled = true;
-            deleteBtn.textContent = 'Eliminazione...';
-            
-            let errors = [];
-            for (const id of dbIds) {
-                const result = await deleteServiceFromDb(id);
-                if (result.success) {
-                    servicesList = servicesList.filter(s => s.id != id);
-                } else {
-                    errors.push(`Servizio ${id}: ${result.error}`);
-                }
-            }
-            
-            deleteBtn.disabled = false;
-            deleteBtn.textContent = 'Elimina Selezionati';
-            
-            if (errors.length > 0) {
-                alert('Alcuni servizi non sono stati eliminati:\n' + errors.join('\n'));
-            } else {
-                alert('Servizi eliminati con successo');
-            }
-        }
+        // Rimuove i servizi solo dalla lista locale (non dal database)
+        servicesList = servicesList.filter(s => !selectedIds.includes(String(s.id)));
         
         renderServicesTable();
         document.getElementById('select-all-services').checked = false;

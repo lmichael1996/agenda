@@ -18,11 +18,18 @@ require_once '../../src/Auth/AccessControl.php';
 // Carica funzioni calendario (dopo verifiche sicurezza)
 require_once '../../src/Helpers/Calendar.php';
 
+// Carica controller appuntamenti
+require_once '../../src/Controllers/AppointmentsController.php';
+
 // Genera dati per il calendario
 $days = getCurrentWeekDays();
 $dayNames = getDayNames();
 $intervals = generateTimeIntervals();
 $today = new DateTime();
+
+// Carica appuntamenti dal database
+$appointmentsController = new AppointmentsController();
+$appointmentsJSON = $appointmentsController->getCurrentWeekAppointmentsJSON();
 
 // Calcola ora attuale per evidenziazione
 $nowHour = (int)$today->format('H');
@@ -145,6 +152,11 @@ $currentDate = $today->format('Y-m-d');
         </div>
 
     </div>
+
+    <!-- Dati appuntamenti dal database -->
+    <script>
+        window.appointmentsData = <?= $appointmentsJSON ?>;
+    </script>
 
     <!-- JavaScript -->
     <script type="module" src="../assets/js/lateral-menu.js"></script>

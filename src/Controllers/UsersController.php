@@ -80,4 +80,11 @@ class UsersController {
     public function delete($id) {
         return $this->service->delete($id);
     }
+    
+    /**
+     * Salvataggio batch di tutti gli utenti
+     */
+    public function saveAll($users) {
+        return $this->service->saveAll($users);
+    }
 }
