@@ -69,13 +69,6 @@ class UserService {
         }
         
         try {
-            // Verifica username univoco
-            $stmt = $this->db->prepare('SELECT COUNT(*) FROM users WHERE username = ?');
-            $stmt->execute([$user->username]);
-            if ($stmt->fetchColumn() > 0) {
-                return ['success' => false, 'error' => 'Username già in uso'];
-            }
-            
             // Hash password
             $hashedPassword = password_hash($data['password'], PASSWORD_DEFAULT);
             
@@ -91,6 +84,12 @@ class UserService {
             return ['success' => true, 'data' => $user, 'message' => 'Utente creato con successo'];
         } catch (PDOException $e) {
             error_log("UserService::create error: " . $e->getMessage());
+            
+            // Gestisci errore di username duplicato
+            if ($e->getCode() == 23000) {
+                return ['success' => false, 'error' => 'Username già in uso'];
+            }
+            
             return ['success' => false, 'error' => 'Errore nella creazione dell\'utente'];
         }
     }
@@ -109,13 +108,6 @@ class UserService {
         }
         
         try {
-            // Verifica username univoco (escluso questo utente)
-            $stmt = $this->db->prepare('SELECT COUNT(*) FROM users WHERE username = ? AND id != ?');
-            $stmt->execute([$user->username, $id]);
-            if ($stmt->fetchColumn() > 0) {
-                return ['success' => false, 'error' => 'Username già in uso'];
-            }
-            
             // Se c'è una nuova password, aggiornala
             if (!empty($data['password'])) {
                 if (strlen($data['password']) < 8) {
@@ -145,6 +137,12 @@ class UserService {
             }
         } catch (PDOException $e) {
             error_log("UserService::update error: " . $e->getMessage());
+            
+            // Gestisci errore di username duplicato
+            if ($e->getCode() == 23000) {
+                return ['success' => false, 'error' => 'Username già in uso'];
+            }
+            
             return ['success' => false, 'error' => 'Errore nell\'aggiornamento dell\'utente'];
         }
     }
@@ -224,9 +222,9 @@ class UserService {
                 error_log("UserService::saveAll: Eliminati " . $deleteStmt->rowCount() . " utenti non presenti nella lista");
             }
             
-            $insertStmt = $this->db->prepare('INSERT INTO users (username, password_hash, type_role, color) VALUES (?, ?, ?, ?)');
-            $updateStmt = $this->db->prepare('UPDATE users SET username = ?, type_role = ?, color = ? WHERE id = ?');
-            $updatePassStmt = $this->db->prepare('UPDATE users SET username = ?, password_hash = ?, type_role = ?, color = ? WHERE id = ?');
+            $insertStmt = $this->db->prepare('INSERT INTO users (username, password_hash, color) VALUES (?, ?, ?)');
+            $updateStmt = $this->db->prepare('UPDATE users SET username = ?, color = ? WHERE id = ?');
+            $updatePassStmt = $this->db->prepare('UPDATE users SET username = ?, password_hash = ?, color = ? WHERE id = ?');
             
             $errors = [];
             $inserted = 0;
@@ -235,7 +233,6 @@ class UserService {
             foreach ($users as $user) {
                 $username = $user['username'] ?? '';
                 $password = $user['password'] ?? '';
-                $role = $user['role'] ?? 'user';
                 $color = $user['color'] ?? '#3498db';
                 $userId = $user['id'] ?? null;
                 
@@ -249,11 +246,6 @@ class UserService {
                     continue;
                 }
                 
-                if (!in_array($role, ['user', 'admin'])) {
-                    $errors[] = "Ruolo non valido per $username";
-                    continue;
-                }
-                
                 $isNewUser = empty($userId) || str_starts_with($userId, 'temp_');
                 
                 if ($isNewUser) {
@@ -264,17 +256,17 @@ class UserService {
                     }
                     
                     $passwordHash = password_hash($password, PASSWORD_DEFAULT);
-                    $insertStmt->execute([$username, $passwordHash, $role, $color]);
+                    $insertStmt->execute([$username, $passwordHash, $color]);
                     $inserted++;
                 } else {
                     // UTENTE ESISTENTE: UPDATE
                     if (!empty($password)) {
                         // Con nuova password
                         $passwordHash = password_hash($password, PASSWORD_DEFAULT);
-                        $updatePassStmt->execute([$username, $passwordHash, $role, $color, $userId]);
+                        $updatePassStmt->execute([$username, $passwordHash, $color, $userId]);
                     } else {
                         // Senza nuova password (mantieni quella esistente)
-                        $updateStmt->execute([$username, $role, $color, $userId]);
+                        $updateStmt->execute([$username, $color, $userId]);
                     }
                     $updated++;
                 }
