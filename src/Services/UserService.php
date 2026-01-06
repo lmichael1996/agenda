@@ -15,7 +15,7 @@ class UserService {
      */
     public function getAll() {
         try {
-            $stmt = $this->db->prepare('SELECT id, username, type_role, color FROM users ORDER BY username');
+            $stmt = $this->db->prepare('SELECT id, username, color FROM users ORDER BY id');
             $stmt->execute();
             $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
@@ -36,7 +36,7 @@ class UserService {
      */
     public function getById($id) {
         try {
-            $stmt = $this->db->prepare('SELECT id, username, type_role, color FROM users WHERE id = ?');
+            $stmt = $this->db->prepare('SELECT id, username, color FROM users WHERE id = ?');
             $stmt->execute([$id]);
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
             
@@ -79,11 +79,10 @@ class UserService {
             // Hash password
             $hashedPassword = password_hash($data['password'], PASSWORD_DEFAULT);
             
-            $stmt = $this->db->prepare('INSERT INTO users (username, password_hash, type_role, color) VALUES (?, ?, ?, ?)');
+            $stmt = $this->db->prepare('INSERT INTO users (username, password_hash, color) VALUES (?, ?, ?)');
             $stmt->execute([
                 $user->username,
                 $hashedPassword,
-                $user->role,
                 $user->color
             ]);
             
@@ -123,19 +122,17 @@ class UserService {
                     return ['success' => false, 'error' => 'La password deve essere almeno 8 caratteri'];
                 }
                 $hashedPassword = password_hash($data['password'], PASSWORD_DEFAULT);
-                $stmt = $this->db->prepare('UPDATE users SET username = ?, password_hash = ?, type_role = ?, color = ? WHERE id = ?');
+                $stmt = $this->db->prepare('UPDATE users SET username = ?, password_hash = ?, color = ? WHERE id = ?');
                 $stmt->execute([
                     $user->username,
                     $hashedPassword,
-                    $user->role,
                     $user->color,
                     $id
                 ]);
             } else {
-                $stmt = $this->db->prepare('UPDATE users SET username = ?, type_role = ?, color = ? WHERE id = ?');
+                $stmt = $this->db->prepare('UPDATE users SET username = ?, color = ? WHERE id = ?');
                 $stmt->execute([
                     $user->username,
-                    $user->role,
                     $user->color,
                     $id
                 ]);

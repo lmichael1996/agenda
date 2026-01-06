@@ -47,8 +47,9 @@ const initializeCalendar = async () => {
         window.calendar = state.calendar;
         console.log('Calendario inizializzato');
         
-        // Carica appuntamenti dal database
+        // Carica appuntamenti e note dal database
         loadAppointmentsFromDB();
+        loadNotesFromDB();
     } else {
         throw new Error('Classe Calendar non disponibile');
     }
@@ -622,8 +623,9 @@ const loadAppointmentsForWeek = async (weekValue) => {
         // Aggiorna data-date degli slot
         updateCalendarSlots(weekValue);
         
-        // Carica nuovi eventi
+        // Carica nuovi eventi (appuntamenti e note)
         loadAppointmentsFromDB(appointments);
+        loadNotesForWeek(weekValue);
         
     } catch (error) {
         console.error('❌ Errore durante il caricamento degli appuntamenti:', error);
@@ -696,6 +698,103 @@ const loadAppointmentsFromDB = (appointmentsData = null) => {
     
     console.log('\n=== CARICAMENTO COMPLETATO ===');
     console.log(`Eventi totali nel calendario: ${state.calendar ? state.calendar.getAllEvents().length : 0}`);
+};
+
+// Carica note per una settimana specifica via AJAX
+const loadNotesForWeek = async (weekValue) => {
+    console.log(`📝 Caricamento note per settimana: ${weekValue}`);
+    
+    try {
+        const response = await fetch(`../api/notes.php?week=${weekValue}`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const notes = await response.json();
+        
+        if (notes.error) {
+            console.error('❌ Errore dal server:', notes.error);
+            return;
+        }
+        
+        console.log(`✅ Ricevute ${notes.length} note dal server`);
+        
+        // Carica le note
+        loadNotesFromDB(notes);
+        
+    } catch (error) {
+        console.error('❌ Errore durante il caricamento delle note:', error);
+    }
+};
+
+// === CARICAMENTO NOTE DAL DATABASE ===
+const loadNotesFromDB = (notesData = null) => {
+    console.log('=== CARICAMENTO NOTE DAL DATABASE ===');
+    
+    // Use parameter or fallback to window.notesData
+    const notes = notesData || window.notesData;
+    
+    if (!notes) {
+        console.warn('⚠️ Nessun dato note disponibile');
+        return;
+    }
+    
+    console.log(`✅ Trovate ${notes.length} note nel database`);
+    
+    if (notes.length === 0) {
+        console.warn('⚠️ Array note vuoto');
+        return;
+    }
+    
+    notes.forEach((note, index) => {
+        console.log(`\n--- Nota ${index + 1}/${notes.length} ---`);
+        console.log(`Titolo: ${note.title || '(senza titolo)'}`);
+        console.log(`Data: ${note.date}, Ora: ${note.time}`);
+        
+        // Trova lo slot corretto per data e ora (già formattate dal backend)
+        const slot = document.querySelector(`.day[data-date="${note.date}"][data-time="${note.time}"]`);
+        
+        if (slot && state.calendar) {
+            // Crea l'evento per la nota
+            const noteText = note.title || note.content.substring(0, 30);
+            const event = state.calendar.createEvent(`📝 ${noteText}`, 30, slot); // 30 minuti di default per le note
+            
+            if (event && event.element) {
+                // Aggiungi l'evento allo slot
+                state.calendar.eventManager.addEventToSlot(event, slot);
+                
+                // Stile distintivo per le note (giallo)
+                event.element.style.backgroundColor = '#fff3cd';
+                event.element.style.borderColor = '#ffc107';
+                event.element.style.color = '#856404';
+                event.element.style.fontWeight = 'bold';
+                
+                // Aggiungi dati custom all'elemento
+                event.element.dataset.noteId = note.id;
+                event.element.dataset.noteType = 'note';
+                event.element.dataset.userId = note.user_id;
+                event.element.dataset.forAll = note.for_all;
+                
+                // Aggiungi tooltip con info complete
+                const tooltipText = `NOTA\nTitolo: ${note.title || '(nessun titolo)'}\n${note.content}\n${note.for_all ? 'Per tutti gli utenti' : 'Nota personale'}`;
+                event.element.title = tooltipText;
+                
+                console.log(`✅ Nota creata con successo`);
+            } else {
+                console.error(`❌ Impossibile creare nota`);
+            }
+        } else {
+            if (!slot) {
+                console.error(`❌ Slot non trovato per data="${note.date}" time="${note.time}"`);
+            }
+            if (!state.calendar) {
+                console.error('❌ state.calendar non disponibile');
+            }
+        }
+    });
+    
+    console.log('\n=== CARICAMENTO NOTE COMPLETATO ===');
 };
 
 

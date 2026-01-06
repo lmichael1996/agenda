@@ -26,7 +26,7 @@ const POPUP_CONFIGS = {
     services: {
         url: 'popup/services.php',
         title: 'Gestione Servizi',
-        width: 1500,
+        width: 1600,
         height: 1100
     },
     users: {

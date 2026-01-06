@@ -18,8 +18,10 @@ require_once '../../src/Auth/AccessControl.php';
 // Carica funzioni calendario (dopo verifiche sicurezza)
 require_once '../../src/Helpers/Calendar.php';
 
-// Carica controller appuntamenti
+// Carica controller appuntamenti e note
 require_once '../../src/Controllers/AppointmentsController.php';
+require_once '../../src/Controllers/NotesController.php';
+require_once '../../src/Database/Connection.php';
 
 // Genera dati per il calendario
 $days = getCurrentWeekDays();
@@ -30,6 +32,11 @@ $today = new DateTime();
 // Carica appuntamenti dal database
 $appointmentsController = new AppointmentsController();
 $appointmentsJSON = $appointmentsController->getCurrentWeekAppointmentsJSON();
+
+// Carica note dal database (settimana corrente)
+$db = getDBConnection();
+$notesController = new NotesController($db);
+$notesJSON = $notesController->getCurrentWeekNotesJSON();
 
 // Calcola ora attuale per evidenziazione
 $nowHour = (int)$today->format('H');
@@ -153,9 +160,10 @@ $currentDate = $today->format('Y-m-d');
 
     </div>
 
-    <!-- Dati appuntamenti dal database -->
+    <!-- Dati appuntamenti e note dal database -->
     <script>
         window.appointmentsData = <?= $appointmentsJSON ?>;
+        window.notesData = <?= $notesJSON ?>;
     </script>
 
     <!-- JavaScript -->

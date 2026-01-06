@@ -144,8 +144,12 @@ body {
 }
 
 .day.selected {
-    background: rgba(108, 117, 125, 0.8) !important;
+    background: rgba(44, 95, 141, 0.8) !important;
     color: white;
+}
+
+.day.current-time {
+    border-bottom: 5px solid #000000 !important;
 }
 
 .search-highlight {

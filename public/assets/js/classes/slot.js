@@ -25,7 +25,7 @@ class Slot {
     
     handleDragOver(e) {
         e.preventDefault();
-        this.element.style.background = '#e0f7fa';
+        this.element.style.background = 'rgba(44, 95, 141, 0.5)';
     }
     
     handleDragLeave() {

@@ -7,8 +7,9 @@ class Note {
     public $id;
     public $title;
     public $content;
-    public $created_at;
-    public $updated_at;
+    public $user_id;
+    public $for_all;
+    public $note_date;
     
     /**
      * Costruttore
@@ -26,8 +27,9 @@ class Note {
         $this->id = $data['id'] ?? null;
         $this->title = $data['title'] ?? '';
         $this->content = $data['content'] ?? '';
-        $this->created_at = $data['created_at'] ?? null;
-        $this->updated_at = $data['updated_at'] ?? null;
+        $this->user_id = $data['user_id'] ?? null;
+        $this->for_all = isset($data['for_all']) ? (bool)$data['for_all'] : false;
+        $this->note_date = $data['note_date'] ?? null;
     }
     
     /**
@@ -38,8 +40,9 @@ class Note {
             'id' => $this->id,
             'title' => $this->title,
             'content' => $this->content,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at
+            'user_id' => $this->user_id,
+            'for_all' => $this->for_all,
+            'note_date' => $this->note_date
         ];
     }
     
@@ -49,12 +52,19 @@ class Note {
     public function validate() {
         $errors = [];
         
-        if (empty(trim($this->title))) {
-            $errors[] = 'Il titolo è obbligatorio';
+        // Almeno uno tra title e content deve essere presente
+        if (empty(trim($this->title)) && empty(trim($this->content))) {
+            $errors[] = 'Inserisci almeno titolo o contenuto';
         }
         
-        if (empty(trim($this->content))) {
-            $errors[] = 'Il contenuto è obbligatorio';
+        // user_id obbligatorio
+        if (empty($this->user_id)) {
+            $errors[] = 'Utente obbligatorio';
+        }
+        
+        // note_date obbligatoria
+        if (empty($this->note_date)) {
+            $errors[] = 'Data obbligatoria';
         }
         
         return empty($errors) ? ['valid' => true] : ['valid' => false, 'errors' => $errors];

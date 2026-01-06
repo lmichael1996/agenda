@@ -26,7 +26,7 @@ class AuthController {
         
         // Query preparata per sicurezza
         $stmt = $this->conn->prepare(
-            'SELECT id, username, password_hash, type_role, is_active 
+            'SELECT id, username, password_hash, color
              FROM users 
              WHERE username = ? 
              LIMIT 1'
@@ -52,12 +52,6 @@ class AuthController {
         // Utente non trovato
         if (!$user) {
             error_log("AuthController: User not found - '$username'");
-            return false;
-        }
-        
-        // Utente disattivato
-        if (!$user['is_active']) {
-            error_log("AuthController: User inactive - '$username'");
             return false;
         }
         

@@ -89,4 +89,77 @@ class NotesController {
         
         return $result;
     }
+    
+    /**
+     * Ottiene le note formattate per la settimana corrente
+     * @return string JSON delle note
+     */
+    public function getCurrentWeekNotesJSON() {
+        $today = new DateTime();
+        $weekStart = clone $today;
+        $weekStart->modify('monday this week');
+        $weekEnd = clone $weekStart;
+        $weekEnd->modify('+6 days');
+
+        $notes = $this->getWeekNotes(
+            $weekStart->format('Y-m-d'),
+            $weekEnd->format('Y-m-d')
+        );
+
+        $formatted = $this->formatForCalendar($notes);
+        
+        return json_encode($formatted, JSON_UNESCAPED_UNICODE);
+    }
+    
+    /**
+     * Ottiene le note per un intervallo di date
+     * @param string $startDate Data inizio (Y-m-d)
+     * @param string $endDate Data fine (Y-m-d)
+     * @return array Array di note
+     */
+    private function getWeekNotes($startDate, $endDate) {
+        $result = $this->service->getAll();
+        
+        if (!$result['success'] || !isset($result['data'])) {
+            return [];
+        }
+        
+        // Filtra le note per l'intervallo di date
+        $notes = array_filter($result['data'], function($note) use ($startDate, $endDate) {
+            $noteArray = is_array($note) ? $note : $note->toArray();
+            return $noteArray['note_date'] >= $startDate && $noteArray['note_date'] <= $endDate;
+        });
+        
+        return array_map(function($note) {
+            return is_array($note) ? $note : $note->toArray();
+        }, $notes);
+    }
+    
+    /**
+     * Formatta le note per il calendario
+     * @param array $notes Array di note dal database
+     * @return array Array di note formattate per il calendario
+     */
+    private function formatForCalendar($notes) {
+        $events = [];
+        
+        foreach ($notes as $note) {
+            // Converti la data dal formato YYYY-MM-DD a DD-MM-YYYY
+            $date = new DateTime($note['note_date']);
+            
+            $events[] = [
+                'id' => $note['id'],
+                'type' => 'note',
+                'date' => $date->format('d-m-Y'),
+                'time' => '08:00', // Orario fisso per le note
+                'title' => $note['title'] ?: '',
+                'content' => $note['content'] ?: '',
+                'user_id' => $note['user_id'],
+                'for_all' => (bool)$note['for_all']
+            ];
+        }
+        
+        return $events;
+    }
 }
+

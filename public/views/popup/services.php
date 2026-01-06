@@ -103,9 +103,9 @@ require_once '../../../src/Auth/AccessControl.php';
             console.log('Risposta caricamento servizi:', data);
             
             if (data.success && Array.isArray(data.services)) {
-                // Filtra il servizio di default (id=1) dalla lista visibile
+                // Escludi il servizio default (id=1) dalla visualizzazione
                 servicesList = data.services.filter(s => s.id != 1);
-                serviceIdCounter = servicesList.length ? Math.max(...servicesList.map(s => s.id)) + 1 : 1;
+                serviceIdCounter = servicesList.length ? Math.max(...servicesList.map(s => s.id)) + 1 : 2;
                 console.log('Servizi caricati (escluso default):', servicesList.length);
                 if (servicesList.length > 0) {
                     console.log('Primo servizio:', servicesList[0]);

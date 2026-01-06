@@ -15,7 +15,7 @@ class NoteService {
      */
     public function getAll() {
         try {
-            $stmt = $this->db->prepare('SELECT id, title, content, created_at, updated_at FROM notes ORDER BY updated_at DESC');
+            $stmt = $this->db->prepare('SELECT id, title, content, user_id, for_all, note_date FROM notes ORDER BY note_date DESC, id DESC');
             $stmt->execute();
             $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
@@ -36,7 +36,7 @@ class NoteService {
      */
     public function getById($id) {
         try {
-            $stmt = $this->db->prepare('SELECT id, title, content, created_at, updated_at FROM notes WHERE id = ?');
+            $stmt = $this->db->prepare('SELECT id, title, content, user_id, for_all, note_date FROM notes WHERE id = ?');
             $stmt->execute([$id]);
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
             
@@ -64,15 +64,16 @@ class NoteService {
         }
         
         try {
-            $stmt = $this->db->prepare('INSERT INTO notes (title, content, created_at, updated_at) VALUES (?, ?, NOW(), NOW())');
+            $stmt = $this->db->prepare('INSERT INTO notes (title, content, user_id, for_all, note_date) VALUES (?, ?, ?, ?, ?)');
             $stmt->execute([
                 $note->title,
-                $note->content
+                $note->content,
+                $note->user_id,
+                $note->for_all ? 1 : 0,
+                $note->note_date
             ]);
             
             $note->id = $this->db->lastInsertId();
-            $note->created_at = date('Y-m-d H:i:s');
-            $note->updated_at = date('Y-m-d H:i:s');
             
             return ['success' => true, 'data' => $note, 'message' => 'Nota creata con successo'];
         } catch (PDOException $e) {
@@ -95,15 +96,17 @@ class NoteService {
         }
         
         try {
-            $stmt = $this->db->prepare('UPDATE notes SET title = ?, content = ?, updated_at = NOW() WHERE id = ?');
+            $stmt = $this->db->prepare('UPDATE notes SET title = ?, content = ?, user_id = ?, for_all = ?, note_date = ? WHERE id = ?');
             $stmt->execute([
                 $note->title,
                 $note->content,
+                $note->user_id,
+                $note->for_all ? 1 : 0,
+                $note->note_date,
                 $id
             ]);
             
             if ($stmt->rowCount() > 0) {
-                $note->updated_at = date('Y-m-d H:i:s');
                 return ['success' => true, 'data' => $note, 'message' => 'Nota aggiornata con successo'];
             } else {
                 return ['success' => false, 'error' => 'Nota non trovata o nessuna modifica'];
@@ -139,7 +142,7 @@ class NoteService {
     public function search($query) {
         try {
             $searchTerm = '%' . $query . '%';
-            $stmt = $this->db->prepare('SELECT id, title, content, created_at, updated_at FROM notes WHERE title LIKE ? OR content LIKE ? ORDER BY updated_at DESC');
+            $stmt = $this->db->prepare('SELECT id, title, content, user_id, for_all, note_date FROM notes WHERE title LIKE ? OR content LIKE ? ORDER BY note_date DESC, id DESC');
             $stmt->execute([$searchTerm, $searchTerm]);
             $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
             

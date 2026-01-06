@@ -12,7 +12,6 @@ CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
-    type_role ENUM('user', 'admin') DEFAULT 'user',
     color VARCHAR(7) DEFAULT '#3498db'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -38,9 +37,9 @@ CREATE TABLE IF NOT EXISTS services (
 -- Tabella super appuntamenti (appuntamento principale)
 CREATE TABLE IF NOT EXISTS super_appointments (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    client_id INT NOT NULL,
+    client_id INT NOT NULL DEFAULT 1,
     start_time DATETIME NOT NULL,
-    FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE
+    FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Tabella appuntamenti (servizi dell'appuntamento)
@@ -57,8 +56,10 @@ CREATE TABLE IF NOT EXISTS appointments (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- NOTA: MySQL/MariaDB non supporta ON DELETE SET DEFAULT.
--- L'aggiornamento al servizio default (id=1) e all'utente default (id=1) 
--- è gestito a livello applicativo nel controller prima dell'eliminazione.
+-- L'aggiornamento ai valori default è gestito a livello applicativo nel controller prima dell'eliminazione:
+-- - Cliente default: id=1 (per super_appointments)
+-- - Servizio default: id=1 (per appointments)
+-- - Utente default: id=1 (per appointments)
 
 -- Tabella note
 CREATE TABLE IF NOT EXISTS notes (

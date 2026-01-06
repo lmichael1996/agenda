@@ -43,7 +43,6 @@ $sampleUsers = [];
                                 <th class="username-col">Username</th>
                                 <th class="password-col">Password</th>
                                 <th class="color-col">Colore</th>
-                                <th class="role-col">Ruolo</th>
                                 <th class="actions-col">Azioni</th>
                             </tr>
                         </thead>
@@ -109,22 +108,27 @@ $sampleUsers = [];
 
         function generateUserRow(user) {
             const isNewUser = String(user.id).startsWith('temp_');
+            const isDefaultUser = user.id == 1; // Utente default non può essere eliminato
             const passwordPlaceholder = isNewUser ? "Inserisci password" : "Vuoto = mantieni";
+            
+            // Checkbox disabilitato per utente default
+            const checkboxHtml = isDefaultUser 
+                ? '<input type="checkbox" class="row-select" disabled>' 
+                : '<input type="checkbox" class="row-select">';
+            
+            // Nessun pulsante elimina per utente default
+            const actionsHtml = isDefaultUser 
+                ? '<span style="color: #999; font-style: italic;">Admin</span>' 
+                : `<button class="action-btn btn-delete-single" data-user-id="${user.id}" title="Elimina">Elimina</button>`;
             
             return `
                 <tr data-user-id="${user.id}">
-                    <td><input type="checkbox" class="row-select"></td>
+                    <td>${checkboxHtml}</td>
                     <td><input type="text" value="${escapeHtml(user.username)}" class="cell-input"></td>
                     <td><input type="password" value="" placeholder="${passwordPlaceholder}" class="cell-input"></td>
                     <td><input type="color" value="${escapeHtml(user.color)}" class="cell-color"></td>
-                    <td>
-                        <select class="role-select">
-                            <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
-                            <option value="user" ${user.role === 'user' ? 'selected' : ''}>User</option>
-                        </select>
-                    </td>
                     <td class="actions-cell">
-                        <button class="action-btn btn-delete-single" data-user-id="${user.id}" title="Elimina">Elimina</button>
+                        ${actionsHtml}
                     </td>
                 </tr>
             `;
@@ -134,7 +138,7 @@ $sampleUsers = [];
             const tbody = document.getElementById('users-list');
             if (!tbody) return;
             if (!usersList.length) {
-                tbody.innerHTML = '<tr><td colspan="6">Nessun utente configurato</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5">Nessun utente configurato</td></tr>';
                 updateSelectionStats();
                 return;
             }
@@ -158,10 +162,10 @@ $sampleUsers = [];
                 console.log('Dati ricevuti:', data);
                 
                 if (data.success && Array.isArray(data.users)) {
-                    // Filtra l'utente default (id=1) dalla visualizzazione
-                    usersList = data.users.filter(u => u.id != 1);
+                    // Mostra tutti gli utenti, compreso l'utente default (id=1)
+                    usersList = data.users;
                     userIdCounter = usersList.length ? Math.max(...usersList.map(u => u.id)) + 1 : 2; // Parte da 2 perché 1 è riservato
-                    console.log('Utenti caricati (escluso default):', usersList.length);
+                    console.log('Utenti caricati:', usersList.length);
                 } else {
                     console.error('Errore nel formato dati:', data);
                     alert('Errore caricamento utenti dal database');
@@ -176,7 +180,6 @@ $sampleUsers = [];
             const newUser = {
                 id: 'temp_' + Date.now(),
                 username: 'nuovo_utente_' + (usersList.length + 1),
-                role: 'user',
                 color: '#3498db'
             };
             usersList.push(newUser);
@@ -209,19 +212,17 @@ $sampleUsers = [];
             const users = [];
             
             rows.forEach((row, index) => {
-                if (row.cells.length < 6) return; // Salta righe vuote
+                if (row.cells.length < 5) return; // Salta righe vuote
                 
                 const username = row.cells[1].querySelector('input').value.trim();
                 const password = row.cells[2].querySelector('input').value.trim();
                 const color = row.cells[3].querySelector('input').value;
-                const role = row.cells[4].querySelector('select').value; // admin o user
                 const userId = row.dataset.userId;
                 
                 if (username) { // Solo se c'è un username
                     const userData = {
                         username,
-                        color,
-                        role: role
+                        color
                     };
                     
                     // Includi password solo se è stata inserita
@@ -340,7 +341,8 @@ $sampleUsers = [];
         document.addEventListener('change', e => {
             if (e.target.id === 'select-all-users') {
                 const checked = e.target.checked;
-                document.querySelectorAll('.row-select').forEach(cb => cb.checked = checked);
+                // Seleziona solo i checkbox non disabilitati
+                document.querySelectorAll('.row-select:not(:disabled)').forEach(cb => cb.checked = checked);
                 updateSelectionStats();
             }
             

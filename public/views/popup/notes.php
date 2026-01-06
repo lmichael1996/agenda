@@ -70,9 +70,32 @@ require_once '../../../src/Auth/AccessControl.php';
             </form>
         </div>
     </div>
-    <script type="module">
-        import { saveNote, formatDateForAPI, validateNoteData } from '../assets/js/api/notes-api.js';
-        import { fetchSchedule } from '../assets/js/api/schedule-api.js';
+    <script>
+        // === API FUNCTIONS ===
+        
+        async function fetchSchedule() {
+            const response = await fetch('../../../src/Api/api.php?endpoint=schedule');
+            return await response.json();
+        }
+        
+        function validateNoteData(data) {
+            const errors = [];
+            if (!data.user_id) errors.push('Utente obbligatorio');
+            if (!data.note_date) errors.push('Data obbligatoria');
+            if (!data.title && !data.content) errors.push('Inserisci almeno titolo o contenuto');
+            return { valid: errors.length === 0, errors };
+        }
+        
+        async function saveNote(noteData) {
+            const response = await fetch('../../../src/Api/api.php?endpoint=notes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(noteData)
+            });
+            return await response.json();
+        }
+        
+        // === MAIN FUNCTIONS ===
         
         // Carica orario di apertura dalla configurazione schedule
         async function loadOpeningHour() {
@@ -151,33 +174,40 @@ require_once '../../../src/Auth/AccessControl.php';
         
         // Carica utenti tramite API
         async function loadUsers() {
+            console.log('=== INIZIO CARICAMENTO UTENTI ===');
             try {
                 const response = await fetch('../../../src/Api/api.php?endpoint=users');
+                console.log('Response status:', response.status);
                 const userSelect = document.getElementById('note-user');
+                console.log('User select element:', userSelect);
                 const data = await response.json();
+                console.log('Data ricevuti:', data);
                 
                 if (data.success && data.users) {
                     userSelect.innerHTML = '';
-                    let firstActiveUser = null;
+                    let firstUser = null;
                     data.users.forEach(user => {
-                        if (user.is_active == 1) { // Solo utenti attivi
-                            const option = document.createElement('option');
-                            option.value = user.id;
-                            option.textContent = user.username;
-                            userSelect.appendChild(option);
-                            
-                            // Memorizza il primo utente attivo
-                            if (!firstActiveUser) {
-                                firstActiveUser = user.id;
-                            }
+                        console.log('Aggiunta utente:', user);
+                        // Mostra tutti gli utenti
+                        const option = document.createElement('option');
+                        option.value = user.id;
+                        option.textContent = user.username;
+                        userSelect.appendChild(option);
+                        
+                        // Memorizza il primo utente
+                        if (!firstUser) {
+                            firstUser = user.id;
                         }
                     });
                     
-                    // Seleziona automaticamente il primo utente attivo
-                    if (firstActiveUser) {
-                        userSelect.value = firstActiveUser;
+                    // Seleziona automaticamente il primo utente
+                    if (firstUser) {
+                        userSelect.value = firstUser;
+                        console.log('Primo utente selezionato:', firstUser);
                     }
+                    console.log('=== CARICAMENTO UTENTI COMPLETATO ===');
                 } else {
+                    console.error('Errore nei dati ricevuti:', data);
                     userSelect.innerHTML = '<option value="">Errore caricamento utenti</option>';
                 }
             } catch (error) {
@@ -210,12 +240,17 @@ require_once '../../../src/Auth/AccessControl.php';
         
         // Inizializza al caricamento della pagina
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('=== DOM CONTENT LOADED ===');
+            console.log('Chiamata loadUsers()...');
             loadUsers();
+            console.log('Chiamata loadOpeningHour()...');
             loadOpeningHour();
+            console.log('Chiamata setupCharacterCounters()...');
             setupCharacterCounters();
             
             // Focus sul primo campo
             document.getElementById('note-title').focus();
+            console.log('=== INIZIALIZZAZIONE COMPLETATA ===');
         });
         
         // Rendi la funzione loadUsers disponibile globalmente per compatibilità

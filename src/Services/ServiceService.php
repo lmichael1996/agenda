@@ -15,7 +15,7 @@ class ServiceService {
      */
     public function getAll() {
         try {
-            $stmt = $this->db->prepare('SELECT id, name, duration, price, description FROM services ORDER BY name');
+            $stmt = $this->db->prepare('SELECT id, name, duration, price, description FROM services ORDER BY id');
             $stmt->execute();
             $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
             

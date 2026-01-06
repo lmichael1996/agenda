@@ -6,7 +6,6 @@
 class User {
     public $id;
     public $username;
-    public $role;
     public $color;
     
     /**
@@ -24,8 +23,6 @@ class User {
     public function hydrate($data) {
         $this->id = $data['id'] ?? null;
         $this->username = $data['username'] ?? '';
-        // Supporta sia 'role' che 'type_role' per compatibilità
-        $this->role = $data['role'] ?? $data['type_role'] ?? 'user';
         $this->color = $data['color'] ?? '#3498db';
     }
     
@@ -36,7 +33,6 @@ class User {
         return [
             'id' => $this->id,
             'username' => $this->username,
-            'role' => $this->role,
             'color' => $this->color
         ];
     }
@@ -51,17 +47,6 @@ class User {
             $errors[] = 'Username deve essere almeno 3 caratteri';
         }
         
-        if (!in_array($this->role, ['user', 'admin'])) {
-            $errors[] = 'Ruolo non valido';
-        }
-        
         return empty($errors) ? ['valid' => true] : ['valid' => false, 'errors' => $errors];
-    }
-    
-    /**
-     * Verifica se è admin
-     */
-    public function isAdmin() {
-        return $this->role === 'admin';
     }
 }
