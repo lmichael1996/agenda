@@ -541,19 +541,13 @@ function addAppointment(clientId) {
         return;
     }
 
-    // Find client data for appointment context
-    const client = clients.find(c => c.id == clientId);
-    const clientName = client ? 
-        [client.first_name, client.last_name].filter(Boolean).join(' ') : 
-        `Cliente ID ${clientId}`;
-
-    const popupUrl = `new-appointment.php?clientId=${clientId}&clientName=${encodeURIComponent(clientName)}`;
+    const popupUrl = `new-appointment.php?clientId=${clientId}`;
     console.log('Opening new appointment popup URL:', popupUrl);
     
     const popupWindow = openCenteredPopup(popupUrl, 'NewAppointment_' + clientId, 1250, 800);
     
     if (popupWindow) {
-        console.log(`New appointment popup opened for client: ${clientName}`);
+        console.log(`New appointment popup opened for client ID: ${clientId}`);
     } else {
         console.error('Failed to open new appointment popup window');
         alert('Impossibile aprire la finestra nuovo appuntamento. Controlla le impostazioni del browser.');

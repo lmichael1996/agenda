@@ -66,6 +66,68 @@ body {
     padding: 8px;
 }
 
+/* Override per new-appointment */
+#appointment-form.note-form {
+    max-width: 800px;
+}
+
+/* Stili per appuntamento multiplo */
+.multiple-appointment-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.multiple-appointment-container label {
+    margin: 0;
+}
+
+#appointment-counter {
+    width: 80px;
+}
+
+#counter-label {
+    color: #666;
+}
+
+.secondary-btn {
+    margin-top: 8px;
+}
+
+/* Stili per riga servizio con tre select */
+.service-row {
+    display: grid;
+    grid-template-columns: 1fr 2fr 100px 36px;
+    gap: 8px;
+    margin-bottom: 8px;
+    align-items: center;
+}
+
+.user-select,
+.service-select,
+.duration-select {
+    width: 100%;
+}
+
+.remove-service-btn {
+    width: 36px;
+    height: 36px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.remove-service-btn:hover {
+    background: #c82333;
+}
+
 /* === TABELLE === */
 .excel-table {
     width: 100%;
@@ -188,9 +250,27 @@ body {
 .cell-textarea {
     resize: vertical;
     min-height: 60px;
-    text-align: center;
+    text-align: left;
     vertical-align: top;
     padding: 8px 10px;
+}
+
+/* Allineamento verticale per celle con textarea */
+.note-table td {
+    vertical-align: middle;
+    text-align: center;
+}
+
+.note-table td textarea {
+    display: block;
+    width: 100%;
+    margin: 0 auto;
+    text-align: left;
+}
+
+.note-table td #first-name,
+.note-table td #last-name {
+    text-align: center;
 }
 
 .note-checkbox {
