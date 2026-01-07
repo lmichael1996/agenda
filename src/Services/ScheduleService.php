@@ -79,6 +79,49 @@ class ScheduleService {
     }
     
     /**
+     * Ottieni appuntamenti per cliente
+     */
+    public function getByClient($clientId) {
+        try {
+            $stmt = $this->db->prepare('
+                SELECT 
+                    a.id,
+                    a.super_appointment_id,
+                    sa.client_id,
+                    c.first_name,
+                    c.last_name,
+                    CONCAT(c.first_name, " ", c.last_name) as client_name,
+                    s.name as service_name,
+                    a.duration,
+                    DATE_FORMAT(sa.start_time, "%d-%m-%Y") as date,
+                    DATE_FORMAT(sa.start_time, "%H:%i") as time,
+                    sa.start_time,
+                    sa.note,
+                    u.username as user_name
+                FROM appointments a
+                JOIN super_appointments sa ON a.super_appointment_id = sa.id
+                JOIN clients c ON sa.client_id = c.id
+                LEFT JOIN services s ON a.service_id = s.id
+                LEFT JOIN users u ON a.user_id = u.id
+                WHERE sa.client_id = :client_id
+                ORDER BY sa.start_time DESC
+            ');
+            $stmt->bindParam(':client_id', $clientId, PDO::PARAM_INT);
+            $stmt->execute();
+            $appointments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            return [
+                'success' => true, 
+                'appointments' => $appointments,
+                'count' => count($appointments)
+            ];
+        } catch (PDOException $e) {
+            error_log("ScheduleService::getByClient error: " . $e->getMessage());
+            return ['success' => false, 'error' => 'Errore nel recupero degli appuntamenti del cliente'];
+        }
+    }
+    
+    /**
      * Ottieni un appuntamento per ID
      */
     public function getById($id) {

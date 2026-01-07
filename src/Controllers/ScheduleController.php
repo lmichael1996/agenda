@@ -45,6 +45,13 @@ class ScheduleController {
     }
     
     /**
+     * Ottieni appuntamenti per cliente
+     */
+    public function getByClient($clientId) {
+        return $this->service->getByClient($clientId);
+    }
+    
+    /**
      * Ottieni un appuntamento specifico
      */
     public function getById($id) {

@@ -124,9 +124,15 @@ button:disabled {
 /* Pulsanti specializzati */
 .action-btn { 
     padding: 6px 8px; 
-    font-size: 8px; 
-    width: 100%;
+    font-size: 12px; 
+    width: 48%;
     border-color: #333;
+}
+
+.actions-cell {
+    display: flex;
+    justify-content: space-between;
+    gap: 4px;
 }
 
 .control-btn {
@@ -422,27 +428,27 @@ input:valid {
 .search-field-select,
 .search-type-select,
 .sort-select {
-    padding: 8px 12px;
+    padding: 6px 10px;
     border: 2px solid #ddd;
     border-radius: 6px;
-    text-align: center;
-    text-align-last: center;
-    font-size: 12px;
+    text-align: left;
+    text-align-last: left;
+    font-size: 11px;
     background: #fff;
     font-family: inherit;
     font-weight: 500;
 }
 
 .search-field-select {
-    min-width: 160px;
+    min-width: 140px;
 }
 
 .search-type-select {
-    min-width: 150px;
+    min-width: 110px;
 }
 
 .sort-select {
-    min-width: 180px;
+    min-width: 130px;
 }
 
 .pagination-section {

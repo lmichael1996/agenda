@@ -14,6 +14,8 @@ require_once '../../../src/Auth/AccessControl.php';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestione Note - Agenda</title>
     <link rel="stylesheet" href="../../assets/css/scheme-popup.css">
+    <link rel="stylesheet" href="../../assets/css/client-detail.css">
+    <link rel="stylesheet" href="../../assets/css/scrollbar.css">
 </head>
 <body>
     <div class="popup-window-container">

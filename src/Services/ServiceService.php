@@ -126,7 +126,7 @@ class ServiceService {
             }
             
             // Aggiorna gli appuntamenti che usano questo servizio al servizio di default (id=1)
-            $stmt = $this->db->prepare('UPDATE appointments SET service_id = 1, note = CONCAT(COALESCE(note, ""), "\n[Servizio originale eliminato]") WHERE service_id = ?');
+            $stmt = $this->db->prepare('UPDATE appointments SET service_id = 1 WHERE service_id = ?');
             $stmt->execute([$id]);
             $affectedAppointments = $stmt->rowCount();
             

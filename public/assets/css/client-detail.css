@@ -1,0 +1,79 @@
+/**
+ * Client Detail Popup Styles
+ * Stili specifici per la pagina di dettaglio cliente
+ */
+
+/* Error container */
+#error-container {
+    display: none;
+    text-align: center;
+    padding: 20px;
+    color: #d32f2f;
+}
+
+#error-message-text {
+    background: #ffebee;
+    padding: 15px;
+    border-radius: 4px;
+}
+
+/* Appointment history section */
+.appointment-history-section {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #ddd;
+}
+
+.appointment-history-section h3 {
+    font-family: 'Courier New', monospace;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #000;
+}
+
+#appointment-history-content {
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+}
+
+#appointment-history-loading,
+#appointment-history-empty {
+    color: #666;
+    font-style: italic;
+    padding: 20px;
+    text-align: center;
+}
+
+#appointment-history-list table {
+    border-collapse: collapse;
+}
+
+#appointment-history-list th {
+    background: #000;
+    color: #fff;
+    font-weight: bold;
+    text-align: left;
+    padding: 8px;
+    border: 1px solid #000;
+}
+
+#appointment-history-list td {
+    padding: 8px;
+    border: 1px solid #ddd;
+    background: #fff;
+}
+
+#appointment-history-list tr:hover td {
+    background: #f5f5f5;
+}
+
+/* Delete button */
+.delete-btn {
+    background: #dc3545;
+    border-color: #dc3545;
+}
+
+.delete-btn:hover {
+    opacity: 0.9;
+    color: #dc3545;
+}

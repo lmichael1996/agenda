@@ -42,31 +42,35 @@ if ($clientName) {
                         <label for="first-name">Nome:</label>
                         <input type="text" id="first-name" name="first_name" 
                                value="<?= htmlspecialchars($firstName) ?>" 
-                               placeholder="Inserisci il nome" required>
+                               placeholder="Inserisci il nome" 
+                               readonly required>
                     </div>
                     
                     <div class="form-group">
                         <label for="last-name">Cognome:</label>
                         <input type="text" id="last-name" name="last_name" 
                                value="<?= htmlspecialchars($lastName) ?>" 
-                               placeholder="Inserisci il cognome" required>
+                               placeholder="Inserisci il cognome" 
+                               readonly required>
                     </div>
                 </div>
 
                 <div class="form-row">
-                    <div class="form-group">
-                        <label for="service">Servizio:</label>
-                        <select id="service" name="service_id" required>
-                            <option value="">Seleziona servizio...</option>
-                            <!-- Le opzioni verranno caricate dinamicamente -->
-                        </select>
+                    <div class="form-group full-width">
+                        <label>Servizi:</label>
+                        <div id="services-container">
+                            <!-- I servizi verranno aggiunti dinamicamente qui -->
+                        </div>
+                        <button type="button" id="add-service-btn" class="secondary-btn">
+                            ➕ Aggiungi Servizio
+                        </button>
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
                         <label for="appointment-date">Data:</label>
-                        <input type="date" id="appointment-date" name="appointment_date" required>
+                        <input type="date" id="appointment-date" name="appointment_date" value="<?= date('Y-m-d', strtotime('+1 day')) ?>" required>
                     </div>
                     
                     <div class="form-group">
@@ -105,28 +109,81 @@ if ($clientName) {
 
         // Elementi DOM
         const form = document.getElementById('appointment-form');
-        const serviceSelect = document.getElementById('service');
+        const servicesContainer = document.getElementById('services-container');
+        const addServiceBtn = document.getElementById('add-service-btn');
         const cancelBtn = document.getElementById('cancel-btn');
         const saveBtn = document.getElementById('save-btn');
+
+        let availableServices = [];
+        let serviceCounter = 0;
 
         // Carica i servizi disponibili
         async function loadServices() {
             try {
                 const response = await fetchServices();
                 if (response.success && response.services) {
-                    serviceSelect.innerHTML = '<option value="">Seleziona servizio...</option>';
-                    response.services.forEach(service => {
-                        const option = document.createElement('option');
-                        option.value = service.id;
-                        option.textContent = `${service.name} (${service.duration} min - €${service.price})`;
-                        serviceSelect.appendChild(option);
-                    });
+                    availableServices = response.services;
+                    // Aggiungi automaticamente il primo servizio
+                    addServiceRow();
                 }
             } catch (error) {
                 console.error('Errore caricamento servizi:', error);
-                serviceSelect.innerHTML = '<option value="">Errore caricamento servizi</option>';
+                alert('Errore nel caricamento dei servizi');
             }
         }
+
+        // Crea una riga di servizio
+        function createServiceSelect(id) {
+            const select = document.createElement('select');
+            select.className = 'service-select';
+            select.name = `service_id_${id}`;
+            select.dataset.serviceId = id;
+            select.required = true;
+            
+            select.innerHTML = '<option value="">Seleziona servizio...</option>';
+            availableServices.forEach(service => {
+                const option = document.createElement('option');
+                option.value = service.id;
+                option.textContent = `${service.name} (${service.duration} min - €${service.price})`;
+                select.appendChild(option);
+            });
+            
+            return select;
+        }
+
+        // Aggiungi una riga servizio
+        function addServiceRow() {
+            serviceCounter++;
+            
+            const serviceRow = document.createElement('div');
+            serviceRow.className = 'service-row';
+            serviceRow.dataset.serviceId = serviceCounter;
+            
+            const select = createServiceSelect(serviceCounter);
+            
+            const removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.textContent = '✖';
+            removeBtn.className = 'remove-service-btn';
+            removeBtn.title = 'Rimuovi servizio';
+            
+            removeBtn.addEventListener('click', () => {
+                if (servicesContainer.children.length > 1) {
+                    serviceRow.remove();
+                } else {
+                    alert('Deve essere presente almeno un servizio');
+                }
+            });
+            
+            serviceRow.appendChild(select);
+            serviceRow.appendChild(removeBtn);
+            servicesContainer.appendChild(serviceRow);
+        }
+
+        // Pulsante aggiungi servizio
+        addServiceBtn.addEventListener('click', () => {
+            addServiceRow();
+        });
 
         // Gestione invio form
         form.addEventListener('submit', async (e) => {
@@ -139,11 +196,22 @@ if ($clientName) {
             const minute = document.getElementById('appointment-minute').value;
             const appointmentTime = `${hour.padStart(2, '0')}:${minute}`;
             
+            // Raccogli tutti i servizi selezionati
+            const serviceSelects = servicesContainer.querySelectorAll('.service-select');
+            const serviceIds = Array.from(serviceSelects)
+                .map(select => select.value)
+                .filter(value => value); // Rimuovi valori vuoti
+            
+            if (serviceIds.length === 0) {
+                alert('Seleziona almeno un servizio');
+                return;
+            }
+            
             const appointmentData = {
                 client_id: formData.get('client_id') || null,
                 first_name: formData.get('first_name'),
                 last_name: formData.get('last_name'),
-                service_id: formData.get('service_id'),
+                service_ids: serviceIds, // Array di servizi
                 appointment_date: formData.get('appointment_date'),
                 appointment_time: appointmentTime,
                 notes: formData.get('notes') || ''
@@ -152,11 +220,6 @@ if ($clientName) {
             // Validazione
             if (!appointmentData.first_name || !appointmentData.last_name) {
                 alert('Nome e cognome sono obbligatori');
-                return;
-            }
-
-            if (!appointmentData.service_id) {
-                alert('Seleziona un servizio');
                 return;
             }
 
@@ -170,10 +233,19 @@ if ($clientName) {
             saveBtn.textContent = 'Salvataggio...';
 
             try {
-                const result = await saveSchedule(appointmentData);
+                // Se ci sono più servizi, crea più appuntamenti
+                const promises = serviceIds.map(serviceId => {
+                    return saveSchedule({
+                        ...appointmentData,
+                        service_id: serviceId
+                    });
+                });
                 
-                if (result.success) {
-                    alert('Appuntamento creato con successo!');
+                const results = await Promise.all(promises);
+                const allSuccess = results.every(r => r.success);
+                
+                if (allSuccess) {
+                    alert(`${serviceIds.length} appuntamento/i creato/i con successo!`);
                     
                     // Notifica la finestra padre del cambiamento
                     if (window.opener && window.opener.clientsData) {
@@ -182,7 +254,8 @@ if ($clientName) {
                     
                     window.close();
                 } else {
-                    alert('Errore durante il salvataggio: ' + (result.error || 'Errore sconosciuto'));
+                    const errors = results.filter(r => !r.success).map(r => r.error).join(', ');
+                    alert('Alcuni appuntamenti non sono stati salvati: ' + errors);
                 }
             } catch (error) {
                 console.error('Errore salvataggio:', error);
@@ -200,16 +273,8 @@ if ($clientName) {
             }
         });
 
-        // Imposta data minima (oggi)
-        const today = new Date();
-        const dateInput = document.getElementById('appointment-date');
-        dateInput.min = today.toISOString().split('T')[0];
-
         // Carica i servizi all'avvio
         loadServices();
-
-        // Focus sul primo campo
-        document.getElementById('first-name').focus();
     </script>
 </body>
 </html>

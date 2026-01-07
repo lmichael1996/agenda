@@ -165,7 +165,7 @@ body {
 .color-col { width: 70px; }
 .role-col { width: 120px; }
 .status-col { width: 100px; }
-.actions-col { width: 80px; }
+.actions-col { width: 60px; }
 
 /* === COLONNE SERVIZI === */
 .service-name-col { width: 200px; }

@@ -72,7 +72,9 @@ $protectedPages = [
     'clients.php',
     'new-appointment.php',
     'client-detail.php',
-    'client-edit.php'
+    'client-edit.php',
+    'client-history.php',
+    'get-client-appointments.php'
 ];
 
 // =================== CONTROLLO ACCESSO PAGINE PUBBLICHE ===================
@@ -90,39 +92,20 @@ if (in_array($currentPage, $publicPages)) {
     // Nessun controllo aggiuntivo richiesto
 }
 
-// =================== CONTROLLO ACCESSO PAGINE PROTETTE ===================
+// =================== AGGIORNA ATTIVITÀ PER PAGINE PROTETTE ===================
 
 else if (in_array($currentPage, $protectedPages)) {
     
-    // 1. VERIFICA AUTENTICAZIONE
-    if (!isset($_SESSION['user_id'])) {
-        error_log("Access Control: Unauthenticated access to $currentPage from IP: $clientIp");
-        $_SESSION['login_error'] = 'Accesso richiesto per visualizzare questa pagina';
-        header('Location: ' . $loginPath);
-        exit;
-    }
-    
-    // 2. VERIFICA SCADENZA SESSIONE (2 ore)
-    $loginTime = $_SESSION['login_time'] ?? 0;
-    $sessionAge = time() - $loginTime;
-    
-    if ($sessionAge > 7200) {
-        error_log("Access Control: Session expired for user {$_SESSION['user_id']} on $currentPage (age: {$sessionAge}s)");
-        session_destroy();
-        session_start();
-        $_SESSION['login_error'] = 'Sessione scaduta, effettua nuovamente il login';
-        header('Location: ' . $loginPath);
-        exit;
-    }
-    
-    // 3. AGGIORNA TIMESTAMP ULTIMA ATTIVITÀ
-    $_SESSION['last_activity'] = time();
-    
-    // 4. LOGGING ATTIVITÀ UTENTE (ogni 5 minuti)
-    $lastLog = $_SESSION['last_log'] ?? 0;
-    if (time() - $lastLog > 300) {
-        error_log("Access Control: User {$_SESSION['user_id']} active on $currentPage from IP: $clientIp");
-        $_SESSION['last_log'] = time();
+    // AGGIORNA TIMESTAMP ULTIMA ATTIVITÀ (solo se autenticato)
+    if (isset($_SESSION['user_id'])) {
+        $_SESSION['last_activity'] = time();
+        
+        // LOGGING ATTIVITÀ UTENTE (ogni 5 minuti)
+        $lastLog = $_SESSION['last_log'] ?? 0;
+        if (time() - $lastLog > 300) {
+            error_log("Access Control: User {$_SESSION['user_id']} active on $currentPage from IP: $clientIp");
+            $_SESSION['last_log'] = time();
+        }
     }
 }
 ?>

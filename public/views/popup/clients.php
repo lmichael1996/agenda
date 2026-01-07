@@ -109,11 +109,14 @@ require_once '../../../src/Auth/AccessControl.php';
         </div>
 </div>
 
-<script>
+<script type="module">
 /**
  * Script per il popup gestione clienti
  * Gestisce tutta la parte grafica e l'interazione utente
  */
+
+// Import utility function
+import { openCenteredPopup } from '../../assets/js/utils/windows.js';
 
 // ========== API FUNCTIONS ==========
 
@@ -365,16 +368,28 @@ function createClientRow(client) {
     
     const editBtn = document.createElement('button');
     editBtn.className = 'action-btn btn-add-appointment';
-    editBtn.textContent = 'Appuntamento';
+    editBtn.textContent = '🆕📅';
     editBtn.title = 'Aggiungi appuntamento';
     editBtn.dataset.clientId = client.id;
     
+    const historyBtn = document.createElement('button');
+    historyBtn.className = 'action-btn btn-view-history';
+    historyBtn.textContent = '📜';
+    historyBtn.title = 'Storico appuntamenti';
+    historyBtn.dataset.clientId = client.id;
+    
     actionsCell.appendChild(editBtn);
+    actionsCell.appendChild(historyBtn);
     
     // Event handlers for action buttons (prevent row click)
     editBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         addAppointment(client.id);
+    });
+    
+    historyBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openClientHistory(client.id);
     });
     
     // Assembla la riga
@@ -502,27 +517,12 @@ function showClientDetails(clientId) {
         return;
     }
 
-    // Open new popup window with client details
-    const windowFeatures = [
-        'width=650',
-        'height=550',
-        'left=' + (screen.width - 650) / 2,
-        'top=' + (screen.height - 550) / 2,
-        'scrollbars=yes',
-        'resizable=yes',
-        'menubar=no',
-        'toolbar=no',
-        'location=no',
-        'status=no'
-    ].join(',');
-    
     const popupUrl = `client-detail.php?clientId=${clientId}`;
     console.log('Opening popup URL:', popupUrl);
     
-    const popupWindow = window.open(popupUrl, 'ClientDetail_' + clientId, windowFeatures);
+    const popupWindow = openCenteredPopup(popupUrl, 'ClientDetail_' + clientId, 900, 700);
     
     if (popupWindow) {
-        popupWindow.focus();
         console.log('Client detail popup opened successfully');
     } else {
         console.error('Failed to open popup window');
@@ -547,27 +547,12 @@ function addAppointment(clientId) {
         [client.first_name, client.last_name].filter(Boolean).join(' ') : 
         `Cliente ID ${clientId}`;
 
-    // Open new appointment popup window with client pre-selected
-    const windowFeatures = [
-        'width=650',
-        'height=600',
-        'left=' + (screen.width - 650) / 2,
-        'top=' + (screen.height - 600) / 2,
-        'scrollbars=yes',
-        'resizable=yes',
-        'menubar=no',
-        'toolbar=no',
-        'location=no',
-        'status=no'
-    ].join(',');
-    
     const popupUrl = `new-appointment.php?clientId=${clientId}&clientName=${encodeURIComponent(clientName)}`;
     console.log('Opening new appointment popup URL:', popupUrl);
     
-    const popupWindow = window.open(popupUrl, 'NewAppointment_' + clientId, windowFeatures);
+    const popupWindow = openCenteredPopup(popupUrl, 'NewAppointment_' + clientId, 1250, 800);
     
     if (popupWindow) {
-        popupWindow.focus();
         console.log(`New appointment popup opened for client: ${clientName}`);
     } else {
         console.error('Failed to open new appointment popup window');
@@ -575,6 +560,29 @@ function addAppointment(clientId) {
     }
 }
 
+/**
+ * Apre lo storico appuntamenti del cliente
+ */
+function openClientHistory(clientId) {
+    console.log('Opening client history for client ID:', clientId);
+    
+    if (!clientId) {
+        alert('ID cliente non valido');
+        return;
+    }
+
+    const popupUrl = `client-history.php?clientId=${clientId}`;
+    console.log('Opening client history popup URL:', popupUrl);
+    
+    const popupWindow = openCenteredPopup(popupUrl, 'ClientHistory_' + clientId, 1200, 750);
+    
+    if (popupWindow) {
+        console.log('Client history popup opened successfully');
+    } else {
+        console.error('Failed to open client history popup window');
+        alert('Impossibile aprire la finestra storico. Controlla le impostazioni del browser.');
+    }
+}
 
 
 /**
@@ -583,27 +591,12 @@ function addAppointment(clientId) {
 function showAddClientDialog() {
     console.log('Opening add client dialog');
     
-    // Open new popup window for adding a client
-    const windowFeatures = [
-        'width=650',
-        'height=550',
-        'left=' + (screen.width - 650) / 2,
-        'top=' + (screen.height - 550) / 2,
-        'scrollbars=yes',
-        'resizable=yes',
-        'menubar=no',
-        'toolbar=no',
-        'location=no',
-        'status=no'
-    ].join(',');
-    
-    const popupUrl = 'client-detail.php?new=1';
+    const popupUrl = 'client-detail.php?clientId=0';
     console.log('Opening new client popup URL:', popupUrl);
     
-    const popupWindow = window.open(popupUrl, 'NewClient', windowFeatures);
+    const popupWindow = openCenteredPopup(popupUrl, 'NewClient', 950, 550);
     
     if (popupWindow) {
-        popupWindow.focus();
         console.log('New client popup opened successfully');
         
         // Ricarica la lista quando la finestra viene chiusa

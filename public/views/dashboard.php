@@ -77,6 +77,9 @@ $currentDate = $today->format('Y-m-d');
         <a href="#" data-popup-window="schedule" class="sidebar-link">
             <span class="sidebar-text">Orario</span>
         </a>
+        <a href="#" data-popup-window="warehouse" class="sidebar-link">
+            <span class="sidebar-text">Magazzino</span>
+        </a>
         <a href="../../src/Auth/Logout.php" class="logout sidebar-link" onclick="return confirm('Sei sicuro di voler uscire?')">
             <span class="sidebar-text">Logout</span>
         </a>

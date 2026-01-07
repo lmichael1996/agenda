@@ -119,7 +119,7 @@ $sampleUsers = [];
             // Nessun pulsante elimina per utente default
             const actionsHtml = isDefaultUser 
                 ? '<span style="color: #999; font-style: italic;">Admin</span>' 
-                : `<button class="action-btn btn-delete-single" data-user-id="${user.id}" title="Elimina">Elimina</button>`;
+                : `<button class="action-btn btn-delete-single" data-user-id="${user.id}" title="Elimina">✘</button>`;
             
             return `
                 <tr data-user-id="${user.id}">

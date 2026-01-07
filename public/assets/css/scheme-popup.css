@@ -21,7 +21,7 @@ body {
 }
 
 .popup-window-container {
-    max-width: 500px;
+    max-width: 700px;
     width: min(95vw, 100%);
     background: #fff;
     border: 3px solid #000;
@@ -477,6 +477,38 @@ input[type="checkbox"].schedule-checkbox {
 /* === CONTROLLO VISIBILITÀ RIGHE === */
 .lunch-time-row.hidden {
     display: none;
+}
+
+/* === STILI READONLY === */
+input[readonly] {
+    background-color: #f0f0f0 !important;
+    cursor: not-allowed !important;
+}
+
+/* === RIGHE SERVIZI === */
+.service-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    align-items: center;
+}
+
+.service-row select {
+    flex: 1;
+}
+
+.remove-service-btn {
+    padding: 6px 12px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.remove-service-btn:hover {
+    background: #c82333;
 }
 
 /* === DESIGN RESPONSIVO APPUNTAMENTI === */

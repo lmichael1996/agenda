@@ -39,6 +39,7 @@ CREATE TABLE IF NOT EXISTS super_appointments (
     id INT AUTO_INCREMENT PRIMARY KEY,
     client_id INT NOT NULL DEFAULT 1,
     start_time DATETIME NOT NULL,
+    note VARCHAR(500),
     FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -49,7 +50,6 @@ CREATE TABLE IF NOT EXISTS appointments (
     service_id INT NOT NULL DEFAULT 1,
     user_id INT NOT NULL DEFAULT 1,
     duration INT NOT NULL COMMENT 'Durata in minuti',
-    note TEXT,
     FOREIGN KEY (super_appointment_id) REFERENCES super_appointments(id) ON DELETE CASCADE,
     FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE RESTRICT,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT

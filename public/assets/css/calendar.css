@@ -106,15 +106,15 @@ body {
 .hour-label {
     display: flex;
     align-items: flex-start;
-    justify-content: flex-end;
+    justify-content: center;
     background: #000;
     border-right: 1px solid #fff;
     color: #fff;
     font-size: 0.75em;
     font-weight: 500;
     height: 40px;
-    padding: 0 8px 0 0;
-    margin-top: -6px;
+    padding: 0 8px;
+    margin-top: -7px;
 }
 
 .hour-label:first-of-type {
@@ -122,7 +122,7 @@ body {
 }
 
 .hour-label-time {
-    text-align: right;
+    text-align: center;
 }
 
 /* Celle */

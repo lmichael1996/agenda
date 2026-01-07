@@ -9,6 +9,9 @@ import {
     fetchClients 
 } from './api/clients-api.js';
 
+// Importa utility per finestre popup
+import { openCenteredPopup } from './utils/windows.js';
+
 // Stato dell'applicazione
 let currentPage = 1;
 let currentLimit = 50;
@@ -336,26 +339,12 @@ function showClientDetails(clientId) {
     }
 
     // Open new popup window with client details
-    const windowFeatures = [
-        'width=650',
-        'height=550',
-        'left=' + (screen.width - 650) / 2,
-        'top=' + (screen.height - 550) / 2,
-        'scrollbars=yes',
-        'resizable=yes',
-        'menubar=no',
-        'toolbar=no',
-        'location=no',
-        'status=no'
-    ].join(',');
-    
     const popupUrl = `client-detail.php?clientId=${clientId}`;
     console.log('Opening popup URL:', popupUrl);
     
-    const popupWindow = window.open(popupUrl, 'ClientDetail_' + clientId, windowFeatures);
+    const popupWindow = openCenteredPopup(popupUrl, 'ClientDetail_' + clientId, 1250, 850);
     
     if (popupWindow) {
-        popupWindow.focus();
         console.log('Client detail popup opened successfully');
     } else {
         console.error('Failed to open popup window');
@@ -381,26 +370,12 @@ function addAppointment(clientId) {
         `Cliente ID ${clientId}`;
 
     // Open new appointment popup window with client pre-selected
-    const windowFeatures = [
-        'width=650',
-        'height=600',
-        'left=' + (screen.width - 650) / 2,
-        'top=' + (screen.height - 600) / 2,
-        'scrollbars=yes',
-        'resizable=yes',
-        'menubar=no',
-        'toolbar=no',
-        'location=no',
-        'status=no'
-    ].join(',');
-    
     const popupUrl = `new-appointment.php?clientId=${clientId}&clientName=${encodeURIComponent(clientName)}`;
     console.log('Opening new appointment popup URL:', popupUrl);
     
-    const popupWindow = window.open(popupUrl, 'NewAppointment_' + clientId, windowFeatures);
+    const popupWindow = openCenteredPopup(popupUrl, 'NewAppointment_' + clientId, 650, 600);
     
     if (popupWindow) {
-        popupWindow.focus();
         console.log(`New appointment popup opened for client: ${clientName}`);
     } else {
         console.error('Failed to open new appointment popup window');

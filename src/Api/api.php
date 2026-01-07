@@ -189,8 +189,13 @@ function handleClientsResource($controller, $method, $action, $id, $input) {
                     // Paginazione
                     $total = count($filtered);
                     $totalPages = ceil($total / $limit);
+                    $totalPages = max(1, $totalPages); // Almeno 1 pagina
                     $offset = ($page - 1) * $limit;
                     $paginatedClients = array_slice($filtered, $offset, $limit);
+                    
+                    // Calcola start e end per visualizzazione
+                    $start = $total > 0 ? $offset + 1 : 0;
+                    $end = min($offset + $limit, $total);
                     
                     echo json_encode([
                         'success' => true,
@@ -199,7 +204,9 @@ function handleClientsResource($controller, $method, $action, $id, $input) {
                             'page' => $page,
                             'limit' => $limit,
                             'total' => $total,
-                            'totalPages' => $totalPages
+                            'totalPages' => $totalPages,
+                            'start' => $start,
+                            'end' => $end
                         ]
                     ]);
                 } else {
@@ -234,8 +241,13 @@ function handleClientsResource($controller, $method, $action, $id, $input) {
                     // Paginazione
                     $total = count($clients);
                     $totalPages = ceil($total / $limit);
+                    $totalPages = max(1, $totalPages); // Almeno 1 pagina
                     $offset = ($page - 1) * $limit;
                     $paginatedClients = array_slice($clients, $offset, $limit);
+                    
+                    // Calcola start e end per visualizzazione
+                    $start = $total > 0 ? $offset + 1 : 0;
+                    $end = min($offset + $limit, $total);
                     
                     echo json_encode([
                         'success' => true,
@@ -244,7 +256,9 @@ function handleClientsResource($controller, $method, $action, $id, $input) {
                             'page' => $page,
                             'limit' => $limit,
                             'total' => $total,
-                            'totalPages' => $totalPages
+                            'totalPages' => $totalPages,
+                            'start' => $start,
+                            'end' => $end
                         ]
                     ]);
                 } else {
@@ -322,7 +336,10 @@ function handleServicesResource($controller, $method, $action, $id, $input) {
 function handleScheduleResource($controller, $method, $action, $id, $input) {
     switch ($method) {
         case 'GET':
-            if (!empty($action)) {
+            // Check for client_id parameter
+            if (!empty($_GET['client_id'])) {
+                echo json_encode($controller->getByClient($_GET['client_id']));
+            } elseif (!empty($action)) {
                 // Get per giorno specifico: /schedule/lunedi
                 echo json_encode($controller->getByDay($action));
             } else {

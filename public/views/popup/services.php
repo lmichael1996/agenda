@@ -195,7 +195,7 @@ require_once '../../../src/Auth/AccessControl.php';
                 <td><input type="number" value="${Number(service.price).toFixed(2)}" step="1" min="0" max="9999.99" class="cell-input price-input"></td>
                 <td><input type="number" value="${service.durationMinutes || service.duration}" step="15" min="15" max="480" class="cell-input duration-input"></td>
                 <td><textarea class="cell-textarea" rows="2" placeholder="Descrizione dettagliata...">${escapeHtml(service.description)}</textarea></td>
-                <td class="actions-cell"><button class="action-btn btn-delete-single" data-service-id="${service.id}" title="Elimina">Elimina</button></td>
+                <td class="actions-cell"><button class="action-btn btn-delete-single" data-service-id="${service.id}" title="Elimina">✘</button></td>
             </tr>
         `;
     }

@@ -1,0 +1,48 @@
+/* Storico Appuntamenti Cliente */
+
+/* Header cliente */
+#client-info-header {
+    padding: 15px;
+    background: #f5f5f5;
+    border-bottom: 2px solid #ddd;
+    margin-bottom: 15px;
+}
+
+#client-name-title {
+    text-align: center;
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+/* Colonne tabella */
+.th-time, .td-time { width: 80px; text-align: center; font-weight: 500; }
+.th-service, .td-service { min-width: 150px; }
+.th-duration, .td-duration { width: 100px; text-align: center; }
+.th-operator, .td-operator { width: 120px; text-align: center; }
+.th-notes, .td-notes { min-width: 200px; }
+
+/* Header data */
+.history-date-header {
+    background: #e8e8e8 !important;
+    font-weight: bold;
+}
+
+.history-date-header td {
+    padding: 10px;
+    text-align: center;
+    background: #e8e8e8 !important;
+}
+
+/* Note */
+.note-cell {
+    font-style: italic;
+}
+
+/* Messaggio vuoto */
+.empty-row td {
+    text-align: center;
+    padding: 30px;
+    color: #999;
+    font-style: italic;
+}
