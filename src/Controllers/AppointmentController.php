@@ -104,4 +104,85 @@ class AppointmentController {
     public function delete($id) {
         return $this->service->delete($id);
     }
+    
+    /**
+     * Ottiene tutti gli appuntamenti per una settimana specifica
+     * @param string $weekStart Data inizio settimana (formato Y-m-d)
+     * @param string $weekEnd Data fine settimana (formato Y-m-d)
+     * @return array Array di appuntamenti formattati per il calendario
+     */
+    public function getWeekAppointments($weekStart, $weekEnd) {
+        $result = $this->service->getAll();
+        
+        if (!$result['success']) {
+            return [];
+        }
+        
+        $appointments = $result['data'];
+        
+        // Filtra per settimana
+        $filtered = array_filter($appointments, function($apt) use ($weekStart, $weekEnd) {
+            if (!isset($apt->start_time)) {
+                return false;
+            }
+            
+            $aptDate = date('Y-m-d', strtotime($apt->start_time));
+            return $aptDate >= $weekStart && $aptDate <= $weekEnd;
+        });
+        
+        return $this->formatForCalendar($filtered);
+    }
+    
+    /**
+     * Formatta gli appuntamenti per il calendario
+     * @param array $appointments Array di oggetti Appointment
+     * @return array Array di eventi formattati per il calendario
+     */
+    private function formatForCalendar($appointments) {
+        $events = [];
+        
+        foreach ($appointments as $apt) {
+            $startTime = new DateTime($apt->start_time);
+            
+            $events[] = [
+                'id' => $apt->id,
+                'super_appointment_id' => $apt->super_appointment_id ?? null,
+                'date' => $startTime->format('d-m-Y'),
+                'time' => $startTime->format('H:i'),
+                'datetime' => $startTime->format('Y-m-d H:i:s'),
+                'client_id' => $apt->client_id ?? null,
+                'client_name' => $apt->client_name ?? '',
+                'client_phone' => $apt->client_phone ?? '',
+                'service_id' => $apt->service_id ?? null,
+                'service_name' => $apt->service_name ?? '',
+                'duration' => $apt->duration ?? 30,
+                'price' => $apt->price ?? 0,
+                'user_id' => $apt->user_id ?? null,
+                'user_name' => $apt->user_name ?? 'Non assegnato',
+                'user_color' => $apt->user_color ?? '#95a5a6',
+                'note' => $apt->note ?? ''
+            ];
+        }
+        
+        return $events;
+    }
+    
+    /**
+     * Ottiene gli appuntamenti formattati per la settimana corrente
+     * @return string JSON degli appuntamenti
+     */
+    public function getCurrentWeekAppointmentsJSON() {
+        $today = new DateTime();
+        $weekStart = clone $today;
+        $weekStart->modify('monday this week');
+        $weekEnd = clone $weekStart;
+        $weekEnd->modify('+6 days');
+
+        $appointments = $this->getWeekAppointments(
+            $weekStart->format('Y-m-d'),
+            $weekEnd->format('Y-m-d')
+        );
+        
+        return json_encode($appointments, JSON_UNESCAPED_UNICODE);
+    }
 }

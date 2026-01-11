@@ -19,7 +19,7 @@ require_once '../../src/Auth/AccessControl.php';
 require_once '../../src/Helpers/Calendar.php';
 
 // Carica controller appuntamenti e note
-require_once '../../src/Controllers/AppointmentsController.php';
+require_once '../../src/Controllers/AppointmentController.php';
 require_once '../../src/Controllers/NotesController.php';
 require_once '../../src/Database/Connection.php';
 
@@ -30,11 +30,11 @@ $intervals = generateTimeIntervals();
 $today = new DateTime();
 
 // Carica appuntamenti dal database
-$appointmentsController = new AppointmentsController();
-$appointmentsJSON = $appointmentsController->getCurrentWeekAppointmentsJSON();
+$db = getDBConnection();
+$appointmentController = new AppointmentController($db);
+$appointmentsJSON = $appointmentController->getCurrentWeekAppointmentsJSON();
 
 // Carica note dal database (settimana corrente)
-$db = getDBConnection();
 $notesController = new NotesController($db);
 $notesJSON = $notesController->getCurrentWeekNotesJSON();
 
