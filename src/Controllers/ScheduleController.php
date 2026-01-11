@@ -1,18 +1,18 @@
 <?php
 /**
  * Controller per la gestione degli appuntamenti
- * Delega la logica business a ScheduleService
+ * Delega la logica business a AppointmentService
  */
 
 require_once __DIR__ . '/../Models/Appointment.php';
 require_once __DIR__ . '/../Models/SuperAppointment.php';
-require_once __DIR__ . '/../Services/ScheduleService.php';
+require_once __DIR__ . '/../Services/AppointmentService.php';
 
 class ScheduleController {
     private $service;
     
     public function __construct($db) {
-        $this->service = new ScheduleService($db);
+        $this->service = new AppointmentService($db);
     }
     
     /**

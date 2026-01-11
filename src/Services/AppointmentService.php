@@ -1,9 +1,9 @@
 <?php
 /**
- * ScheduleService - Logica business per la gestione degli appuntamenti
+ * AppointmentService - Logica business per la gestione degli appuntamenti
  */
 
-class ScheduleService {
+class AppointmentService {
     private $db;
     
     public function __construct($db) {
@@ -53,7 +53,7 @@ class ScheduleService {
             
             return ['success' => true, 'data' => $appointments];
         } catch (PDOException $e) {
-            error_log("ScheduleService::getAll error: " . $e->getMessage());
+            error_log("AppointmentService::getAll error: " . $e->getMessage());
             return [
                 'success' => false, 
                 'error' => 'Errore nel recupero degli appuntamenti'
@@ -90,7 +90,7 @@ class ScheduleService {
             
             return ['success' => true, 'data' => $appointments];
         } catch (PDOException $e) {
-            error_log("ScheduleService::getByDate error: " . $e->getMessage());
+            error_log("AppointmentService::getByDate error: " . $e->getMessage());
             return ['success' => false, 'error' => 'Errore nel recupero degli appuntamenti'];
         }
     }
@@ -133,7 +133,7 @@ class ScheduleService {
                 'count' => count($appointments)
             ];
         } catch (PDOException $e) {
-            error_log("ScheduleService::getByClient error: " . $e->getMessage());
+            error_log("AppointmentService::getByClient error: " . $e->getMessage());
             return ['success' => false, 'error' => 'Errore nel recupero degli appuntamenti del cliente'];
         }
     }
@@ -186,7 +186,7 @@ class ScheduleService {
                 ]
             ];
         } catch (PDOException $e) {
-            error_log("ScheduleService::getById error: " . $e->getMessage());
+            error_log("AppointmentService::getById error: " . $e->getMessage());
             return ['success' => false, 'error' => 'Errore nel recupero dell\'appuntamento'];
         }
     }
@@ -316,7 +316,7 @@ class ScheduleService {
                 return ['success' => false, 'error' => 'Appuntamento non trovato o nessuna modifica'];
             }
         } catch (PDOException $e) {
-            error_log("ScheduleService::update error: " . $e->getMessage());
+            error_log("AppointmentService::update error: " . $e->getMessage());
             return ['success' => false, 'error' => 'Errore nell\'aggiornamento dell\'appuntamento'];
         }
     }
@@ -335,7 +335,7 @@ class ScheduleService {
                 return ['success' => false, 'error' => 'Appuntamento non trovato'];
             }
         } catch (PDOException $e) {
-            error_log("ScheduleService::delete error: " . $e->getMessage());
+            error_log("AppointmentService::delete error: " . $e->getMessage());
             return ['success' => false, 'error' => 'Errore nell\'eliminazione dell\'appuntamento'];
         }
     }
@@ -367,7 +367,7 @@ class ScheduleService {
             
             return ['success' => true];
         } catch (PDOException $e) {
-            error_log("ScheduleService::checkOverlap error: " . $e->getMessage());
+            error_log("AppointmentService::checkOverlap error: " . $e->getMessage());
             return ['success' => false, 'error' => 'Errore nella verifica delle sovrapposizioni'];
         }
     }
