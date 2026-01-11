@@ -8,7 +8,7 @@ require_once __DIR__ . '/../Models/Appointment.php';
 require_once __DIR__ . '/../Models/SuperAppointment.php';
 require_once __DIR__ . '/../Services/AppointmentService.php';
 
-class ScheduleController {
+class AppointmentController {
     private $service;
     
     public function __construct($db) {

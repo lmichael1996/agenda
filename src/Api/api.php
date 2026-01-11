@@ -30,7 +30,7 @@ require_once __DIR__ . '/../Database/Connection.php';  // Contiene getDBConnecti
 // Carica i controller
 require_once __DIR__ . '/../Controllers/ClientsController.php';
 require_once __DIR__ . '/../Controllers/ServicesController.php';
-require_once __DIR__ . '/../Controllers/ScheduleController.php';
+require_once __DIR__ . '/../Controllers/AppointmentController.php';
 require_once __DIR__ . '/../Controllers/NotesController.php';
 require_once __DIR__ . '/../Controllers/UsersController.php';
 require_once __DIR__ . '/../Controllers/ProductsController.php';
@@ -41,7 +41,7 @@ $db = getDBConnection();
 // Inizializza i controller
 $clientsController = new ClientsController($db);
 $servicesController = new ServicesController($db);
-$scheduleController = new ScheduleController($db);
+$appointmentController = new AppointmentController($db);
 $notesController = new NotesController($db);
 $usersController = new UsersController($db);
 $productsController = new ProductsController($db);
@@ -83,7 +83,7 @@ try {
             break;
             
         case 'schedule':
-            handleScheduleResource($scheduleController, $method, $action, $id, $input);
+            handleScheduleResource($appointmentController, $method, $action, $id, $input);
             break;
             
         case 'settings':
