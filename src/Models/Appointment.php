@@ -5,6 +5,7 @@
 
 class Appointment {
     public $id;
+    public $super_appointment_id;
     public $client_id;
     public $service_id;
     public $start_time;
@@ -26,6 +27,7 @@ class Appointment {
      */
     public function hydrate($data) {
         $this->id = $data['id'] ?? null;
+        $this->super_appointment_id = $data['super_appointment_id'] ?? null;
         $this->client_id = $data['client_id'] ?? null;
         $this->service_id = $data['service_id'] ?? null;
         $this->start_time = $data['start_time'] ?? null;
@@ -40,6 +42,7 @@ class Appointment {
     public function toArray() {
         return [
             'id' => $this->id,
+            'super_appointment_id' => $this->super_appointment_id,
             'client_id' => $this->client_id,
             'service_id' => $this->service_id,
             'start_time' => $this->start_time,
