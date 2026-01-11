@@ -171,6 +171,7 @@ body {
 .service-name-col { width: 200px; }
 .price-col { width: 120px; }
 .duration-col { width: 100px; }
+.notification-col { width: 100px; }
 .description-col { width: 250px; }
 
 /* === INPUT E CONTROLLI === */

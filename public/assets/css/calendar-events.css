@@ -48,20 +48,17 @@
   align-self: flex-end;
   margin-right: 2px;
   margin-bottom: 2px;
-  transition: all 0.2s ease;
   border-radius: 4px;
 }
 
 .resize-btn:hover {
   color: #333;
   background: rgba(0, 0, 0, 0.05);
-  transform: scale(1.15);
 }
 
 .resize-btn:active {
   color: #000;
   background: rgba(0, 0, 0, 0.1);
-  transform: scale(1.1);
 }
 
 .calendar-note.resizing {

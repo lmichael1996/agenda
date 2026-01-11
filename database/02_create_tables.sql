@@ -31,6 +31,16 @@ CREATE TABLE IF NOT EXISTS services (
     name VARCHAR(100) NOT NULL,
     duration INT NOT NULL COMMENT 'Durata in minuti',
     price DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+    notification_days INT DEFAULT NULL,
+    description TEXT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tabella prodotti
+CREATE TABLE IF NOT EXISTS products (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    price DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+    stock_quantity INT DEFAULT 0 COMMENT 'Quantità in magazzino',
     description TEXT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

@@ -370,7 +370,7 @@ function addAppointment(clientId) {
         `Cliente ID ${clientId}`;
 
     // Open new appointment popup window with client pre-selected
-    const popupUrl = `new-appointment.php?clientId=${clientId}&clientName=${encodeURIComponent(clientName)}`;
+    const popupUrl = `appointment.php?clientId=${clientId}&clientName=${encodeURIComponent(clientName)}`;
     console.log('Opening new appointment popup URL:', popupUrl);
     
     const popupWindow = openCenteredPopup(popupUrl, 'NewAppointment_' + clientId, 650, 600);

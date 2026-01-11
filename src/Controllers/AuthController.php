@@ -1,142 +1,80 @@
 <?php
 /**
  * AuthController - Gestisce l'autenticazione degli utenti
+ * Delega la logica business a AuthService
  */
 
+require_once __DIR__ . '/../Models/Auth.php';
+require_once __DIR__ . '/../Services/AuthService.php';
+
 class AuthController {
-    private $conn;
+    private $service;
     
-    public function __construct($dbConnection) {
-        $this->conn = $dbConnection;
+    public function __construct($db) {
+        $this->service = new AuthService($db);
     }
     
     /**
      * Autentica un utente verificando username e password nel database
-     * @param string $username Username da verificare
-     * @param string $password Password in chiaro da verificare
-     * @return array|false Array con dati utente se successo, false altrimenti
+     * Returns user array on success, false on failure (for backward compatibility)
      */
     public function authenticate($username, $password) {
-        // Verifica connessione database
-        if (!isset($this->conn) || $this->conn->connect_errno) {
-            error_log('AuthController: Database connection error - ' . 
-                ($this->conn ? $this->conn->connect_error : 'not initialized'));
-            return false;
+        $result = $this->service->authenticate($username, $password);
+        
+        // Backward compatibility: return user array directly or false
+        if ($result['success'] && isset($result['data'])) {
+            return $result['data']->toSessionArray();
         }
         
-        // Query preparata per sicurezza
-        $stmt = $this->conn->prepare(
-            'SELECT id, username, password_hash, color
-             FROM users 
-             WHERE username = ? 
-             LIMIT 1'
-        );
-        
-        if (!$stmt) {
-            error_log('AuthController: Query preparation failed - ' . $this->conn->error);
-            return false;
-        }
-        
-        $stmt->bind_param('s', $username);
-        
-        if (!$stmt->execute()) {
-            error_log('AuthController: Query execution failed - ' . $stmt->error);
-            $stmt->close();
-            return false;
-        }
-        
-        $result = $stmt->get_result();
-        $user = $result->fetch_assoc();
-        $stmt->close();
-        
-        // Utente non trovato
-        if (!$user) {
-            error_log("AuthController: User not found - '$username'");
-            return false;
-        }
-        
-        // Verifica password
-        if (!password_verify($password, $user['password_hash'])) {
-            error_log("AuthController: Invalid password for user '$username'");
-            return false;
-        }
-        
-        // Restituisci dati utente (senza password_hash)
-        unset($user['password_hash']);
-        return $user;
+        return false;
     }
     
     /**
      * Verifica se l'utente è bloccato per troppi tentativi
-     * @return array ['blocked' => bool, 'remaining_time' => int]
+     */
+    /**
+     * Verifica se l'utente è bloccato per troppi tentativi
      */
     public function checkRateLimit() {
-        // Inizializza contatori se non esistono
-        if (!isset($_SESSION['login_attempts'])) {
-            $_SESSION['login_attempts'] = 0;
-            $_SESSION['last_attempt'] = 0;
-        }
-        
-        // Calcola tempo di blocco (3-4 tentativi = 2min, 5+ = 5min)
-        $blockTime = 0;
-        if ($_SESSION['login_attempts'] >= 5) {
-            $blockTime = 300; // 5 minuti
-        } elseif ($_SESSION['login_attempts'] >= 3) {
-            $blockTime = 120; // 2 minuti
-        }
-        
-        // Verifica se è bloccato
-        $timeSinceLastAttempt = time() - $_SESSION['last_attempt'];
-        $isBlocked = $blockTime > 0 && $timeSinceLastAttempt < $blockTime;
-        $remainingTime = $isBlocked ? ceil(($blockTime - $timeSinceLastAttempt) / 60) : 0;
-        
-        return [
-            'blocked' => $isBlocked,
-            'remaining_time' => $remainingTime,
-            'attempts' => $_SESSION['login_attempts']
-        ];
+        return $this->service->checkRateLimit();
     }
     
     /**
      * Incrementa il contatore dei tentativi falliti
      */
     public function incrementFailedAttempts() {
-        $_SESSION['login_attempts'] = ($_SESSION['login_attempts'] ?? 0) + 1;
-        $_SESSION['last_attempt'] = time();
+        return $this->service->incrementFailedAttempts();
     }
     
     /**
      * Reset dei tentativi di login
      */
     public function resetAttempts() {
-        unset($_SESSION['login_attempts'], $_SESSION['last_attempt']);
+        $this->service->resetFailedAttempts();
     }
     
     /**
      * Crea una sessione sicura per l'utente autenticato
-     * @param array $user Dati utente
+     * @param array $authData - User array from authenticate() ['id', 'username', 'color']
      */
-    public function createSession($user) {
+    public function createSession($authData) {
         // Rigenera ID sessione per sicurezza
         session_regenerate_id(true);
         
-        // Salva dati utente in sessione
-        $_SESSION['user_id'] = $user['id'];
-        $_SESSION['username'] = $user['username'];
-        $_SESSION['user_role'] = $user['role'] ?? 'user';
+        // Crea Auth Model da array per passare al Service
+        $auth = new Auth($authData);
+        $this->service->initializeSession($auth);
+        
+        // Log successo
         $_SESSION['login_time'] = time();
         $_SESSION['login_ip'] = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
         $_SESSION['user_agent_hash'] = hash('sha256', $_SERVER['HTTP_USER_AGENT'] ?? '');
         
-        // Log successo
-        error_log("AuthController: Session created for user '{$user['username']}' from {$_SESSION['login_ip']}");
+        error_log("AuthController: Session created for user '{$authData['username']}' from {$_SESSION['login_ip']}");
     }
     
     /**
      * Valida input username e password
-     * @param string $username
-     * @param string $password
-     * @return array ['valid' => bool, 'error' => string]
      */
     public function validateInput($username, $password) {
         // Verifica campi vuoti

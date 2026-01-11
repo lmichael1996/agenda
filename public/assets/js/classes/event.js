@@ -2,10 +2,11 @@ import { setDraggedEvent, getDraggedEvent, clearDraggedEvent } from '../utils/dr
 import { SLOT_PX, MIN_DURATION } from '../utils/constants.js';
 
 class Event {
-    constructor(text, duration, parentSlot = null) {
+    constructor(text, duration, parentSlot = null, superAppointmentId = null) {
         this.text = text;
         this.duration = duration;
         this.parentSlot = parentSlot;
+        this.superAppointmentId = superAppointmentId;
         this.isResizing = false;
         this.startY = 0;
         this.startHeight = 0;
@@ -75,6 +76,11 @@ class Event {
         event.className = 'calendar-note';
         event.draggable = true;
         
+        // Salva super_appointment_id come data attribute
+        if (this.superAppointmentId) {
+            event.setAttribute('data-super-appointment-id', this.superAppointmentId);
+        }
+        
         // Calcola altezza
         if (this.parentSlot) {
             event.style.height = this.calculateDivHeight(this.duration, this.parentSlot);
@@ -94,7 +100,7 @@ class Event {
         resizeBtn.className = 'resize-btn';
         resizeBtn.type = 'button';
         resizeBtn.title = 'Ridimensiona evento';
-        resizeBtn.innerHTML = '&#x2195;';
+        resizeBtn.innerHTML = '&#x2195;'; // ↕ arrows
         resizeBtn.setAttribute('tabindex', '0');
         event.appendChild(resizeBtn);
         
@@ -103,6 +109,19 @@ class Event {
     }
     
     setupEventListeners() {
+        // Doppio click per aprire popup modifica
+        this.element.addEventListener('dblclick', (e) => {
+            // Non aprire se si sta cliccando sul resize button
+            if (e.target.closest('.resize-btn')) {
+                return;
+            }
+            
+            const superAppointmentId = this.element.getAttribute('data-super-appointment-id');
+            if (superAppointmentId) {
+                this.openEditPopup(superAppointmentId);
+            }
+        });
+        
         // Drag eventi
         this.element.addEventListener('dragstart', (e) => {
             if (e.target.closest && e.target.closest('.resize-btn')) {
@@ -126,6 +145,20 @@ class Event {
             e.stopPropagation();
             this.startResize(e);
         });
+    }
+    
+    openEditPopup(superAppointmentId) {
+        const width = 1300;
+        const height = 700;
+        const left = (screen.width - width) / 2;
+        const top = (screen.height - height) / 2;
+        
+        const url = `/public/views/popup/appointment.php?superAppointmentId=${superAppointmentId}`;
+        window.open(
+            url,
+            'EditAppointment',
+            `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`
+        );
     }
     
     startResize(e) {

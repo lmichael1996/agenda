@@ -70,7 +70,7 @@ $protectedPages = [
     'services.php',
     'notes.php',
     'clients.php',
-    'new-appointment.php',
+    'appointment.php',
     'client-detail.php',
     'client-edit.php',
     'client-history.php',

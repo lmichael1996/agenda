@@ -9,6 +9,7 @@ class Service {
     public $duration;
     public $price;
     public $description;
+    public $notification_days;
     
     /**
      * Costruttore
@@ -28,6 +29,7 @@ class Service {
         $this->duration = $data['duration'] ?? 0;
         $this->price = $data['price'] ?? 0.0;
         $this->description = $data['description'] ?? '';
+        $this->notification_days = $data['notification_days'] ?? null;
     }
     
     /**
@@ -39,7 +41,8 @@ class Service {
             'name' => $this->name,
             'duration' => $this->duration,
             'price' => $this->price,
-            'description' => $this->description
+            'description' => $this->description,
+            'notification_days' => $this->notification_days
         ];
     }
     

@@ -3,6 +3,7 @@
  * Controller per la gestione degli appuntamenti
  */
 
+require_once __DIR__ . '/../Models/Appointment.php';
 require_once __DIR__ . '/../Database/Connection.php';
 
 class AppointmentsController {

@@ -15,7 +15,7 @@ class ServiceService {
      */
     public function getAll() {
         try {
-            $stmt = $this->db->prepare('SELECT id, name, duration, price, description FROM services ORDER BY id');
+            $stmt = $this->db->prepare('SELECT id, name, duration, price, description, notification_days FROM services ORDER BY id');
             $stmt->execute();
             $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
@@ -36,7 +36,7 @@ class ServiceService {
      */
     public function getById($id) {
         try {
-            $stmt = $this->db->prepare('SELECT id, name, duration, price, description FROM services WHERE id = ?');
+            $stmt = $this->db->prepare('SELECT id, name, duration, price, description, notification_days FROM services WHERE id = ?');
             $stmt->execute([$id]);
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
             
@@ -64,12 +64,13 @@ class ServiceService {
         }
         
         try {
-            $stmt = $this->db->prepare('INSERT INTO services (name, duration, price, description) VALUES (?, ?, ?, ?)');
+            $stmt = $this->db->prepare('INSERT INTO services (name, duration, price, description, notification_days) VALUES (?, ?, ?, ?, ?)');
             $stmt->execute([
                 $service->name,
                 $service->duration,
                 $service->price,
-                $service->description
+                $service->description,
+                $service->notification_days
             ]);
             
             $service->id = $this->db->lastInsertId();
@@ -95,12 +96,13 @@ class ServiceService {
         }
         
         try {
-            $stmt = $this->db->prepare('UPDATE services SET name = ?, duration = ?, price = ?, description = ? WHERE id = ?');
+            $stmt = $this->db->prepare('UPDATE services SET name = ?, duration = ?, price = ?, description = ?, notification_days = ? WHERE id = ?');
             $stmt->execute([
                 $service->name,
                 $service->duration,
                 $service->price,
                 $service->description,
+                $service->notification_days,
                 $id
             ]);
             

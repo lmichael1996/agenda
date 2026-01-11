@@ -5,6 +5,7 @@
  */
 
 require_once __DIR__ . '/../Models/Appointment.php';
+require_once __DIR__ . '/../Models/SuperAppointment.php';
 require_once __DIR__ . '/../Services/ScheduleService.php';
 
 class ScheduleController {
@@ -52,13 +53,14 @@ class ScheduleController {
     }
     
     /**
-     * Ottieni un appuntamento specifico
+     * Ottieni un appuntamento specifico (super_appointment con tutti gli appointments)
      */
     public function getById($id) {
         $result = $this->service->getById($id);
         
-        if ($result['success'] && isset($result['data'])) {
-            $result['data'] = $result['data']->toArray();
+        // Converti SuperAppointment Model in array
+        if ($result['success'] && isset($result['data']['super_appointment'])) {
+            $result['data']['super_appointment'] = $result['data']['super_appointment']->toArray();
         }
         
         return $result;
@@ -70,8 +72,14 @@ class ScheduleController {
     public function create($data) {
         $result = $this->service->create($data);
         
+        // Converti Models in array per JSON
         if ($result['success'] && isset($result['data'])) {
-            $result['data'] = $result['data']->toArray();
+            if (isset($result['data']['super_appointment'])) {
+                $result['data']['super_appointment'] = $result['data']['super_appointment']->toArray();
+            }
+            if (isset($result['data']['appointment'])) {
+                $result['data']['appointment'] = $result['data']['appointment']->toArray();
+            }
         }
         
         return $result;

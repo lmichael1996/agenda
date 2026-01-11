@@ -33,6 +33,7 @@ require_once __DIR__ . '/../Controllers/ServicesController.php';
 require_once __DIR__ . '/../Controllers/ScheduleController.php';
 require_once __DIR__ . '/../Controllers/NotesController.php';
 require_once __DIR__ . '/../Controllers/UsersController.php';
+require_once __DIR__ . '/../Controllers/ProductsController.php';
 
 // Ottieni connessione database
 $db = getDBConnection();
@@ -43,6 +44,7 @@ $servicesController = new ServicesController($db);
 $scheduleController = new ScheduleController($db);
 $notesController = new NotesController($db);
 $usersController = new UsersController($db);
+$productsController = new ProductsController($db);
 
 // Parse della richiesta - Solo query string
 $method = $_SERVER['REQUEST_METHOD'];
@@ -65,7 +67,8 @@ if (empty($resource)) {
 // Gestisci input JSON per POST/PUT
 $input = null;
 if (in_array($method, ['POST', 'PUT'])) {
-    $input = json_decode(file_get_contents('php://input'), true);
+    $rawInput = file_get_contents('php://input');
+    $input = json_decode($rawInput, true);
 }
 
 // Routing per risorsa
@@ -95,14 +98,23 @@ try {
             handleUsersResource($usersController, $method, $action, $id, $input);
             break;
             
+        case 'products':
+            handleProductsResource($productsController, $method, $action, $id, $input);
+            break;
+            
         default:
             http_response_code(404);
             echo json_encode(['success' => false, 'error' => 'Risorsa non trovata']);
     }
 } catch (Exception $e) {
-    error_log("Errore API: " . $e->getMessage());
     http_response_code(500);
-    echo json_encode(['success' => false, 'error' => 'Errore interno del server']);
+    echo json_encode([
+        'success' => false, 
+        'error' => 'Errore interno del server',
+        'message' => $e->getMessage(),
+        'file' => $e->getFile(),
+        'line' => $e->getLine()
+    ]);
 }
 
 // ============= HANDLER PER OGNI RISORSA =============
@@ -336,8 +348,11 @@ function handleServicesResource($controller, $method, $action, $id, $input) {
 function handleScheduleResource($controller, $method, $action, $id, $input) {
     switch ($method) {
         case 'GET':
-            // Check for client_id parameter
-            if (!empty($_GET['client_id'])) {
+            // Check for id parameter (super_appointment_id)
+            if (!empty($id)) {
+                echo json_encode($controller->getById($id));
+            } elseif (!empty($_GET['client_id'])) {
+                // Check for client_id parameter
                 echo json_encode($controller->getByClient($_GET['client_id']));
             } elseif (!empty($action)) {
                 // Get per giorno specifico: /schedule/lunedi
@@ -345,6 +360,14 @@ function handleScheduleResource($controller, $method, $action, $id, $input) {
             } else {
                 echo json_encode($controller->getAll());
             }
+            break;
+            
+        case 'POST':
+            // Crea nuovo appuntamento
+            $result = $controller->create($input);
+            http_response_code($result['success'] ? 200 : 400);
+            echo json_encode($result);
+            flush();
             break;
             
         case 'PUT':
@@ -539,6 +562,58 @@ function handleSettingsResource($db, $method, $input) {
                 error_log("Settings PUT error: " . $e->getMessage());
                 http_response_code(500);
                 echo json_encode(['success' => false, 'error' => 'Errore nel salvataggio delle impostazioni']);
+            }
+            break;
+            
+        default:
+            http_response_code(405);
+            echo json_encode(['success' => false, 'error' => 'Metodo non supportato']);
+    }
+}
+
+/**
+ * Handler per la risorsa products
+ */
+function handleProductsResource($controller, $method, $action, $id, $input) {
+    switch ($method) {
+        case 'GET':
+            if (!empty($id)) {
+                echo json_encode($controller->getById($id));
+            } else {
+                echo json_encode($controller->getAll());
+            }
+            break;
+            
+        case 'POST':
+            // Supporta sia creazione singola che batch
+            if (isset($input['products'])) {
+                // Salvataggio batch
+                echo json_encode($controller->saveAll($input['products']));
+            } else {
+                // Creazione singola
+                echo json_encode($controller->create($input));
+            }
+            break;
+            
+        case 'PUT':
+            // Supporta sia aggiornamento singolo che batch
+            if (!empty($id)) {
+                echo json_encode($controller->update($id, $input));
+            } elseif (isset($input['products'])) {
+                // Salvataggio batch
+                echo json_encode($controller->saveAll($input['products']));
+            } else {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'ID o array products richiesto']);
+            }
+            break;
+            
+        case 'DELETE':
+            if (!empty($id)) {
+                echo json_encode($controller->delete($id));
+            } else {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'ID richiesto per eliminazione']);
             }
             break;
             

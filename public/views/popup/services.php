@@ -40,6 +40,7 @@ require_once '../../../src/Auth/AccessControl.php';
                                 <th class="service-name-col">Nome Servizio</th>
                                 <th class="price-col">Prezzo (€)</th>
                                 <th class="duration-col">Durata (min)</th>
+                                <th class="notification-col">Notifica (gg)</th>
                                 <th class="description-col">Descrizione</th>
                                 <th class="actions-col">Azioni</th>
                             </tr>
@@ -125,7 +126,11 @@ require_once '../../../src/Auth/AccessControl.php';
     
     async function saveServicesToDb(services) {
         try {
-            const response = await fetch('../../../src/Api/api.php?endpoint=services', {
+            console.log('Invio richiesta PUT con servizi:', services);
+            const url = '../../../src/Api/api.php?endpoint=services';
+            console.log('URL chiamata:', url);
+            
+            const response = await fetch(url, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
@@ -133,13 +138,23 @@ require_once '../../../src/Auth/AccessControl.php';
                 body: JSON.stringify({ services: services })
             });
             
+            console.log('Response status:', response.status);
+            console.log('Response ok:', response.ok);
+            
+            if (!response.ok) {
+                const text = await response.text();
+                console.error('Response text:', text);
+                return { success: false, error: `HTTP ${response.status}: ${text}` };
+            }
+            
             const data = await response.json();
             console.log('Risposta salvataggio:', data);
             
             return data;
         } catch (e) {
             console.error('Errore salvataggio:', e);
-            return { success: false, error: 'Errore di connessione' };
+            console.error('Stack:', e.stack);
+            return { success: false, error: 'Errore di connessione: ' + e.message };
         }
     }
     
@@ -188,13 +203,25 @@ require_once '../../../src/Auth/AccessControl.php';
     }
 
     function generateServiceRow(service) {
+        const hasNotification = service.notification_days !== null && service.notification_days !== undefined;
+        const notificationDays = hasNotification ? service.notification_days : 90;
+        
         return `
             <tr data-service-id="${service.id}">
                 <td><input type="checkbox" class="row-select"></td>
-                <td><input type="text" value="${escapeHtml(service.name)}" class="cell-input"></td>
+                <td><input type="text" value="${escapeHtml(service.name)}" class="cell-input name-input"></td>
                 <td><input type="number" value="${Number(service.price).toFixed(2)}" step="1" min="0" max="9999.99" class="cell-input price-input"></td>
                 <td><input type="number" value="${service.durationMinutes || service.duration}" step="15" min="15" max="480" class="cell-input duration-input"></td>
-                <td><textarea class="cell-textarea" rows="2" placeholder="Descrizione dettagliata...">${escapeHtml(service.description)}</textarea></td>
+                <td>
+                    <div style="display: flex; align-items: center; gap: 6px; justify-content: center;">
+                        <label class="notification-toggle" title="Attiva/Disattiva notifica promemoria">
+                            <input type="checkbox" class="notification-enabled" ${hasNotification ? 'checked' : ''}>
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <input type="number" value="${notificationDays}" step="1" min="1" max="365" class="notification-input" title="Giorni per promemoria" ${!hasNotification ? 'disabled' : ''} style="width: 70px;">
+                    </div>
+                </td>
+                <td><textarea class="cell-textarea description-input" rows="2" placeholder="Descrizione dettagliata...">${escapeHtml(service.description)}</textarea></td>
                 <td class="actions-cell"><button class="action-btn btn-delete-single" data-service-id="${service.id}" title="Elimina">✘</button></td>
             </tr>
         `;
@@ -213,7 +240,7 @@ require_once '../../../src/Auth/AccessControl.php';
         
         if (!servicesList.length) {
             console.log('Nessun servizio da mostrare');
-            tbody.innerHTML = '<tr><td colspan="6">Nessun servizio configurato</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7">Nessun servizio configurato</td></tr>';
             updateSelectionStats();
             return;
         }
@@ -239,24 +266,36 @@ require_once '../../../src/Auth/AccessControl.php';
         const service = servicesList.find(s => s.id == id);
         if (!service) return true;
         
-        const inputs = row.querySelectorAll('.cell-input, .cell-textarea');
-        const name = inputs[0]?.value?.trim() || '';
-        const price = parseFloat(inputs[1]?.value) || 0;
-        const duration = parseInt(inputs[2]?.value) || 15;
-        const description = inputs[3]?.value?.trim() || '';
+        // Selettori specifici per ogni campo
+        const nameInput = row.querySelector('.name-input');
+        const priceInput = row.querySelector('.price-input');
+        const durationInput = row.querySelector('.duration-input');
+        const descriptionInput = row.querySelector('.description-input');
+        
+        const name = nameInput?.value?.trim() || '';
+        const price = parseFloat(priceInput?.value) || 0;
+        const duration = parseInt(durationInput?.value) || 15;
+        
+        // Gestione notifica con checkbox
+        const notificationCheckbox = row.querySelector('.notification-enabled');
+        const notificationInput = row.querySelector('.notification-input');
+        const notificationDays = notificationCheckbox?.checked ? (parseInt(notificationInput?.value) || 90) : null;
+        
+        const description = descriptionInput?.value?.trim() || '';
         
         // Validazione nome obbligatorio
         if (!name) {
-            inputs[0].classList.add('error-highlight');
+            nameInput.classList.add('error-highlight');
             return false;
         } else {
-            inputs[0].classList.remove('error-highlight');
+            nameInput.classList.remove('error-highlight');
         }
         
         // Aggiorna modello
         service.name = name;
         service.price = price;
         service.durationMinutes = duration;
+        service.notification_days = notificationDays;
         service.description = description;
         
         return true;
@@ -270,6 +309,7 @@ require_once '../../../src/Auth/AccessControl.php';
             name: 'Nuovo Servizio ' + (servicesList.length + 1),
             price: 25.00,
             durationMinutes: 30,
+            notification_days: 90,
             description: ''
         };
         
@@ -312,6 +352,8 @@ require_once '../../../src/Auth/AccessControl.php';
     }
 
     async function onSaveAll() {
+        console.log('=== onSaveAll chiamata ===');
+        
         // Sincronizza tutti i dati dalla UI
         let allValid = true;
         document.querySelectorAll('#services-list tr[data-service-id]').forEach(row => {
@@ -320,42 +362,66 @@ require_once '../../../src/Auth/AccessControl.php';
             if (!isValid) allValid = false;
         });
         
+        console.log('Validazione:', allValid);
+        
         if (!allValid) {
             alert('Correggi gli errori evidenziati prima di salvare');
             return;
         }
+        
+        console.log('servicesList.length:', servicesList.length);
+        console.log('servicesList:', servicesList);
         
         if (servicesList.length === 0) {
             alert('Nessun servizio da salvare');
             return;
         }
         
-        if (!confirm(`Aggiorna la lista servizi nel database?\n\nATTENZIONE: Questa operazione sostituirà tutti i servizi esistenti.`)) {
+        console.log('Mostrando conferma...');
+        const confirmed = confirm(`Aggiorna la lista servizi nel database?\n\nATTENZIONE: Questa operazione aggiornerà tutti i servizi esistenti.`);
+        console.log('Confermato:', confirmed);
+        
+        if (!confirmed) {
+            console.log('Operazione annullata dall\'utente');
             return;
         }
         
+        console.log('Inizio salvataggio...');
         const saveBtn = document.getElementById('save-all-btn');
         const originalText = saveBtn.textContent;
         saveBtn.textContent = 'Salvataggio...';
         saveBtn.disabled = true;
         
         try {
+            console.log('Chiamando saveServicesToDb...');
             const result = await saveServicesToDb(servicesList);
+            console.log('Risultato ricevuto:', result);
             
             if (result.success) {
                 alert('Servizi salvati con successo!');
+                console.log('Ricaricando servizi...');
                 await loadServicesFromDb();
                 renderServicesTable();
                 
                 setTimeout(() => {
+                    console.log('Chiudendo finestra...');
                     window.close();
                 }, 500);
             } else {
-                alert('Errore durante il salvataggio:\n' + (result.error || 'Errore sconosciuto'));
+                console.error('Errore dal server:', result.error);
+                console.error('Dettagli errore:', result.details);
+                console.error('Risposta completa:', result);
+                
+                let errorMsg = 'Errore durante il salvataggio:\n' + (result.error || 'Errore sconosciuto');
+                if (result.details && Array.isArray(result.details)) {
+                    errorMsg += '\n\nDettagli:\n' + result.details.join('\n');
+                }
+                alert(errorMsg);
             }
         } catch (error) {
-            console.error('Errore salvataggio:', error);
-            alert('Errore di connessione durante il salvataggio');
+            console.error('Eccezione durante salvataggio:', error);
+            console.error('Stack:', error.stack);
+            alert('Errore di connessione durante il salvataggio: ' + error.message);
         } finally {
             saveBtn.textContent = originalText;
             saveBtn.disabled = false;
@@ -393,6 +459,20 @@ require_once '../../../src/Auth/AccessControl.php';
             if (e.target.classList.contains('row-select')) {
                 updateSelectionStats();
             }
+            
+            // Gestione checkbox attivazione notifica
+            if (e.target.classList.contains('notification-enabled')) {
+                const row = e.target.closest('tr');
+                const notificationInput = row.querySelector('.notification-input');
+                if (e.target.checked) {
+                    notificationInput.disabled = false;
+                    if (!notificationInput.value || notificationInput.value === '0') {
+                        notificationInput.value = 90; // Default quando si attiva
+                    }
+                } else {
+                    notificationInput.disabled = true;
+                }
+            }
         });
         
         // Event listener delete singolo
@@ -417,5 +497,73 @@ require_once '../../../src/Auth/AccessControl.php';
         });
     });
 </script>
+
+<style>
+/* Toggle Switch per Notifica */
+.notification-toggle {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.notification-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    border: 1px solid #999;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+.notification-toggle input:checked + .toggle-slider {
+    background-color: #4CAF50;
+    border-color: #45a049;
+}
+
+.notification-toggle input:checked + .toggle-slider:before {
+    transform: translateX(20px);
+}
+
+.notification-toggle:hover .toggle-slider {
+    box-shadow: 0 0 5px rgba(0,0,0,0.2);
+}
+
+/* Input giorni quando disabilitato */
+.notification-input:disabled {
+    background-color: #f0f0f0;
+    color: #999;
+    cursor: not-allowed;
+    border-color: #ddd;
+}
+
+.notification-input:enabled {
+    background-color: #fff;
+}
+</style>
+
 </body>
 </html>

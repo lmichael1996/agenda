@@ -40,6 +40,12 @@ const POPUP_CONFIGS = {
         title: 'Gestione Orari',
         width: 800,
         height: 950
+    },
+    warehouse: {
+        url: 'popup/magazine.php',
+        title: 'Gestione Magazzino',
+        width: 1600,
+        height: 1100
     }
 };
 

@@ -7,8 +7,8 @@ class EventManager {
     }
     
     // Crea un nuovo evento
-    createEvent(text, duration, parentSlot = null) {
-        const event = new Event(text, duration, parentSlot);
+    createEvent(text, duration, parentSlot = null, superAppointmentId = null) {
+        const event = new Event(text, duration, parentSlot, superAppointmentId);
         this.events.push(event);
         return event;
     }

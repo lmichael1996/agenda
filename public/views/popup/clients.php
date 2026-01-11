@@ -541,7 +541,20 @@ function addAppointment(clientId) {
         return;
     }
 
-    const popupUrl = `new-appointment.php?clientId=${clientId}`;
+    // Recupera date e time dai parametri URL se presenti
+    const urlParams = new URLSearchParams(window.location.search);
+    const date = urlParams.get('date');
+    const time = urlParams.get('time');
+    
+    // Costruisci URL con parametri opzionali
+    let popupUrl = `appointment.php?clientId=${clientId}`;
+    if (date) {
+        popupUrl += `&date=${encodeURIComponent(date)}`;
+    }
+    if (time) {
+        popupUrl += `&time=${encodeURIComponent(time)}`;
+    }
+    
     console.log('Opening new appointment popup URL:', popupUrl);
     
     const popupWindow = openCenteredPopup(popupUrl, 'NewAppointment_' + clientId, 1250, 800);

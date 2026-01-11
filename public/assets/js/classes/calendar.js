@@ -72,8 +72,8 @@ class Calendar {
     }
     
     // Metodi per gestire gli eventi tramite EventManager
-    createEvent(text, duration, parentSlot = null) {
-        return this.eventManager.createEvent(text, duration, parentSlot);
+    createEvent(text, duration, parentSlot = null, superAppointmentId = null) {
+        return this.eventManager.createEvent(text, duration, parentSlot, superAppointmentId);
     }
     
     getAllEvents() {

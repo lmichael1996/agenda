@@ -40,6 +40,7 @@ class ServicesController {
     
     /**
      * Salvataggio batch di tutti i servizi
+     * Aggiorna servizi esistenti, inserisce nuovi, elimina quelli rimossi
      */
     public function saveAll($services) {
         if (!is_array($services)) {
@@ -52,24 +53,66 @@ class ServicesController {
         try {
             $this->db->beginTransaction();
             
-            // Prima aggiorna tutti gli appuntamenti che usano servizi diversi dal default al servizio di default
-            $updateStmt = $this->db->prepare('UPDATE appointments SET service_id = 1 WHERE service_id != 1');
-            $updateStmt->execute();
-            error_log("saveAll: Aggiornati " . $updateStmt->rowCount() . " appuntamenti al servizio default");
+            // Ottieni tutti gli ID dei servizi nel database (escluso default)
+            $existingIds = [];
+            $stmt = $this->db->query('SELECT id FROM services WHERE id != 1');
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                $existingIds[] = (int)$row['id'];
+            }
+            error_log("saveAll: Servizi esistenti nel DB: " . implode(', ', $existingIds));
             
-            // Ora elimina tutti i servizi TRANNE quello di default (id=1)
-            $deleteResult = $this->db->exec('DELETE FROM services WHERE id != 1');
-            error_log("saveAll: Eliminati $deleteResult servizi dal database");
+            // Raccogli gli ID dei servizi che arrivano dal frontend
+            $incomingIds = [];
+            $newServices = [];
             
-            // Inserisce tutti i nuovi servizi (saltando quello con id=1 se presente)
-            $stmt = $this->db->prepare('INSERT INTO services (name, duration, price, description) VALUES (?, ?, ?, ?)');
-            
-            $errors = [];
-            $inserted = 0;
             foreach ($services as $service) {
-                // Salta il servizio di default se presente nell'array
-                if (isset($service['id']) && $service['id'] == 1) {
+                $id = $service['id'] ?? null;
+                
+                // Salta il servizio di default se presente
+                if ($id == 1) {
                     error_log("saveAll: Saltato servizio default id=1");
+                    continue;
+                }
+                
+                // Se l'ID è numerico, è un servizio esistente
+                if (is_numeric($id)) {
+                    $incomingIds[] = (int)$id;
+                } else {
+                    // ID temporaneo tipo "temp_..." = servizio nuovo
+                    $newServices[] = $service;
+                }
+            }
+            
+            error_log("saveAll: Servizi in arrivo: " . implode(', ', $incomingIds));
+            error_log("saveAll: Nuovi servizi: " . count($newServices));
+            
+            // ELIMINA i servizi che non sono più nell'elenco
+            $toDelete = array_diff($existingIds, $incomingIds);
+            if (!empty($toDelete)) {
+                error_log("saveAll: Da eliminare: " . implode(', ', $toDelete));
+                
+                // Prima aggiorna gli appuntamenti che usano questi servizi al servizio default
+                $placeholders = implode(',', array_fill(0, count($toDelete), '?'));
+                $updateStmt = $this->db->prepare("UPDATE appointments SET service_id = 1 WHERE service_id IN ($placeholders)");
+                $updateStmt->execute(array_values($toDelete));
+                error_log("saveAll: Aggiornati " . $updateStmt->rowCount() . " appuntamenti al servizio default");
+                
+                // Ora elimina i servizi
+                $deleteStmt = $this->db->prepare("DELETE FROM services WHERE id IN ($placeholders)");
+                $deleteStmt->execute(array_values($toDelete));
+                error_log("saveAll: Eliminati " . $deleteStmt->rowCount() . " servizi");
+            }
+            
+            // AGGIORNA i servizi esistenti
+            $updateStmt = $this->db->prepare('UPDATE services SET name = ?, duration = ?, price = ?, description = ? WHERE id = ?');
+            $errors = [];
+            $updated = 0;
+            
+            foreach ($services as $service) {
+                $id = $service['id'] ?? null;
+                
+                // Solo servizi esistenti (ID numerico)
+                if (!is_numeric($id) || $id == 1) {
                     continue;
                 }
                 
@@ -78,10 +121,10 @@ class ServicesController {
                 $duration = intval($service['durationMinutes'] ?? 30);
                 $description = $service['description'] ?? '';
                 
-                error_log("saveAll: Processando servizio '$name' - price=$price, duration=$duration");
+                error_log("saveAll: Aggiornamento servizio ID=$id '$name' - price=$price, duration=$duration");
                 
                 if (empty($name)) {
-                    error_log("saveAll: Saltato servizio senza nome");
+                    error_log("saveAll: Saltato servizio senza nome ID=$id");
                     continue;
                 }
                 
@@ -98,11 +141,47 @@ class ServicesController {
                     continue;
                 }
                 
-                $stmt->execute([$name, $duration, $price, $description]);
+                $updateStmt->execute([$name, $duration, $price, $description, $id]);
+                $updated++;
+            }
+            
+            error_log("saveAll: Aggiornati $updated servizi");
+            
+            // INSERISCI i nuovi servizi
+            $insertStmt = $this->db->prepare('INSERT INTO services (name, duration, price, description) VALUES (?, ?, ?, ?)');
+            $inserted = 0;
+            
+            foreach ($newServices as $service) {
+                $name = $service['name'] ?? '';
+                $price = floatval($service['price'] ?? 0);
+                $duration = intval($service['durationMinutes'] ?? 30);
+                $description = $service['description'] ?? '';
+                
+                error_log("saveAll: Inserimento nuovo servizio '$name' - price=$price, duration=$duration");
+                
+                if (empty($name)) {
+                    error_log("saveAll: Saltato nuovo servizio senza nome");
+                    continue;
+                }
+                
+                // Validazione
+                if ($price < 0 || $price > 9999.99) {
+                    $errors[] = "Prezzo non valido per servizio {$name}";
+                    error_log("saveAll: Errore validazione prezzo per '$name'");
+                    continue;
+                }
+                
+                if ($duration < 15 || $duration > 480 || $duration % 15 !== 0) {
+                    $errors[] = "Durata non valida per servizio {$name}";
+                    error_log("saveAll: Errore validazione durata per '$name': $duration");
+                    continue;
+                }
+                
+                $insertStmt->execute([$name, $duration, $price, $description]);
                 $inserted++;
             }
             
-            error_log("saveAll: Inseriti $inserted servizi");
+            error_log("saveAll: Inseriti $inserted nuovi servizi");
             
             if (!empty($errors)) {
                 $this->db->rollBack();
@@ -111,8 +190,8 @@ class ServicesController {
             }
             
             $this->db->commit();
-            error_log("saveAll: Commit completato con successo");
-            return ['success' => true, 'message' => 'Servizi salvati con successo'];
+            error_log("saveAll: Commit completato - $updated aggiornati, $inserted inseriti, " . count($toDelete) . " eliminati");
+            return ['success' => true, 'message' => "Servizi salvati: $updated aggiornati, $inserted nuovi, " . count($toDelete) . " eliminati"];
             
         } catch (PDOException $e) {
             $this->db->rollBack();

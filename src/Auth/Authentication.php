@@ -28,8 +28,8 @@ require_once __DIR__ . '/../Helpers/Captcha.php';
 require_once __DIR__ . '/../Database/Connection.php';
 require_once __DIR__ . '/../Controllers/AuthController.php';
 
-// Inizializza controller
-$authController = new AuthController($conn);
+// Inizializza controller con connessione PDO
+$authController = new AuthController(getDBConnection());
 
 // ========== CONTROLLO RATE LIMIT ==========
 

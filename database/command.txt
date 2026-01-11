@@ -1,0 +1,1 @@
+cd /home/mich/Software/agenda/database && sudo mariadb -e "DROP DATABASE IF EXISTS agenda_db; DROP USER IF EXISTS 'admin'@'localhost'; FLUSH PRIVILEGES;" && sudo mariadb < 01_create_database.sql && sudo mariadb < 02_create_tables.sql && sudo mariadb < 03_default_data.sql && sudo mariadb < 04_test_data.sql && sudo mariadb < 05_update_notes.sql

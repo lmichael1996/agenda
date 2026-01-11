@@ -174,6 +174,34 @@ const setupCalendarEvents = () => {
     window.addEventListener('calendarSlotSelected', (e) => handleSlotSelected(e.detail));
     window.addEventListener('calendarEventCreated', (e) => handleEventCreated(e.detail));
     window.addEventListener('calendarEventMoved', (e) => handleEventMoved(e.detail));
+    
+    // Listener per doppio click su appuntamenti
+    document.addEventListener('dblclick', (e) => {
+        const appointmentElement = e.target.closest('.calendar-note');
+        if (appointmentElement) {
+            // Non aprire se si clicca sul resize button
+            if (e.target.closest('.resize-btn')) {
+                return;
+            }
+            
+            const superAppointmentId = appointmentElement.getAttribute('data-super-appointment-id');
+            if (superAppointmentId) {
+                openEditAppointmentPopup(superAppointmentId);
+            }
+        }
+    });
+    
+    // Listener per click su slot vuoti del calendario
+    document.addEventListener('click', (e) => {
+        const slot = e.target.closest('.day');
+        if (slot) {
+            // Non gestire se c'è un evento (gestito dal doppio click)
+            if (e.target.closest('.calendar-note')) {
+                return;
+            }
+            handleSlotClick(e, slot);
+        }
+    });
 };
 
 // === HANDLERS ===
@@ -200,7 +228,8 @@ const handleViewChange = (viewType, weekInput, dateInput) => {
 };
 
 const handleWeekChange = (weekValue) => {
-    console.log(`Cambio settimana: ${weekValue}`);
+    console.log(`🔄 === CAMBIO SETTIMANA === `);
+    console.log(`📅 Nuova settimana selezionata: ${weekValue}`);
     
     // Carica appuntamenti via AJAX
     loadAppointmentsForWeek(weekValue);
@@ -234,6 +263,20 @@ const updateDateDisplay = (dateValue) => {
     if (dateInput && dateInput.value !== dateValue) {
         dateInput.value = dateValue;
     }
+};
+
+const openEditAppointmentPopup = (superAppointmentId) => {
+    const width = 1300;
+    const height = 700;
+    const left = (screen.width - width) / 2;
+    const top = (screen.height - height) / 2;
+    
+    const url = `/public/views/popup/appointment.php?superAppointmentId=${superAppointmentId}`;
+    window.open(
+        url,
+        'EditAppointment',
+        `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`
+    );
 };
 
 const handleClientSearch = () => {
@@ -382,10 +425,31 @@ const initializeFallback = () => {
 };
 
 const handleSlotClick = (event, slot) => {
+    console.log('=== handleSlotClick chiamato ===');
+    console.log('Event:', event);
+    console.log('Slot:', slot);
+    
+    // Se lo slot contiene già un evento, non fare nulla (gestito dal doppio click sull'evento)
+    const hasEvent = slot.querySelector('.calendar-note');
+    console.log('Slot ha evento:', hasEvent);
+    
+    if (hasEvent) {
+        console.log('Slot contiene evento, ignoro click');
+        return;
+    }
+    
     const date = slot.dataset.date;
     const time = slot.dataset.time;
     
-    console.log(`Slot cliccato: ${date} ${time}`);
+    console.log(`Slot vuoto cliccato: ${date} ${time}`);
+    console.log('Apertura popup clienti...');
+    
+    // Apri popup clienti con data e ora come parametri GET
+    const popupUrl = `/public/views/popup/clients.php?date=${encodeURIComponent(date)}&time=${encodeURIComponent(time)}`;
+    const popup = window.open(popupUrl, 'ClientsPopup', 'width=1000,height=700,scrollbars=yes,resizable=yes');
+    console.log('Popup aperto:', popup);
+    console.log('URL:', popupUrl);
+    
     dispatchCalendarEvent('slotSelected', { date, time, slot });
 };
 
@@ -488,9 +552,9 @@ window.calendarAPI = {
             state.calendar.refresh();
         }
     },
-    createEvent: (text, duration, parentSlot = null) => {
+    createEvent: (text, duration, parentSlot = null, superAppointmentId = null) => {
         if (state.calendar && state.calendar.createEvent) {
-            return state.calendar.createEvent(text, duration, parentSlot);
+            return state.calendar.createEvent(text, duration, parentSlot, superAppointmentId);
         }
         return null;
     },
@@ -503,11 +567,67 @@ window.calendarAPI = {
 };
 
 // === GESTIONE APPUNTAMENTI ===
+// Filtra appuntamenti per settimana
+const filterAppointmentsByWeek = (appointments, weekValue) => {
+    // Parse formato settimana: 2026-W02
+    const match = weekValue.match(/(\d{4})-W(\d{2})/);
+    if (!match) return appointments;
+    
+    const year = parseInt(match[1]);
+    const weekNumber = parseInt(match[2]);
+    
+    // Calcola il lunedì di quella settimana ISO
+    const jan4 = new Date(year, 0, 4);
+    const jan4Day = jan4.getDay() || 7;
+    const mondayWeek1 = new Date(jan4);
+    mondayWeek1.setDate(jan4.getDate() - jan4Day + 1);
+    
+    const monday = new Date(mondayWeek1);
+    monday.setDate(mondayWeek1.getDate() + (weekNumber - 1) * 7);
+    
+    // Calcola la domenica
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    
+    // Formatta date per confronto
+    const formatDate = (date) => {
+        const d = String(date.getDate()).padStart(2, '0');
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const y = date.getFullYear();
+        return `${d}-${m}-${y}`;
+    };
+    
+    const mondayStr = formatDate(monday);
+    const sundayStr = formatDate(sunday);
+    
+    console.log(`Filtraggio appuntamenti da ${mondayStr} a ${sundayStr}`);
+    
+    return appointments.filter(apt => {
+        if (!apt.date) return false;
+        
+        // Converti data appuntamento in oggetto Date per confronto
+        const [day, month, year] = apt.date.split('-').map(Number);
+        const aptDate = new Date(year, month - 1, day);
+        
+        return aptDate >= monday && aptDate <= sunday;
+    });
+};
+
 // Pulisce tutti gli eventi dal calendario
 const clearAllEvents = () => {
+    console.log('🧹 Pulizia eventi esistenti...');
+    
+    // Rimuovi tutti gli elementi .calendar-note dal DOM
+    const allEvents = document.querySelectorAll('.calendar-note');
+    allEvents.forEach(event => {
+        event.remove();
+    });
+    console.log(`✅ Rimossi ${allEvents.length} eventi dal DOM`);
+    
+    // Pulisci anche l'event manager se disponibile
     if (state.calendar && state.calendar.eventManager) {
         state.calendar.eventManager.clearAllEvents();
-        console.log('✅ Eventi rimossi dal calendario');
+        console.log('✅ Event manager pulito');
     }
 };
 
@@ -530,6 +650,8 @@ const updateCalendarHeader = (weekValue) => {
     const monday = new Date(mondayWeek1);
     monday.setDate(mondayWeek1.getDate() + (weekNumber - 1) * 7);
     
+    console.log(`   📅 Lunedì settimana ${weekNumber}: ${monday.toLocaleDateString('it-IT')}`);
+    
     const dayNames = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'];
     
     // Aggiorna ogni colonna dell'header
@@ -547,7 +669,7 @@ const updateCalendarHeader = (weekValue) => {
         }
     }
     
-    console.log('✅ Header calendario aggiornato');
+    console.log('   ✅ Header aggiornato');
 };
 
 // Aggiorna gli attributi data-date degli slot del calendario
@@ -591,41 +713,54 @@ const updateCalendarSlots = (weekValue) => {
         }
     }
     
-    console.log('✅ Slot calendario aggiornati');
+    console.log('   ✅ Slot aggiornati');
 };
 
 // Carica appuntamenti per una settimana specifica via AJAX
 const loadAppointmentsForWeek = async (weekValue) => {
-    console.log(`📅 Caricamento appuntamenti per settimana: ${weekValue}`);
+    console.log(`\n📅 === CARICAMENTO SETTIMANA ${weekValue} ===`);
     
     try {
-        const response = await fetch(`../api/appointments.php?week=${weekValue}`);
+        // Usa l'API corretta
+        const response = await fetch(`/src/Api/api.php?endpoint=schedule`);
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         
-        const appointments = await response.json();
+        const data = await response.json();
         
-        if (appointments.error) {
-            console.error('❌ Errore dal server:', appointments.error);
+        if (!data.success) {
+            console.error('❌ Errore dal server:', data.error);
             return;
         }
         
-        console.log(`✅ Ricevuti ${appointments.length} appuntamenti dal server`);
+        const appointments = data.data || [];
         
-        // Pulisci eventi esistenti
+        console.log(`✅ Ricevuti ${appointments.length} appuntamenti totali dal server`);
+        
+        // Filtra appuntamenti per la settimana selezionata
+        const filteredAppointments = filterAppointmentsByWeek(appointments, weekValue);
+        console.log(`✅ Filtrati ${filteredAppointments.length} appuntamenti per questa settimana`);
+        
+        // 1. Pulisci eventi esistenti
+        console.log('\n🧹 Fase 1: Pulizia eventi...');
         clearAllEvents();
         
-        // Aggiorna header del calendario
+        // 2. Aggiorna header del calendario
+        console.log('\n📋 Fase 2: Aggiornamento header...');
         updateCalendarHeader(weekValue);
         
-        // Aggiorna data-date degli slot
+        // 3. Aggiorna data-date degli slot
+        console.log('\n🔄 Fase 3: Aggiornamento slot...');
         updateCalendarSlots(weekValue);
         
-        // Carica nuovi eventi (appuntamenti e note)
-        loadAppointmentsFromDB(appointments);
+        // 4. Carica nuovi eventi (appuntamenti e note)
+        console.log('\n📦 Fase 4: Caricamento eventi...');
+        loadAppointmentsFromDB(filteredAppointments);
         loadNotesForWeek(weekValue);
+        
+        console.log(`\n✅ === SETTIMANA ${weekValue} CARICATA ===\n`);
         
     } catch (error) {
         console.error('❌ Errore durante il caricamento degli appuntamenti:', error);
@@ -651,18 +786,18 @@ const loadAppointmentsFromDB = (appointmentsData = null) => {
         return;
     }
     
-    appointments.forEach((apt, index) => {
-        console.log(`\n--- Appuntamento ${index + 1}/${appointments.length} ---`);
-        console.log(`Cliente: ${apt.client_name}, Servizio: ${apt.service_name}`);
-        console.log(`Data: ${apt.date}, Ora: ${apt.time}, Durata: ${apt.duration} min`);
-        
+    let successCount = 0;
+    let errorCount = 0;
+    
+    appointments.forEach((apt) => {
         // Trova lo slot corretto per data e ora
-        const slot = document.querySelector(`.day[data-date="${apt.date}"][data-time="${apt.time}"]`);
+        const selector = `.day[data-date="${apt.date}"][data-time="${apt.time}"]`;
+        const slot = document.querySelector(selector);
         
         if (slot && state.calendar) {
             // Crea l'evento con il nome del cliente e servizio
             const eventText = `${apt.client_name} - ${apt.service_name}`;
-            const event = state.calendar.createEvent(eventText, apt.duration, slot);
+            const event = state.calendar.createEvent(eventText, apt.duration, slot, apt.super_appointment_id);
             
             if (event && event.element) {
                 // Aggiungi l'evento allo slot (IMPORTANTE!)
@@ -682,13 +817,15 @@ const loadAppointmentsFromDB = (appointmentsData = null) => {
                 // Aggiungi tooltip con info complete
                 event.element.title = `Cliente: ${apt.client_name}\nServizio: ${apt.service_name}\nOperatore: ${apt.user_name}\nDurata: ${apt.duration} min\nPrezzo: €${apt.price}${apt.note ? '\nNote: ' + apt.note : ''}`;
                 
-                console.log(`✅ Evento creato con successo`);
+                successCount++;
             } else {
-                console.error(`❌ Impossibile creare evento`);
+                console.warn(`⚠️ Impossibile creare evento per: ${apt.client_name} alle ${apt.time}`);
+                errorCount++;
             }
         } else {
             if (!slot) {
-                console.error(`❌ Slot non trovato per data="${apt.date}" time="${apt.time}"`);
+                console.warn(`⚠️ Appuntamento fuori orario: ${apt.client_name} - ${apt.date} ${apt.time}`);
+                errorCount++;
             }
             if (!state.calendar) {
                 console.error('❌ state.calendar non disponibile');
@@ -696,8 +833,11 @@ const loadAppointmentsFromDB = (appointmentsData = null) => {
         }
     });
     
-    console.log('\n=== CARICAMENTO COMPLETATO ===');
-    console.log(`Eventi totali nel calendario: ${state.calendar ? state.calendar.getAllEvents().length : 0}`);
+    if (errorCount > 0) {
+        console.log(`✅ Caricati ${successCount}/${appointments.length} appuntamenti (${errorCount} fuori orario lavorativo)`);
+    } else {
+        console.log(`✅ Caricati ${successCount} appuntamenti con successo`);
+    }
 };
 
 // Carica note per una settimana specifica via AJAX
@@ -730,8 +870,6 @@ const loadNotesForWeek = async (weekValue) => {
 
 // === CARICAMENTO NOTE DAL DATABASE ===
 const loadNotesFromDB = (notesData = null) => {
-    console.log('=== CARICAMENTO NOTE DAL DATABASE ===');
-    
     // Use parameter or fallback to window.notesData
     const notes = notesData || window.notesData;
     
@@ -740,18 +878,15 @@ const loadNotesFromDB = (notesData = null) => {
         return;
     }
     
-    console.log(`✅ Trovate ${notes.length} note nel database`);
-    
     if (notes.length === 0) {
         console.warn('⚠️ Array note vuoto');
         return;
     }
     
-    notes.forEach((note, index) => {
-        console.log(`\n--- Nota ${index + 1}/${notes.length} ---`);
-        console.log(`Titolo: ${note.title || '(senza titolo)'}`);
-        console.log(`Data: ${note.date}, Ora: ${note.time}`);
-        
+    let successCount = 0;
+    let errorCount = 0;
+    
+    notes.forEach((note) => {
         // Trova lo slot corretto per data e ora (già formattate dal backend)
         const slot = document.querySelector(`.day[data-date="${note.date}"][data-time="${note.time}"]`);
         
@@ -780,13 +915,15 @@ const loadNotesFromDB = (notesData = null) => {
                 const tooltipText = `NOTA\nTitolo: ${note.title || '(nessun titolo)'}\n${note.content}\n${note.for_all ? 'Per tutti gli utenti' : 'Nota personale'}`;
                 event.element.title = tooltipText;
                 
-                console.log(`✅ Nota creata con successo`);
+                successCount++;
             } else {
-                console.error(`❌ Impossibile creare nota`);
+                console.warn(`⚠️ Impossibile creare nota: ${note.title}`);
+                errorCount++;
             }
         } else {
             if (!slot) {
-                console.error(`❌ Slot non trovato per data="${note.date}" time="${note.time}"`);
+                console.warn(`⚠️ Nota fuori orario: ${note.title || 'Senza titolo'} - ${note.date} ${note.time}`);
+                errorCount++;
             }
             if (!state.calendar) {
                 console.error('❌ state.calendar non disponibile');
@@ -794,7 +931,11 @@ const loadNotesFromDB = (notesData = null) => {
         }
     });
     
-    console.log('\n=== CARICAMENTO NOTE COMPLETATO ===');
+    if (errorCount > 0) {
+        console.log(`✅ Caricate ${successCount}/${notes.length} note (${errorCount} fuori orario lavorativo)`);
+    } else {
+        console.log(`✅ Caricate ${successCount} note con successo`);
+    }
 };
 
 
